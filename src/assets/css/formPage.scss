@@ -1,0 +1,34 @@
+/*
+  表单页面通用样式
+*/
+.formPage{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  .nav{
+    margin: 40px;
+    /deep/.el-breadcrumb__item:not(:last-child){
+      .el-breadcrumb__inner{
+        color: #999999;
+        font-weight: 400;
+      }
+    }
+  }
+  .form{
+    margin: 20px 40px;
+    /deep/.el-form-item__label{
+      font-weight: 700;
+      color: #333;
+    }
+    .el-input{
+      width: 240px;
+    }
+    .el-radio:not(:last-child){
+      margin-right: 60px;
+    }
+  }
+  .footer{
+    margin: 40px;
+  }
+}

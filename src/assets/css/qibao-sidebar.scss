@@ -1,0 +1,78 @@
+.menu-wrap {
+  height: 100%;
+  background: #001529;
+  .menu-logo {
+    height: 64px;
+    cursor: pointer;
+    &.collapse {
+      width: 64px;
+      background: url('~@/assets/image/logo_small.png') no-repeat center;
+      background-size: 45px 45px;
+    }
+    &.expand {
+      transition: width .5s linear;
+      width: 225px;
+      background: url('~@/assets/image/logo@2x.png') no-repeat center;
+      background-size: 168px 27px;
+    }
+  }
+}
+.menu {
+  border-right: none;
+  background: transparent;
+  margin-top: 24px;
+  .el-menu-item{
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    > img {
+      width: 18px;
+      height: 18px;
+      margin-right: 25px;
+      vertical-align: middle;
+    }
+    &:hover, &:focus{
+      background: rgba(255,255,255,0.05);
+    }
+    &.is-active {
+      color: #fff;
+      background: $themeColor;
+    }
+  }
+  /deep/ .el-submenu {
+    .el-submenu__title {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.7);
+      > img {
+        width: 18px;
+        height: 18px;
+        margin-right: 25px;
+        vertical-align: middle;
+      }
+      &:hover {
+        background: rgba(255,255,255,0.05);
+      }
+    }
+    &.is-active {
+      .el-submenu__title {
+        color: #fff;
+        background: rgba(255,255,255,0.05);
+        i {
+          color: #fff;
+        }
+      }
+    }
+    .el-menu-item {
+      padding-left: 50px !important;
+      color: rgba(255, 255, 255, 0.7);
+      background: #000C17;
+      font-size: 14px;
+      &.is-active {
+        color: #fff;
+        background: $themeColor;
+      }
+      &:hover, &:focus {
+        background: $themeColor;
+      }
+    }
+  }
+}

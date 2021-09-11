@@ -1,0 +1,1158 @@
+<template>
+  <div class="taskList page-list">
+    <!-- 面包屑导航 -->
+    <div class="nav">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/main' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item>呼叫任务管理</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
+    <div class="toolbar">
+      <div class="tool-search">
+        <el-input placeholder="请输入任务名称" class="search-component search-input" v-model.trim="search.planName" @keyup.enter.native="fetchTaskList(1)" clearable></el-input>
+        <el-select v-model="search.taskStatus" placeholder="请选择任务状态" clearable class="search-component search-input">
+          <el-option v-for="(value, key) in taskStatusList" :key="key" :label="value.statusName" :value="key"></el-option>
+        </el-select>
+        <el-date-picker v-model="search.beginDate" class="search-component search-input" type="date" placeholder="开始日期" value-format="yyyy-MM-dd" :picker-options="beginDateValidator('search', 'endDate')" clearable></el-date-picker>
+        <span class="search-delimiter">-</span>
+        <el-date-picker v-model="search.endDate" class="search-component search-input" type="date" placeholder="结束日期" value-format="yyyy-MM-dd" :picker-options="endDateValidator('search', 'beginDate')" clearable></el-date-picker>
+        <el-select v-model="search.robotName" placeholder="请选择机器人名称" clearable class="search-component search-input">
+          <el-option v-for="(item,index) in robotList" :key="index" :label="item.showName" :value="item.id"></el-option>
+        </el-select>
+        <el-button type="primary" class="search-component" @click="fetchTaskList(1)">搜索</el-button>
+      </div>
+      <div class="tool-button">
+        <el-button @click="$router.push('createTask')" icon="el-icon-plus">新建任务</el-button>
+      </div>
+    </div>
+
+    <div class="table">
+      <el-table :data="planList" height="100%" border stripe tooltip-effect="dark" v-loading="isLoadingPlanList" @selection-change="(val) => (checkedTableRow = val)">
+        <el-table-column type="selection" fixed="left" align="center" width="55"></el-table-column>
+        <el-table-column label="序号" align="center" type="index" width="55">
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="name" label="任务名称" width="160" align="center"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="robotName" label="机器人名称" min-width="200" align="center"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="concurrentNum" label="并发数量" min-width="200" align="center"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="calls" label="外呼平台" min-width="200" align="center"></el-table-column>
+        <el-table-column label="任务状态" width="140" align="center">
+          <template slot-scope="scope">
+            <span class="icon-status" :class="scope.row.statusClass">{{
+              scope.row.statusName
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column show-overflow-tooltip prop="phoneCt" label="号码总数" width="160" align="center"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="finishNum" label="已呼数量" width="160" align="center"></el-table-column>
+        <el-table-column show-overflow-tooltip prop="successNum" label="接通数量" width="160" align="center"></el-table-column>
+        <el-table-column label="接通率" width="100" align="center">
+          <template slot-scope="scope">
+            <span>{{
+              scope.row.finishNum
+                ? ((scope.row.successNum * 100) / scope.row.finishNum).toFixed(
+                    2
+                  ) + '%'
+                : '0.00%'
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="定时启动时间" width="180" align="center">
+          <template slot-scope="scope">
+            <span>{{
+              scope.row.taskTime | formatDate('yyyy-MM-dd hh:mm:ss')
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="开始时间" width="180" align="center">
+          <template slot-scope="scope">
+            <span>{{
+              scope.row.beginTime | formatDate('yyyy-MM-dd hh:mm:ss')
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="结束时间" width="180" align="center">
+          <template slot-scope="scope">
+            <span>{{
+              scope.row.endTime | formatDate('yyyy-MM-dd hh:mm:ss')
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="280" fixed="right" align="center">
+          <template slot-scope="scope">
+            <el-button v-if="
+                  scope.row.status === 0 ||
+                  scope.row.status === 3 ||
+                  scope.row.status === 4
+              " @click="handleRun(scope.row.id,scope.row.status)">启动</el-button>
+            <el-button v-else-if="scope.row.status === 1" @click="handlePause(scope.row.id,scope.row.status)">暂停</el-button>
+            <el-button v-else-if="scope.row.status === 2" disabled>完成</el-button>
+            <el-button @click="handleExport(scope.row.id)">下载</el-button>
+            <!-- <el-button :disabled="
+                !!scope.row.planType ||
+                  scope.row.statusCd === '6' ||
+                  scope.row.overSixMon ||
+                  !authCatchcall
+              " @click="handleChase(scope.row)">追拨</el-button> -->
+            <!-- <el-button :disabled="
+                scope.row.statusCd === '1' ||
+                  scope.row.statusCd === '6' ||
+                  scope.row.overSixMon ||
+                  !authEdit
+              " @click="handleEdit(scope.row)">编辑</el-button> -->
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <div class="pagination">
+      <el-pagination background @current-change="fetchTaskList" @size-change="fetchTaskList" :page-size.sync="pagination.pageSize" :page-sizes="[10, 20, 50]" :current-page.sync="pagination.currentPage" layout="prev, pager, next, sizes, jumper" :total="pagination.total"></el-pagination>
+    </div>
+
+    <el-dialog title="编辑任务" :visible.sync="dialogEditVisible" @close="$refs.editForm.resetFields()" class="ddd">
+      <el-form :model="editFormData" ref="editForm" :rules="editFormRule" label-width="150px">
+        <el-form-item prop="planName" label="任务名称：">
+          <el-input disabled v-model.trim="editFormData.planName" placeholder="请输入任务名称" class="input-large"></el-input>
+        </el-form-item>
+        <el-form-item prop="robotId" label="机器人名称：">
+          <el-select disabled v-model="editFormData.robotId" placeholder="请选择机器人名称" class="input-large">
+            <el-option v-for="item in robotList" :key="item.id" :label="item.showName" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item prop="activeNumber" label="线路选取：">
+          <!-- <el-select
+            multiple
+            popper-class="select-multi"
+            v-model="editFormData.activeNumber"
+            placeholder="请选择线路"
+            class="input-large"
+          >
+            <li
+              @click="
+                toggleSelectAll(
+                  editFormData.activeNumber,
+                  activeNumberList,
+                  'id'
+                )
+              "
+              class="el-select-dropdown__item"
+              :class="{
+                selected:
+                  editFormData.activeNumber &&
+                  editFormData.activeNumber.length === activeNumberList.length
+              }"
+            >
+              全选
+            </li>
+            <el-option
+              v-for="item in activeNumberList"
+              :key="item.id"
+              :label="item.lineId"
+              :value="item.id + ''"
+            ></el-option>
+          </el-select> -->
+          <flow-select :options="activeNumberList" popperClass="selectmulti" labelField="lineId" placeholder="请选择线路" v-model="editFormData.activeNumber" class="flow-sel" width="420" @visibleChange="selectToggleDown"></flow-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button @click="dialogEditVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEditForm">确定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="追拨任务" :visible.sync="dialogChaseVisible" @close="$refs.chaseForm.resetFields()">
+      <el-form :model="chaseFormData" ref="chaseForm" @submit.native.prevent :rules="chaseFormRule" label-width="120px" label-position="left">
+        <el-form-item prop="planName" label="任务名称：">
+          <span>{{ chaseFormData.planName }}</span>
+        </el-form-item>
+        <el-form-item prop="importMethod" label="导入被叫号码：">
+          <el-radio-group v-model="chaseFormData.importMethod">
+            <el-radio :label="'file'">文件导入</el-radio>
+            <el-radio :label="'manual'">手动输入</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item v-show="chaseFormData.importMethod === 'file'" prop="importFile" label="文件导入：">
+          <div class="input-large form-item_upload">
+            <file-uploader class="form-uploader" :uploaded.sync="chaseFormData.importFile"></file-uploader>
+            <el-button @click="handleDownloadTemplate(chaseFormData.robotId)" type="primary">下载模板</el-button>
+          </div>
+        </el-form-item>
+        <el-form-item v-show="chaseFormData.importMethod === 'manual'" prop="importNumber" label="输入号码：">
+          <el-input v-model.trim="chaseFormData.importNumber" @keyup.enter.native.prevent="submitChaseForm" placeholder="多个号码用,隔开" class="input-large"></el-input>
+        </el-form-item>
+        <el-form-item prop="callSingle" label="呼叫去重：">
+          <el-radio-group v-model="chaseFormData.callSingle">
+            <el-radio :label="1">是</el-radio>
+            <el-radio :label="0">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button @click="dialogChaseVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitChaseForm">确定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="重呼设置" :visible.sync="dialogRecallVisible" width="700px">
+      <span class="recallTitle">新建任务重呼</span>
+      <el-form :model="recallForm" ref="recallForm" label-width="100px" label-position="left" class="recallForm">
+        <el-form-item label="任务名称：">
+          <el-input v-model.trim="recallForm.name" placeholder="请输入任务名称" class="input-long"></el-input>
+        </el-form-item>
+        <el-form-item label="机器人名称：">
+          <el-input v-model="recallForm.robotName" disabled class="input-long"></el-input>
+        </el-form-item>
+        <el-form-item label="任务类型：">
+          <el-input v-model="recallForm.planTypeName" disabled class="input-long"></el-input>
+        </el-form-item>
+        <el-form-item label="线路选择">
+          <flow-select :options="activeNumberList" popperClass="selectmulti" width="400" labelField="lineId" placeholder="请选择线路" v-model="recallForm.activeNumber" @visibleChange="selectToggleDown" class="flow-sel"></flow-select>
+          <!-- <el-select
+            multiple
+            popper-class="select-multi"
+            v-model="recallForm.activeNumber"
+            placeholder="请选择线路"
+            class="input-long"
+          >
+            <li
+              @click="
+                toggleSelectAll(recallForm.activeNumber, activeNumberList, 'id')
+              "
+              class="el-select-dropdown__item"
+              :class="{
+                selected:
+                  recallForm.activeNumber &&
+                  recallForm.activeNumber.length === activeNumberList.length
+              }"
+            >
+              全选
+            </li>
+            <el-option
+              v-for="item in activeNumberList"
+              :key="item.id"
+              :label="item.lineId"
+              :value="item.id + ''"
+            ></el-option>
+          </el-select> -->
+        </el-form-item>
+        <el-divider></el-divider>
+        <div>
+          <p class="formLabel">
+            呼叫失败结果：<span class="check-all" @click="checkAllRes">{{
+              ifCheckAllRes ? '取消' : '全选'
+            }}</span>
+          </p>
+          <el-checkbox-group v-model="recallForm.recallResult" @change="toggleCheckAllRes">
+            <el-checkbox v-for="item in recallResultList" :label="item.key" :key="item.key">{{ item.label }}</el-checkbox>
+          </el-checkbox-group>
+        </div>
+        <p style="margin-top:28px; margin-bottom:22px; font-weight:600">
+          呼叫成功结果（三个条件同时满足）：
+        </p>
+        <div>
+          <p class="formLabel">
+            客户分类：<span class="check-all" @click="checkAllCat">{{
+              ifCheckAllCat ? '取消' : '全选'
+            }}</span>
+          </p>
+          <div class="advanced-category-container">
+            <span @click="toggleSelectedCat(item)" v-for="item in categoryList" :key="item" class="advanced-category" :class="{ selected: recallForm.selectedCat.includes(item) }">{{ item }}</span>
+          </div>
+        </div>
+        <el-form-item label="通话时长：">
+          <el-input v-model="recallForm.minCallTime" placeholder="最小值" class="input-short" v-number></el-input>
+          <span> - </span>
+          <el-input v-model="recallForm.maxCallTime" placeholder="最大值" class="input-short" v-number></el-input>
+        </el-form-item>
+        <el-form-item label="呼叫次数：">
+          <el-input v-model="recallForm.minAllCallNum" placeholder="最小值" class="input-short" v-number></el-input>
+          <span> - </span>
+          <el-input v-model="recallForm.maxAllCallNum" placeholder="最大值" class="input-short" v-number></el-input>
+        </el-form-item>
+        <el-divider></el-divider>
+        <el-form-item label="呼叫去重：">
+          <el-radio-group v-model="recallForm.callSingle">
+            <el-radio :label="true">是</el-radio>
+            <el-radio :label="false">否</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="启动设置：">
+          <el-radio-group v-model="recallForm.startWay">
+            <el-radio label="自动启动">自动启动</el-radio>
+            <el-radio label="手动启动">手动启动</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button @click="dialogRecallVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitRecallForm">确定</el-button>
+      </span>
+    </el-dialog>
+    <progress-pop :close-on-click-modal="false" :dialog-visible.sync="dialogVisible" :is-finished="progerssFinish"></progress-pop>
+  </div>
+</template>
+<script>
+import FileUploader from '@/components/FileUploader'
+import util from '@/service/filter'
+import ProgressPop from '@/components/ProgressPop'
+import FlowSelect from '@/components/FlowSelect'
+export default {
+  components: {
+    FlowSelect,
+    FileUploader,
+    ProgressPop
+  },
+  data () {
+    return {
+      authCreate: false,
+      authRecall: false,
+      authDelete: false,
+      authExport: false,
+      authCatchcall: false,
+      authEdit: false,
+      userInfo: this.$store.state.userInfo,
+      ifCheckAllCat: false, // 是否选择所有分类
+      ifCheckAllRes: false, // 是否选择所有失败结果
+      errorNum: 0, //错误号码数量
+      jsons: [], //文件导入之后的数据
+      dialogVisible: false, // 加密提示弹框是否展示
+      progerssFinish: false, // 加密相关文件上传是否完成
+      search: {
+        planName: null,
+        taskStatus: null,
+        beginDate: null,
+        endDate: null,
+        robotName: null,
+        suserId: '',
+        tuserId: ''
+      }, // 搜索条件
+      suserIdList: [],
+      tuserIdList: [],
+      taskStatusList: {
+        '0': {
+          statusName: '待启动',
+          statusClass: 'status-ready'
+        },
+        '1': {
+          statusName: '运行中',
+          statusClass: 'status-running'
+        },
+        '2': {
+          statusName: '已完成',
+          statusClass: 'status-completed'
+        },
+        '3': {
+          statusName: '已暂停',
+          statusClass: 'status-paused'
+        },
+        '4': {
+          statusName: '定时暂停',
+          statusClass: 'status-timeout'
+        }
+        // '5': {
+        //   statusName: '定时启动',
+        //   statusClass: 'status-timein'
+        // },
+        // '6': {
+        //   statusName: '重呼准备中',
+        //   statusClass: 'status-recall'
+        // }
+      },
+      robotList: [], // 可选机器人列表
+      categoryList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'], // 可选意向分类
+      activeNumberList: [], // 可选线路
+      availableCallTaskTemplate: [238, 253, 283, 310], // 可选任务模板id
+      planList: [], // 任务列表数据
+      isLoadingPlanList: false, // 控制表格loading效果显隐
+      checkedTableRow: [], // 表格已选中行
+      pagination: {
+        currentPage: 1,
+        total: 50,
+        pageSize: 10
+      }, // 分页数据
+      dialogRecallVisible: false, // 重呼设置弹框是否可见
+      dialogEditVisible: false, // 编辑任务弹框是否可见
+      recallForm: {
+        name: null,
+        robotName: null,
+        robotId: null,
+        planType: null,
+        planTypeName: null,
+        activeNumber: null,
+        recallResult: [], // 已选择的呼叫结果
+        selectedCat: [], // 已选择的分类
+        callSingle: true,
+        startWay: '自动启动',
+        maxCallTime: null,
+        minCallTime: null,
+        maxAllCallNum: null,
+        minAllCallNum: null
+      },
+      recallResultList: [
+        { label: '正在通话中', key: '1' },
+        { label: '用户忙', key: '2' },
+        { label: '无应答', key: '3' },
+        { label: '空号', key: '4' },
+        { label: '关机', key: '5' },
+        { label: '停机', key: '6' },
+        { label: '号码错误', key: '8' },
+        { label: '暂停服务', key: '12' },
+        { label: '暂时无法接通', key: '13' },
+        { label: '线路欠费', key: '17' },
+        { label: '请求超时', key: '18' },
+        { label: '用户未响应', key: '22' },
+        { label: '其他', key: '7,11,14,15,16,19,20,21' }
+      ], // 可选通话结果
+      editFormData: {
+        id: null, // 任务id
+        planName: null, // 任务名称
+        robotId: null, // 机器人名称
+        activeNumber: null // 线路
+      }, // 编辑任务表单项
+      editFormRule: {
+        robotId: [
+          { required: true, message: '请选择机器人名称', trigger: 'blur' }
+        ],
+        activeNumber: [
+          { required: true, message: '请选择线路', trigger: 'blur' }
+        ]
+      }, // 编辑任务表单项校验规则
+      dialogChaseVisible: false, // 追拨任务弹框是否可见
+      chaseFormData: {
+        planName: '', // 任务名称
+        importMethod: 'file', // 导入方式
+        importFile: [], // 文件导入
+        customerList: [], // 用户列表
+        importNumber: null, // 输入号码
+        callSingle: 1 //呼叫去重，默认为1
+      }, // 追拨任务表单项
+      chaseFormRule: {
+        importFile: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.chaseFormData.importMethod === 'file' && !value.length) {
+                callback(new Error('请选择导入文件'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        importNumber: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.chaseFormData.importMethod === 'manual') {
+                if (!value) {
+                  callback(new Error('请输入号码'))
+                } else if (!/^1[3-9]\d{9}(,1[3-9]\d{9})*$/.test(value)) {
+                  callback(new Error('请输入正确手机号'))
+                } else {
+                  callback()
+                }
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ]
+      }, // 追拨任务表单项校验规则
+      beginDateValidator: (search, field) => {
+        return {
+          disabledDate: (current) =>
+            this[search][field] &&
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
+        }
+      },
+      endDateValidator: (search, field) => {
+        return {
+          disabledDate: (current) =>
+            this[search][field] &&
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
+        }
+      }
+    }
+  },
+  watch: {
+    'chaseFormData.importFile' (files) {
+      if (!files || !files.length) return
+      if (!this.validateFile(files[0])) {
+        this.chaseFormData.importFile = []
+        return
+      }
+      this.transpileFile(files[0], this.chaseFormData.robotId).then(
+        (res) => {
+          // this.chaseFormData.customerList = res[0];
+          this.jsons = res.dataList
+          this.errorNum = res.errorNum
+          if (res.reminderText) {
+            this.$message({
+              message: res.reminderText,
+              type: 'warning',
+              duration: 6000
+            })
+          }
+        },
+        () => {
+          this.chaseFormData.importFile = []
+        }
+      )
+    }
+  },
+  async created () {
+    this.fetchTaskList()
+    this.fetchRobotList()
+  },
+  methods: {
+    beforeSelectBus () {
+      if (this.userInfo.rankCode == 10 && !this.search.suserId) {
+        this.$message.error('请先选择所属二级账号')
+        this.$refs.busRef.blur()
+      }
+    },
+
+    selectToggleDown (isShow) {
+      this.$nextTick(() => {
+        if (isShow) {
+          const el = this.$el.querySelector('.selectmulti')
+          el.style.position = 'static'
+          const el2 = this.$el.querySelector('.flow-sel .el-select__tags')
+          el2.style.top = '20px'
+          const el3 = el.querySelector('.popper__arrow')
+          el3.style.top = '46px'
+        }
+      })
+    },
+    // 根据全选状态切换呼叫结果
+    checkAllRes () {
+      this.ifCheckAllRes = !this.ifCheckAllRes
+      if (this.ifCheckAllRes) {
+        this.recallForm.recallResult = this.recallResultList.map(
+          (item) => item.key
+        )
+      } else {
+        this.recallForm.recallResult = []
+      }
+    },
+    // 根据全选状态切换意向分类
+    checkAllCat () {
+      this.ifCheckAllCat = !this.ifCheckAllCat
+      if (this.ifCheckAllCat) {
+        this.categoryList.forEach((item) => {
+          this.recallForm.selectedCat.push(item)
+        })
+      } else {
+        this.recallForm.selectedCat = []
+      }
+    },
+    // 根据选择的呼叫结果切换全选状态
+    toggleCheckAllRes () {
+      this.ifCheckAllRes =
+        this.recallForm.recallResult.length === this.recallResultList.length
+          ? true
+          : false
+    },
+    // 切换选择的通话分类
+    toggleSelectedCat (val) {
+      const flag = this.recallForm.selectedCat.includes(val)
+      if (flag) {
+        const index = this.recallForm.selectedCat.indexOf(val)
+        this.recallForm.selectedCat.splice(index, 1)
+      } else {
+        this.recallForm.selectedCat.push(val)
+      }
+      this.ifCheckAllCat =
+        this.recallForm.selectedCat.length === this.categoryList.length
+          ? true
+          : false
+    },
+    // 查询任务列表
+    fetchTaskList (type) {
+      if (type === 1) {
+        // 筛选搜索页码要重置为1
+        this.pagination.currentPage = 1
+      }
+      this.isLoadingPlanList = true
+      this.$request
+        .jsonPost('/task/getTaskInfoList', {
+          userId: this.$store.state.userInfo.userId,
+          startTime: this.search.beginDate,
+          endTime: this.search.endDate,
+          name: this.search.planName,
+          robotName: this.search.robotName ? this.search.robotName : null,
+          status: this.search.taskStatus === '' ? null : this.search.taskStatus,
+          page: this.pagination.currentPage,
+          size: this.pagination.pageSize,
+          taskId: this.search.taskId
+        })
+        .then((res) => {
+          this.isLoadingPlanList = false
+          if (!res.data) {
+            if (res.message) {
+              this.$message.error('获取任务列表失败-' + res.message)
+            }
+            return
+          }
+          this.planList = res.data.list.map((item) => {
+            // 根据状态id映射状态名与样式类
+            return Object.assign(item, this.taskStatusList[item.status])
+          })
+          this.planList.forEach((item) => {
+            item.overSixMon =
+              Date.now() - new Date(item.beginTime).getTime() >
+                6 * 30 * 24 * 3600 * 1000
+                ? true
+                : false
+          })
+          this.pagination.total = res.data.total
+        })
+    },
+    // 查询机器人列表
+    fetchRobotList () {
+      this.$request
+        .jsonGet('/task/getRobots', {
+          params: {
+            userId: this.$store.state.userInfo.userId
+          }
+        })
+        .then((res) => {
+          this.robotList = res.data
+        })
+    },
+    // 点击启动按钮
+    handleRun (taskId) {
+      this.isLoadingPlanList = true
+      this.$request
+        .jsonPost('/task/updateStatus', {
+          status: 1,
+          taskId,
+          userId: this.$store.state.userInfo.id,
+        })
+        .then((res) => {
+          if (res.code === '0') {
+            this.$message.success('启动成功')
+            this.fetchTaskList()
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+        .finally(() => {
+          this.isLoadingPlanList = false
+        })
+    },
+    // 点击暂停按钮
+    handlePause (taskId) {
+      this.$request
+        .jsonPost('/task/updateStatus', {
+          status: 3,
+          taskId,
+          userId: this.$store.state.userInfo.id,
+        })
+        .then((res) => {
+          if (res.code === '0') {
+            this.$message.success('暂停成功')
+            this.fetchTaskList()
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+    },
+    // 点击下载按钮
+    async handleExport (taskId) {
+      const res = await this.$request.xml('/task/export', { taskId })
+      const a = document.createElement('a')
+      a.download = '未呼号码+失败号码.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    },
+    /**
+     * 点击表格行编辑按钮，唤起编辑弹窗
+     * @param data 行数据
+     */
+    handleEdit (data) {
+      if (data.lineIds && data.lineIds.length) {
+        data.lineIds = data.lineIds.map((e) => parseInt(e))
+      }
+      this.editFormData = {
+        id: data.id,
+        planName: data.planName,
+        robotId: data.robotId,
+        activeNumber: data.lineIds
+      }
+      this.dialogEditVisible = true
+    },
+    // 提交编辑任务表单
+    submitEditForm () {
+      this.$refs.editForm.validate((isValid) => {
+        if (!isValid) {
+          this.$message.error('请填写必填字段')
+          return
+        }
+
+        const param = {
+          id: this.editFormData.id,
+          userId: this.$store.state.userInfo.userId,
+          robotId: this.editFormData.robotId,
+          activeNums: this.editFormData.activeNumber.join(',')
+        }
+        this.$request.post('/plan/update', param).then((res) => {
+          if (res.code === '0') {
+            this.$message.success('编辑任务成功')
+            this.fetchTaskList()
+            this.dialogEditVisible = false
+          } else {
+            this.$message.error(res.message)
+          }
+        })
+      })
+    },
+    // 点击重呼按钮
+    handleRecall () {
+      if (this.checkedTableRow.length === 0) {
+        this.$message.error('请选择需要重呼的任务')
+        return
+      }
+      const notAllFinish = this.checkedTableRow.find((item) => {
+        return item.statusCd !== '2'
+      })
+      if (notAllFinish) {
+        this.$message.error('重呼只支持已完成的任务，请重新选择')
+        return
+      }
+      const singleRobotArr = []
+      this.checkedTableRow.forEach((item) => {
+        if (!singleRobotArr.includes(item.robotId)) {
+          singleRobotArr.push(item.robotId)
+        }
+      })
+      if (singleRobotArr.length !== 1) {
+        this.$message.error('重呼只针对单个机器人，请重新选择')
+        return
+      }
+      const singleTypeArr = []
+      this.checkedTableRow.forEach((item) => {
+        if (!singleTypeArr.includes(item.planType)) {
+          singleTypeArr.push(item.planType)
+        }
+      })
+      if (singleTypeArr.length !== 1) {
+        this.$message.error('重呼只针对单个类型的任务，请重新选择')
+        return
+      }
+      const overSixMon = this.checkedTableRow.find((item) => {
+        return item.overSixMon === true
+      })
+      if (overSixMon) {
+        this.$message.error('请选择180天内的任务执行重呼任务')
+        return
+      }
+      Object.keys(this.recallForm).forEach((item) => {
+        this.recallForm[item] = null
+      })
+      this.recallForm.robotName = this.checkedTableRow[0].robotName
+      this.recallForm.robotId = this.checkedTableRow[0].robotId
+      this.recallForm.planType = this.checkedTableRow[0].planType
+      this.recallForm.planTypeName = this.checkedTableRow[0].planType
+        ? '商机任务'
+        : '普通任务'
+      this.recallForm.recallResult = []
+      this.recallForm.selectedCat = []
+      this.recallForm.activeNumber = []
+      this.recallForm.callSingle = true
+      this.recallForm.startWay = '自动启动'
+      this.ifCheckAllCat = false
+      this.ifCheckAllRes = false
+      this.dialogRecallVisible = true
+    },
+    // 点击追拨按钮，唤起追拨弹窗
+    handleChase (data) {
+      this.chaseFormData = {
+        id: data.id,
+        planName: data.planName,
+        importMethod: 'file',
+        importFile: [], // 文件导入
+        customerList: [], // 用户列表
+        phoneNum: data.phoneNum, // 号码总数
+        importNumber: null, // 输入号码
+        robotId: data.robotId, // 机器人名称id
+        callSingle: 1 // 呼叫去重
+      }
+      this.dialogChaseVisible = true
+    },
+    // 提交重呼设置表单
+    async submitRecallForm () {
+      if (!this.recallForm.name) {
+        this.$message.error('请填写任务名称')
+        return
+      }
+      if (this.recallForm.activeNumber.length === 0) {
+        this.$message.error('请选择线路')
+        return
+      }
+      if (
+        this.recallForm.maxCallTime &&
+        this.recallForm.minCallTime &&
+        this.recallForm.minCallTime > this.recallForm.maxCallTime
+      ) {
+        this.$message.error('通话时长填写有误')
+        return
+      }
+      if (
+        this.recallForm.maxAllCallNum &&
+        this.recallForm.minAllCallNum &&
+        this.recallForm.minAllCallNum > this.recallForm.maxAllCallNum
+      ) {
+        this.$message.error('呼叫次数填写有误')
+        return
+      }
+      const loading = this.$loading({
+        lock: true,
+        text: '正在新建重呼任务，请稍候',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.3)'
+      })
+      const data = {
+        userId: this.$store.state.userInfo.userId,
+        planName: this.recallForm.name,
+        robotId: this.recallForm.robotId,
+        activeNums: this.recallForm.activeNumber.join(','),
+        resultCodes: this.recallForm.recallResult.join(','),
+        categories: this.recallForm.selectedCat,
+        maxCallTime: this.recallForm.maxCallTime,
+        minCallTime: this.recallForm.minCallTime,
+        maxAllCallNum: this.recallForm.maxAllCallNum,
+        minAllCallNum: this.recallForm.minAllCallNum,
+        removeRepeat: this.recallForm.callSingle,
+        startWay: this.recallForm.startWay,
+        planType: this.recallForm.planType,
+        ids: this.checkedTableRow.map((item) => item.id)
+      }
+      const res = await this.$request({
+        method: 'post',
+        url: '/plan/reCall/create',
+        timeout: '3600000',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(data)
+      })
+      loading.close()
+      if (res.code === '0') {
+        this.$message.success('新建重呼任务成功')
+        this.fetchTaskList()
+        this.dialogRecallVisible = false
+      } else {
+        this.$message.error(res.message || '新建重呼任务失败')
+      }
+    },
+    // 提交追拨任务表单
+    submitChaseForm () {
+      this.$refs.chaseForm.validate((isValid) => {
+        if (!isValid) {
+          this.$message.error('请填写必填字段')
+          return
+        }
+
+        const param = {
+          id: this.chaseFormData.id,
+          robotId: this.chaseFormData.robotId,
+          userId: this.$store.state.userInfo.userId,
+          jsons: this.jsons,
+          customerList: this.formatCustomerInfo(this.chaseFormData),
+          phoneNum: this.chaseFormData.phoneNum,
+          planType: 0,
+          callSingle: this.chaseFormData.callSingle
+        }
+        let loading,
+          ltext = '正在提交追拨任务，请稍候'
+        if (this.$store.state.userInfo.encMobile) {
+          this.dialogVisible = true
+          ltext = ''
+        }
+        loading = this.$loading({
+          lock: true,
+          text: ltext,
+          spinner: 'el-icon-loading',
+          background: 'rgba(255, 255, 255, 0.3)'
+        })
+        this.$request
+          .post('/plan/adddial', param, { timeout: 1200000 })
+          .then((res) => {
+            const now = Date.now()
+            if (res.code === '0') {
+              if (
+                now - window._mtimestamp < 5000 &&
+                this.$store.state.userInfo.encMobile
+              ) {
+                setTimeout(async () => {
+                  this.dialogVisible = false
+                  if (this.chaseFormData.importMethod === 'file') {
+                    const infos = Object.keys(res.data.info)
+                    const h = this.$createElement
+                    this.$message({
+                      message: h('div', null, [
+                        h('p', null, [
+                          h('span', null, `${infos[0]}：`),
+                          h(
+                            'span',
+                            { style: 'color: #F56C6C' },
+                            res.data.info[infos[0]]
+                          )
+                        ]),
+                        h('p', null, [
+                          h('span', null, '错误数量：'),
+                          h('span', { style: 'color: #F56C6C' }, this.errorNum)
+                        ]),
+                        h('p', null, [
+                          h('span', null, `${infos[1]}：`),
+                          h(
+                            'span',
+                            { style: 'color: #F56C6C' },
+                            res.data.info[infos[1]]
+                          )
+                        ])
+                      ]),
+                      type: 'success',
+                      duration: 6000
+                    })
+                  } else {
+                    this.$message.success('追拨成功')
+                  }
+                  this.fetchTaskList()
+                  this.dialogChaseVisible = false
+                }, 5000 + window._mtimestamp - now)
+              } else {
+                this.dialogVisible = false
+                if (this.chaseFormData.importMethod === 'file') {
+                  const infos = Object.keys(res.data.info)
+                  const h = this.$createElement
+                  this.$message({
+                    message: h('div', null, [
+                      h('p', null, [
+                        h('span', null, `${infos[0]}：`),
+                        h(
+                          'span',
+                          { style: 'color: #F56C6C' },
+                          res.data.info[infos[0]]
+                        )
+                      ]),
+                      h('p', null, [
+                        h('span', null, '错误数量：'),
+                        h('span', { style: 'color: #F56C6C' }, this.errorNum)
+                      ]),
+                      h('p', null, [
+                        h('span', null, `${infos[1]}：`),
+                        h(
+                          'span',
+                          { style: 'color: #F56C6C' },
+                          res.data.info[infos[1]]
+                        )
+                      ])
+                    ]),
+                    type: 'success',
+                    duration: 6000
+                  })
+                } else {
+                  this.$message.success('追拨成功')
+                }
+                this.fetchTaskList()
+                this.dialogChaseVisible = false
+              }
+            } else if (res.code === '3') {
+              if (
+                now - window._mtimestamp < 2000 &&
+                this.$store.state.userInfo.encMobile
+              ) {
+                setTimeout(() => {
+                  this.dialogVisible = false
+                  this.$message.error(res.message)
+                  this.fetchTaskList()
+                  this.dialogChaseVisible = false
+                }, 1000)
+              } else {
+                this.$message.error(res.message)
+                this.fetchTaskList()
+                this.dialogChaseVisible = false
+              }
+            } else {
+              if (
+                now - window._mtimestamp < 2000 &&
+                this.$store.state.userInfo.encMobile
+              ) {
+                setTimeout(() => {
+                  this.dialogVisible = false
+                  this.$message.error(res.message)
+                }, 1000)
+              } else {
+                this.dialogVisible = false
+                this.$message.error(res.message)
+              }
+            }
+          })
+          .finally(() => {
+            loading.close()
+          })
+      })
+    },
+    // 验证文件可用性
+    validateFile (file) {
+      if (file.size > 1024 * 1024 * 5) {
+        this.$message.error('文件不得超过5M')
+        return false
+      }
+      return true
+    },
+    // 解析已上传文件
+    transpileFile (file, robotId) {
+      let param = new FormData()
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+      const loading = this.$loading({
+        lock: true,
+        text: '正在解析，请稍候',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.3)'
+      })
+      param.append('file', file)
+      param.append('code', robotId)
+      param.append('userId', this.$store.state.userInfo.userId)
+      return this.$request
+        .post('/customer/file', param, config)
+        .then((res) => {
+          if (res.code === '0') {
+            return Promise.resolve(res.data)
+          } else {
+            this.$message.warning(res.message)
+            return Promise.reject([])
+          }
+        })
+        .finally(() => {
+          loading.close()
+        })
+    },
+
+    // 依据不同导入号码方式解析客户信息
+    formatCustomerInfo (data) {
+      if (data.importMethod === 'file') {
+        return data.customerList
+      } else {
+        const customerList = []
+        const numberList = data.importNumber.split(/[,，]/) // 多个号码以逗号分隔
+        numberList.forEach((number) => {
+          customerList.push({
+            号码: number
+          })
+        })
+        return customerList
+      }
+    },
+
+    // 切换多选框全选按钮
+    toggleSelectAll (target, list, field) {
+      let newTarget = [],
+        length = target.length
+      if (!target || length !== list.length) {
+        newTarget = list.map((item) => item[field] + '')
+      }
+      target.splice(0, length, ...newTarget)
+    },
+    // 点击下载模板
+    async handleDownloadTemplate (robotId) {
+      if (!robotId) {
+        this.$message.warning('请先选择机器人名称')
+        return
+      }
+      const robotItem = this.robotList.find((item) => {
+        return item.id == robotId
+      })
+      let a = document.createElement('a')
+      let res = await this.$request({
+        method: 'get',
+        responseType: 'blob',
+        url: 'variable/down/' + robotId + '/false'
+      })
+      a.download = robotItem.showName + '-文件导入模板.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    }
+  }
+}
+</script>
+<style lang="scss">
+/deep/ .select-multi {
+  left: 0;
+}
+</style>
+<style lang="scss" scoped>
+@import "@/assets/css/common.scss";
+.ddd {
+  /deep/ .el-dialog__body {
+    overflow: hidden;
+  }
+}
+.form-item_upload {
+  display: flex;
+  align-items: center;
+  .form-uploader {
+    flex: 1;
+    overflow: hidden;
+    margin-right: 20px;
+  }
+}
+.recallTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2e008b;
+}
+.recallForm {
+  margin-top: 30px;
+  max-height: 500px;
+  overflow: auto;
+  padding-right: 10px;
+  .input-short {
+    width: 100px;
+  }
+  .input-long {
+    width: 400px;
+  }
+  .el-checkbox {
+    width: 96px;
+    margin-bottom: 10px;
+  }
+  /deep/.el-form-item__label {
+    font-weight: 600;
+  }
+  .formLabel {
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .check-all {
+    margin-left: 10px;
+    color: $themeColor;
+    /* font-weight: 500; */
+    cursor: pointer;
+  }
+  .advanced-category-container {
+    margin-bottom: 20px;
+  }
+  .advanced-category {
+    display: inline-block;
+    width: 92.5px;
+    line-height: 27px;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    margin: 0 15px 10px 0;
+    color: rgba(0, 0, 0, 0.65);
+    transition: all 0.3s;
+    &.selected {
+      color: #fff;
+      border-color: $themeColor;
+      background: $themeColor;
+    }
+  }
+}
+</style>

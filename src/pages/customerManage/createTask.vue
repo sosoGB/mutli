@@ -1,0 +1,1153 @@
+<template>
+  <div class="createTask page-list">
+    <!-- 面包屑导航 -->
+    <div class="nav">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }">客户批次管理</el-breadcrumb-item>
+        <el-breadcrumb-item>新建任务</el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
+    <el-form :model="createFormData" ref="createForm" :rules="createFormRule" label-width="150px">
+      <el-form-item prop="name" label="任务名称：">
+        <el-input v-model.trim="createFormData.name" placeholder="请输入任务名称" clearable class="input-name"></el-input>
+      </el-form-item>
+      <el-form-item prop="selectCtNum" label="已选客户数量：">
+        <span>{{selectCtNum}}</span>
+      </el-form-item>
+      <el-form-item prop="robotId" label="机器人名称：">
+        <div class="input-large form-item_upload">
+          <el-select v-model="createFormData.robotId" @change="handleChangeRobotId" placeholder="请选择机器人名称" filterable clearable>
+            <el-option v-for="(item,index) in robotList" :key="index" :label="item.showName" :value="item.id"></el-option>
+          </el-select>
+          <el-button @click="handleDownload(createFormData.robotId)" type="primary">下载机器人变量模板</el-button>
+        </div>
+      </el-form-item>
+      <el-form-item prop="outCallPlatformId" label="外呼平台：" v-if="createFormData.robotId">
+        <div class="input-large form-item_upload">
+          <el-select v-model="createFormData.outCallPlatformId" @change="handleChangePlat" placeholder="请选择外呼平台" filterable multiple>
+            <el-option v-for="item in OutCallPlatformList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </div>
+      </el-form-item>
+      <el-form-item prop="importComVar" label="共用型变量：">
+        <div class="input-large form-item_upload">
+          <file-uploader class="form-uploader" :uploaded.sync="createFormData.importComVar"></file-uploader>
+          <el-button @click="handleDownloadTemplate(1)" type="primary">下载模板</el-button>
+        </div>
+      </el-form-item>
+      <el-form-item prop="importRelVar" label="关系型变量：">
+        <div class="input-large form-item_upload">
+          <file-uploader class="form-uploader" :uploaded.sync="createFormData.importRelVar"></file-uploader>
+          <el-button @click="handleDownloadTemplate(2)" type="primary">下载模板</el-button>
+        </div>
+      </el-form-item>
+      <el-form-item prop="importRelVar" label="变量校验：" v-show="ulCom && ulRel">
+        <div class="input-large form-item_upload">
+          <el-button @click="handleCheckVar()" type="primary">变量校验</el-button>
+        </div>
+      </el-form-item>
+      <el-form-item prop="concurrentNum" label="总并发数量：">
+        <el-input v-model.trim="createFormData.concurrentNum" placeholder="" clearable class="input-name"></el-input>
+      </el-form-item>
+      <el-form-item prop="type" label="外呼启动方式：">
+        <el-radio-group v-model="createFormData.type">
+          <el-radio :label="0">定时启动</el-radio>
+          <el-radio :label="1">立即启动</el-radio>
+          <el-radio :label="2">手动启动</el-radio>
+        </el-radio-group>
+        <div v-if="createFormData.type === 0" class="timing">
+          <span>任务启动时间：</span>
+          <div>
+            <el-date-picker v-model="createFormData.startDate" value-format="yyyy-MM-dd" type="date" :editable="false" :picker-options="datePicker" placeholder="选择日期">
+            </el-date-picker>
+            <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+                start: '08:00',
+                step: '00:10',
+                end: '20:50'
+              }" placeholder="选择时间">
+            </el-time-select>
+          </div>
+
+          <span>允许呼叫时段时段：</span>
+          <div class="allowTime">
+            <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+                start: '08:00',
+                step: '00:10',
+                end: '20:50'
+              }" placeholder="选择时间">
+            </el-time-select>
+            <el-time-select v-model="allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+                start: '08:00',
+                step: '00:10',
+                end: '20:50'
+              }" placeholder="选择时间">
+            </el-time-select>
+            <el-button type="primary" size="mini" icon="el-icon-plus" @click.prevent="addDomain"></el-button>
+          </div>
+          <div class="allowTime" v-for="domain in allowTime" :key="domain.key">
+            <!-- <el-form-item
+    v-for="(domain, index) in allowTime"
+    :key="domain.key"
+    :prop="'allowTime.' + index + '.start'"
+  >
+    <el-input v-model="domain.start"></el-input><el-button @click.prevent="removeDomain(domain)">删除</el-button>
+  </el-form-item> -->
+            <!-- <el-form-item>
+    <el-button @click="addDomain">新增域名</el-button>
+  </el-form-item> -->
+
+            <el-time-select v-model="domain.allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+                start: '08:00',
+                step: '00:10',
+                end: '20:50'
+              }" placeholder="选择时间">
+            </el-time-select>
+            <el-time-select v-model="domain.allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+                start: '08:00',
+                step: '00:10',
+                end: '20:50'
+              }" placeholder="选择时间">
+            </el-time-select>
+            <el-button type="danger" size="mini" icon="el-icon-delete" @click.prevent="removeDomain(domain)"></el-button>
+          </div>
+
+          <span>为避免打扰用户休息，系统强制默认外呼时间为08:00-12:00,14:00-21:00，请在该时间段内设置</span>
+        </div>
+      </el-form-item>
+      <el-form-item prop="callSingle" label="呼叫去重：">
+        <el-radio-group v-model="createFormData.callSingle">
+          <el-radio :label="1">是</el-radio>
+          <el-radio :label="0">否</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item prop="recallFlag" label="自动失败重呼：">
+        <el-radio-group v-model="createFormData.recallFlag">
+          <el-radio :label="1">是</el-radio>
+          <el-radio :label="0">否</el-radio>
+        </el-radio-group>
+        <div v-show="createFormData.recallFlag">
+          <p>
+            <span class="form-prefix">选择通话结果</span>
+            <span class="clickable" @click="handleCheckAllCallResult(createFormData)">
+              {{
+                createFormData.recallResult.length === recallResultList.length
+                  ? '全部取消'
+                  : '全选'
+              }}
+            </span>
+          </p>
+          <el-checkbox-group v-model="createFormData.recallResult">
+            <el-checkbox v-for="item in recallResultList" :label="item.key" :key="item.key">{{ item.label }}</el-checkbox>
+          </el-checkbox-group>
+          <el-form-item label-width="70px" prop="recallInterval" label="重呼间隔">
+            <el-input-number v-model="createFormData.recallInterval" :min="1" :precision="0" size="small" placeholder="请输入重呼间隔"></el-input-number>
+            <span class="form-suffix">分钟</span>
+          </el-form-item>
+          <el-form-item label-width="70px" prop="recallMaxNum" label="重呼次数">
+            <el-input-number v-model="createFormData.recallMaxNum" :min="1" :precision="0" size="small" placeholder="请输入重呼次数"></el-input-number>
+            <span class="form-suffix">次</span>
+          </el-form-item>
+        </div>
+      </el-form-item>
+      <el-form-item prop="conversionFlag" label="转化失败重呼：">
+        <el-radio-group v-model="createFormData.conversionFlag">
+          <el-radio :label="1">是</el-radio>
+          <el-radio :label="0">否</el-radio>
+        </el-radio-group>
+        <div v-show="createFormData.conversionFlag">
+          <div class="conversion_task">
+            <span class="form-prefix">任务创建时间</span>
+            <span class="form-conversion-suffix">当前任务创建后</span>
+            <el-input v-model.trim="createFormData.name" placeholder="" clearable class="input-name"></el-input>
+            <span class="form-conversion-suffix">天</span>
+            <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+                start: '08:00',
+                step: '00:10',
+                end: '20:50'
+              }" placeholder="选择时间">
+            </el-time-select>
+            <el-form-item prop="type">
+              <span class="form-prefix">任务启动方式</span>
+              <el-radio-group v-model="createFormData.type">
+                <el-radio :label="'立即启动'">立即启动</el-radio>
+                <el-radio :label="'手动启动'">手动启动</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item prop="type">
+              <span class="form-prefix">接通失败重呼</span>
+              <el-radio-group v-model="createFormData.jietongFlag">
+                <el-radio :label="1">是</el-radio>
+                <el-radio :label="0">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <div v-show="createFormData.jietongFlag"><span class="form-prefix">选择通话结果</span>
+              <span class="clickable" @click="handleCheckAllCallConversionResult(createFormData)">
+                {{
+                createFormData.recallResult.length === conversionResultList.length
+                  ? '全部取消'
+                  : '全选'
+              }}
+              </span>
+              <el-checkbox-group v-model="createFormData.recallResult">
+                <el-checkbox v-for="item in conversionResultList" :label="item.key" :key="item.key">{{ item.label }}</el-checkbox>
+              </el-checkbox-group>
+              <el-form-item label-width="70px" prop="recallInterval" label="重呼间隔">
+                <el-input-number v-model="createFormData.recallInterval" :min="1" :precision="0" size="small" placeholder="请输入重呼间隔"></el-input-number>
+                <span class="form-suffix">分钟</span>
+              </el-form-item>
+              <el-form-item label-width="70px" prop="recallMaxNum" label="重呼次数">
+                <el-input-number v-model="createFormData.recallMaxNum" :min="1" :precision="0" size="small" placeholder="请输入重呼次数"></el-input-number>
+                <span class="form-suffix">次</span>
+              </el-form-item>
+            </div>
+
+          </div>
+
+        </div>
+      </el-form-item>
+    </el-form>
+    <el-row class="bottom">
+      <el-button type="primary" @click="submitCreateForm">确定</el-button>
+      <el-button @click="backtrack">取消</el-button>
+    </el-row>
+    <progress-pop :close-on-click-modal="false" :dialog-visible.sync="dialogVisible" :is-finished="progerssFinish"></progress-pop>
+  </div>
+</template>
+
+<script>
+import FileUploader from '@/components/FileUploader'
+import ProgressPop from '@/components/ProgressPop'
+import util from '@/service/filter'
+export default {
+  components: {
+    FileUploader,
+    ProgressPop
+  },
+  data () {
+    return {
+      selectCtNum: 0, //已选客户数量
+      selectRobotName: null, //已选机器人名称
+      ulCom: null,
+      ulRel: null,
+      unionVO: null,//变量校验参数
+      customerInfoVOs: null,
+      varResult: null,//校验结果
+      allowstartTime: '',//允许开始时间
+      allowendTime: '',//允许结束时间
+      errorNum: 0, //错误号码数量
+      jsons: [], //文件导入之后的数据
+      robotList: [], // 可选机器人列表
+      OutCallPlatformList: [],//可选外呼平台列表
+      activeNumberList: [], // 可选线路
+      dialogVisible: false, // 加密提示弹框是否展示
+      progerssFinish: false, // 加密相关文件上传是否完成
+      recallResultList: [
+        { label: '正在通话中', key: '1' },
+        { label: '用户忙', key: '2' },
+        { label: '无应答', key: '3' },
+        { label: '空号', key: '4' },
+        { label: '关机', key: '5' },
+        { label: '停机', key: '6' },
+        { label: '号码错误', key: '8' },
+        { label: '暂停服务', key: '12' },
+        { label: '暂时无法接通', key: '13' },
+        { label: '线路欠费', key: '17' },
+        { label: '请求超时', key: '18' },
+        { label: '用户未响应', key: '22' },
+        { label: '其他', key: '7,11,14,15,16,19,20,21' }
+      ], // 可选通话结果
+      conversionResultList: [
+        { label: '正在通话中', key: '1' },
+        { label: '用户忙', key: '2' },
+        { label: '无应答', key: '3' },
+        { label: '空号', key: '4' },
+        { label: '关机', key: '5' },
+        { label: '停机', key: '6' },
+        { label: '号码错误', key: '8' },
+        { label: '暂停服务', key: '12' },
+        { label: '暂时无法接通', key: '13' },
+        { label: '线路欠费', key: '17' },
+        { label: '请求超时', key: '18' },
+        { label: '用户未响应', key: '22' },
+        { label: '其他', key: '7,11,14,15,16,19,20,21' }
+      ], // 可选通话结果
+      createFormData: {
+        name: null, // 任务名称
+        robotId: null, // 机器人名称
+        outCallPlatformId: [], // 外呼平台名称
+        concurrentNum: null,//并发数量
+        activeNumber: null, // 线路
+        importMethod: 'file', // 导入方式
+        importComVar: [],//共用型变量导入
+        importRelVar: [],//关系型变量导入
+        customerList: [], // 用户列表
+        opportunityAvailable: true, // 是否可导入商机名单
+        importOpportunityList: [], // 所选商机名单
+        importOpportunityFile: [], // 文件方式导入商机名单
+        variableMap: null, // 商机名单变量表
+        callSingle: 1, // 呼叫去重
+        recallFlag: 0, // 自动失败重呼
+        recallResult: [], // 通话结果
+        recallInterval: 1, // 重呼间隔
+        recallMaxNum: 1, // 重呼次数
+        type: 0, // 启动设置
+        startDate: null, // 启动日期
+        startTime: null, // 启动时间
+        conversionFlag: 0, // 转化失败重呼
+        jietongFlag: 0, // 接通失败重呼
+      }, // 新建任务表单项
+      createFormRule: {
+        name: [
+          { required: true, message: '请输入任务名称', trigger: 'blur' },
+          { max: 20, message: '不得超过20个字符', trigger: 'blur' }
+        ],
+        robotId: [
+          { required: true, message: '请选择机器人名称', trigger: 'blur' }
+        ],
+        activeNumber: [
+          { required: true, message: '请选择线路', trigger: 'blur' }
+        ],
+        concurrentNum
+          : [
+            { required: true, message: '请输入总并发数量', trigger: 'blur' }
+          ],
+        recallInterval: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.createFormData.recallFlag && !value) {
+                callback(new Error('请输入重呼间隔'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        recallMaxNum: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.createFormData.recallFlag && !value) {
+                callback(new Error('请输入重呼次数'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        conversionInterval: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.createFormData.conversionFlag && !value) {
+                callback(new Error('请输入重呼间隔'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        conversionMaxNum: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.createFormData.conversionFlag && !value) {
+                callback(new Error('请输入重呼次数'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        importComVar: [
+          {
+            validator: (rule, value, callback) => {
+              if (
+                this.createFormData.importMethod === 'file' &&
+                !value.length
+              ) {
+                callback(new Error('请导入公用型变量'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        importRelVar: [
+          {
+            validator: (rule, value, callback) => {
+              if (
+                this.createFormData.importMethod === 'file' &&
+                !value.length
+              ) {
+                callback(new Error('请导入关系型变量'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        importOpportunityList: [
+          {
+            validator: (rule, value, callback) => {
+              if (
+                this.createFormData.importMethod === 'opportunity' &&
+                !value.length
+              ) {
+                callback(new Error('请选择商机名单'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
+        importOpportunityFile: [
+          {
+            validator: (rule, value, callback) => {
+              if (
+                this.createFormData.importMethod === 'opportunity' &&
+                !value.length
+              ) {
+                callback(new Error('请选择导入文件'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ]
+      }, // 新增任务表单项校验规则
+      beginDateValidator: (search, field) => {
+        return {
+          disabledDate: (current) =>
+            this[search][field] &&
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
+        }
+      },
+      endDateValidator: (search, field) => {
+        return {
+          disabledDate: (current) =>
+            this[search][field] &&
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
+        }
+      },
+      datePicker: {
+        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
+      },
+      dialogOpportunityVisible: false, // 导入商机名单弹窗可见性
+      opportunityTagList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
+      opportunityStatusList: [
+        {
+          label: '未呼叫',
+          value: 0
+        },
+        {
+          label: '已呼叫',
+          value: 1
+        }
+      ],
+      opportunitySearch: {
+        tag: null,
+        status: null,
+        number: null,
+        beginTime: null,
+        endTime: null
+      },
+      opportunityPagination: {
+        currentPage: 1,
+        total: 1,
+        pageSize: 10
+      },
+      opportunityList: [], // 商机名单
+      isLoadingOpportunityList: false, // 商机名单表格loading效果
+      isCheckDown: false,
+      allowTime: [],
+      allowTimes: [],
+      dynamicValidateForm: {
+        domains: [{
+          value: ''
+        }]
+      }
+    }
+  },
+  watch: {
+    'createFormData.concurrentNum': {
+      handler () {
+        if (this.timer) {
+          clearTimeout(this.timer)
+        }
+        this.timer = setTimeout(() => {
+          this.checkConcurrentNum();
+        }, 1500)
+      },
+      deep: true
+    },
+    // 导入公用型变量
+    'createFormData.importComVar' (files) {
+      if (!files || !files.length) return
+      if (!this.validateFile(files[0])) {
+        this.createFormData.importComVar = []
+        return
+      }
+      this.ulCom = files[0]
+    },
+    // 导入关系型变量
+    'createFormData.importRelVar' (files) {
+      if (!files || !files.length) return
+      if (!this.validateFile(files[0])) {
+        this.createFormData.importRelVar = []
+        return
+      }
+      this.ulRel = files[0]
+    },
+    'createFormData.importOpportunityFile' (files) {
+      if (!files || !files.length) return
+      if (!this.createFormData.robotId) {
+        this.$message.warning('请先选择机器人名称')
+        this.createFormData.importOpportunityFile = []
+        return
+      }
+      if (!this.validateFile(files[0])) {
+        this.createFormData.importOpportunityFile = []
+        return
+      }
+      this.transpileFile(files[0], this.createFormData.robotId, true).then(
+        (res) => {
+          this.createFormData.variableMap = res
+        },
+        () => {
+          this.createFormData.variableMap = null
+          this.createFormData.importOpportunityFile = []
+        }
+      )
+    }
+  },
+  created () {
+    //把数组由字符串转化成数字
+    const param = this.$route.query.name
+    const search = this.$route.query.search
+    console.log(search, '==========')
+    let distList = []
+    let customerInfos = []
+    param.forEach(item => {
+      distList.push(item.row.distCt)
+      var obj = {}
+      obj.uuid = item.row.uuid
+      obj.type = item.row.type
+      obj.userId = search.userId
+      obj.batch = search.batch
+      obj.startTime = search.startTime
+      obj.endTime = search.endTime
+      obj.isCall = search.isCall
+      obj.isNewCus = search.isNewCus
+      obj.isSuccess = search.isSuccess
+      obj.sex = search.sex
+      obj.minAge = search.minAge
+      obj.maxAge = search.maxAge
+      customerInfos.push(obj)
+    })
+    let vo = {}
+    this.customerInfoVOs = customerInfos
+    vo.customerInfos = customerInfos
+    this.unionVO = vo
+    const numList = distList.map(Number)
+    //计算客户总数量
+    this.selectCtNum = numList.reduce(function (prev, cur) {
+      return prev + cur
+    })
+    this.fetchRobotList()
+  },
+  methods: {
+    testFile (file) {
+      let param = new FormData()
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+      const loading = this.$loading({
+        lock: true,
+        text: '正在解析，请稍候',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.3)'
+      })
+      param.append('file', file)
+      const url = '/qbzz/manage/api/check/union'
+      return this.$request
+        .uploadPost(url, param, config)
+        .then((res) => {
+          console.log(res)
+          if (res.code === '0') {
+            return Promise.resolve(res.data)
+          } else {
+            this.$message.warning(res.message)
+            return Promise.reject([])
+          }
+        })
+        .finally(() => {
+          loading.close()
+        })
+    },
+    removeDomain (item) {
+      var index = this.allowTime.indexOf(item)
+      if (index !== -1) {
+        this.allowTime.splice(index, 1)
+      }
+    },
+    addDomain () {
+      if (!this.allowstartTime || !this.allowendTime) {
+        this.$message.warning('请选择正确的时间添加')
+        return
+      }
+      this.allowTimes.push(
+        this.allowstartTime + ':00-' + this.allowendTime + ':00',
+      )
+      this.allowTime.push({
+        allowstartTime: this.allowstartTime,
+        allowendTime: this.allowendTime,
+      })
+      this.allowstartTime = ''
+      this.allowendTime = ''
+    },
+    // 选择外呼平台
+    handleChangePlat (select) {
+      if (select) {
+        let platforms = []
+        select.forEach(item => {
+          let plat = this.OutCallPlatformList.find((list) => {
+            return list.id === item
+          })
+          let obj = {}
+          obj.platformId = plat.id
+          obj.userId = plat.serviceUserId
+          obj.robotId = plat.robotId
+          platforms.push(obj)
+        })
+        this.unionVO.platforms = platforms
+      }
+    },
+    // 变量校验
+    handleCheckVar () {
+      let param = new FormData()
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+      const loading = this.$loading({
+        lock: true,
+        text: '正在校验，请稍候',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.3)'
+      })
+      param.append('pFile', this.ulCom)
+      param.append('rFile', this.ulRel)
+      param.append('unionVO', JSON.stringify(this.unionVO))
+      const url = '/qbzz/manage/api/check/union'
+      return this.$request
+        .uploadPost(url, param, config)
+        .then((res) => {
+          if (res.code === '0') {
+            this.varResult = res.data
+            this.$message.success(res.message)
+          } else {
+            this.$message.warning(res.message)
+            return Promise.reject([])
+          }
+        })
+        .finally(() => {
+          loading.close()
+        })
+    },
+    // 校验并发数
+    checkConcurrentNum () {
+      this.$request
+        .jsonPost('/task/checkConcurrentNum', {
+          concurrentNum: this.createFormData.concurrentNum,
+          serviceIds: this.createFormData.outCallPlatformId,
+        })
+        .then((res) => {
+          if (res.code === '0' && res.data === false) {
+            this.$message.error(res.message)
+          }
+        })
+    },
+    onCheckDown (event) {
+      this.isCheckDown = true
+      // else {
+      //   this.createFormData.activeNumber.splice(index, 1)
+      // }
+      event.preventDefault() // 阻止默认行为
+      event.stopPropagation() // 阻止事件冒泡
+    },
+    onMoveOn (event, id) {
+      const index = this.createFormData.activeNumber.indexOf(id)
+      if (index == -1) {
+        this.createFormData.activeNumber.push(id)
+      }
+      event.preventDefault() // 阻止默认行为
+      event.stopPropagation() // 阻止事件冒泡
+    },
+    // 查询机器人列表
+    fetchRobotList () {
+      this.$request
+        .jsonGet('/task/getRobots', {
+          params: {
+            userId: this.$store.state.userInfo.userId
+          }
+        })
+        .then((res) => {
+          this.robotList = res.data
+        })
+    },
+    // 根据机器人名称查询外呼平台列表
+    fetchOutCallPlatformList () {
+      this.robotList.forEach(item => {
+        if (this.createFormData.robotId === item.id) {
+          this.selectRobotName = item.showName
+        }
+      })
+      this.$request
+        .formGet('/task/getService', {
+          robotName: this.selectRobotName
+        })
+        .then((res) => {
+          this.OutCallPlatformList = res.data
+        })
+    },
+    // 切换机器人名称
+    handleChangeRobotId (id) {
+      this.fetchOutCallPlatformList()
+      let item = this.robotList.find((item) => {
+        return item.id === id
+      })
+      this.createFormData.opportunityAvailable = item.businessUsable
+      !item.businessUsable && (this.createFormData.importMethod = 'file')
+    },
+    // 切换多选框全选按钮
+    toggleSelectAll (target, list, field) {
+      let newTarget = [],
+        length = target.length
+      if (!target || length !== list.length) {
+        newTarget = list.map((item) => item[field] + '')
+      }
+      target.splice(0, length, ...newTarget)
+    },
+    // 全选/取消全选通话结果
+    handleCheckAllCallResult (formData) {
+      if (formData.recallResult.length === this.recallResultList.length) {
+        formData.recallResult = []
+      } else {
+        formData.recallResult = this.recallResultList.map((item) => item.key)
+      }
+    },
+    // 全选/取消全选通话结果
+    handleCheckAllCallConversionResult (formData) {
+      if (formData.recallResult.length === this.conversionResultList.length) {
+        formData.recallResult = []
+      } else {
+        formData.recallResult = this.conversionResultList.map((item) => item.key)
+      }
+    },
+    // 验证文件可用性
+    validateFile (file) {
+      if (file.size > 1024 * 1024 * 5) {
+        this.$message.error('文件不得超过5M')
+        return false
+      }
+      return true
+    },
+    // 解析已上传文件 -- isOpportunity：是否商机名单
+    transpileFile (file, robotId, isOpportunity) {
+      let param = new FormData()
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+      const loading = this.$loading({
+        lock: true,
+        text: '正在解析，请稍候',
+        spinner: 'el-icon-loading',
+        background: 'rgba(255, 255, 255, 0.3)'
+      })
+      param.append('file', file)
+      if (isOpportunity) {
+        param.append('variableType', 'true')
+        param.append('robotId', robotId)
+      } else {
+        param.append('userId', this.$store.state.userInfo.userId)
+        param.append('code', robotId)
+      }
+      const url = isOpportunity
+        ? '/businessChance/uploadFile'
+        : '/customer/file'
+      return this.$request
+        .post(url, param, config)
+        .then((res) => {
+          if (res.code === '0') {
+            return Promise.resolve(res.data)
+          } else {
+            this.$message.warning(res.message)
+            return Promise.reject([])
+          }
+        })
+        .finally(() => {
+          loading.close()
+        })
+    },
+    // 点击下载机器人变量模板
+    async handleDownload (robotId) {
+      if (!robotId) {
+        this.$message.warning('请先选择机器人名称')
+        return
+      }
+      const robotItem = this.robotList.find((item) => {
+        return item.id == robotId
+      })
+      const res = await this.$request.xmlGet(`task/variable/down/${robotItem.showName}`)
+      const a = document.createElement("a");
+      a.download = robotItem.showName + '-文件导入模板.xls'
+      a.href = URL.createObjectURL(res);
+      a.click();
+    },
+
+    // 点击下载模板 --isOpportunity：是否商机名单 /task/template/down/{type}
+    async handleDownloadTemplate (id) {
+      let a = document.createElement('a')
+      let res = await this.$request.xmlGet(
+        `/task/template/down/${id}`
+      )
+      const endStr = id === 1
+        ? '共用型导入模板.xls'
+        : '关系型导入模板.xls'
+      a.download = endStr
+      a.href = URL.createObjectURL(res)
+      a.click()
+    },
+    // 提交新建任务表单
+    async submitCreateForm () {
+      this.$refs.createForm.validate(async (isValid) => {
+        if (!isValid) {
+          this.$message.error('请填写必填字段')
+          return
+        }
+        if (
+          this.createFormData.type === '0' &&
+          (!this.createFormData.startDate || !this.createFormData.startTime)
+        ) {
+          this.$message.error('请填写启动任务日期及时间')
+          return
+        }
+
+        const taskTime =
+          this.createFormData.startDate +
+          ' ' +
+          this.createFormData.startTime +
+          ':00'
+        const timeSeconds = new Date(taskTime).getTime()
+        if (
+          this.createFormData.type === 0 &&
+          timeSeconds < Date.now()
+        ) {
+          this.$message.error('启动时间不能早于当前时间')
+          return
+        }
+        // 保存参数
+        const param = {
+          userId: this.$store.state.userInfo.userId,
+          name: this.createFormData.name,
+          phoneCt: this.selectCtNum,
+          robotName: this.selectRobotName,
+          calls: this.createFormData.outCallPlatformId,
+          concurrentNum: this.createFormData.concurrentNum,
+          type: this.createFormData.type,
+          taskTime: this.createFormData.type === 0 ? taskTime : null,
+          allowTime: this.createFormData.type === 0 ? this.allowTimes : null,
+          callSingle: this.createFormData.callSingle == 1 ? true : false,//呼叫去重
+          connectCall: this.createFormData.recallFlag,
+          platforms: this.varResult, //校验结果
+          customerInfoVOs: this.customerInfoVOs
+        }
+        // 如果选了自动失败重呼，则添加通话结果
+        if (param.connectCall) {
+          param.connectCallResult = this.createFormData.recallResult.map(Number)
+          param.timeInterval = this.createFormData.recallInterval
+          param.callNum = this.createFormData.recallMaxNum
+        }
+        // if (param.conversionFlag) {
+        //   param.connectCallResult = this.createFormData.conversionrecallResult.join(',')
+        //   param.conversionrecallSpace = this.createFormData.conversionrecallInterval
+        //   param.conversionrecallMaxNum = this.createFormData.conversionrecallMaxNum
+        // }
+        let loading,
+          ltext = '正在创建，请稍候'
+        loading = this.$loading({
+          lock: true,
+          text: ltext,
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.5)'
+        })
+        const url = '/task/save'
+        let res = await this.$request.jsonPost(url, param, { timeout: 60000 })
+        loading && loading.close()
+        this.progerssFinish = true
+        if (res.code === '0') {
+          this.$message.success('新增任务成功')
+          this.dialogVisible = false
+        }
+        else {
+          loading && loading.close()
+          this.dialogVisible = false
+        }
+        // const now = Date.now()
+        // if (res.code === '0') {
+        //   if (
+        //     now - window._mtimestamp < 5000 &&
+        //     this.$store.state.userInfo.encMobile
+        //   ) {
+        //     setTimeout(async () => {
+        //       this.dialogVisible = false
+        //       if (this.createFormData.importMethod === 'file') {
+        //         const infos = Object.keys(res.data.info)
+        //         const h = this.$createElement
+        //         this.$message({
+        //           message: h('div', null, [
+        //             h('p', null, [
+        //               h('span', null, `${infos[0]}：`),
+        //               h(
+        //                 'span',
+        //                 { style: 'color: #F56C6C' },
+        //                 res.data.info[infos[0]]
+        //               )
+        //             ]),
+        //             h('p', null, [
+        //               h('span', null, '错误数量：'),
+        //               h('span', { style: 'color: #F56C6C' }, this.errorNum)
+        //             ]),
+        //             h('p', null, [
+        //               h('span', null, `${infos[1]}：`),
+        //               h(
+        //                 'span',
+        //                 { style: 'color: #F56C6C' },
+        //                 res.data.info[infos[1]]
+        //               )
+        //             ])
+        //           ]),
+        //           type: 'success',
+        //           duration: 8000
+        //         })
+        //       } else {
+        //         this.$message.success('新增任务成功')
+        //       }
+        //       if (param.type === '自动启动') {
+        //         await this.handleRun(res.data.data.id)
+        //       }
+        //       this.backtrack()
+        //     }, 5000 + window._mtimestamp - now)
+        //   } else {
+        //     this.dialogVisible = false
+        //     if (this.createFormData.importMethod === 'file') {
+        //       const infos = Object.keys(res.data.info)
+        //       const h = this.$createElement
+        //       this.$message({
+        //         message: h('div', null, [
+        //           h('p', null, [
+        //             h('span', null, `${infos[0]}：`),
+        //             h(
+        //               'span',
+        //               { style: 'color: #F56C6C' },
+        //               res.data.info[infos[0]]
+        //             )
+        //           ]),
+        //           h('p', null, [
+        //             h('span', null, '错误数量：'),
+        //             h('span', { style: 'color: #F56C6C' }, this.errorNum)
+        //           ]),
+        //           h('p', null, [
+        //             h('span', null, `${infos[1]}：`),
+        //             h(
+        //               'span',
+        //               { style: 'color: #F56C6C' },
+        //               res.data.info[infos[1]]
+        //             )
+        //           ])
+        //         ]),
+        //         type: 'success',
+        //         duration: 8000
+        //       })
+        //     } else {
+        //       this.$message.success('新增任务成功')
+        //     }
+        //     if (param.type === '自动启动') {
+        //       await this.handleRun(res.data.data.id)
+        //     }
+        //     this.backtrack()
+        //   }
+        // } else {
+        //   if (
+        //     now - window._mtimestamp < 2000 &&
+        //     this.$store.state.userInfo.encMobile
+        //   ) {
+        //     setTimeout(() => {
+        //       this.dialogVisible = false
+        //       this.$message.error(res.message)
+        //     }, 1000)
+        //   } else {
+        //     this.dialogVisible = false
+        //     this.$message.error(res.message)
+        //   }
+        // }
+      })
+    },
+    // 返回任务列表页
+    backtrack () {
+      this.$router.replace('customerList')
+    },
+    // 任务启动时间focus事件
+    handleStartTimeFocus () {
+      this.$nextTick(() => {
+        const items = document
+          .querySelector('.startTimer')
+          .querySelectorAll('.time-select-item')
+        items.forEach((item) => {
+          if (item.innerHTML >= '12:00' && item.innerHTML < '14:00') {
+            item.style.display = 'none'
+          }
+        })
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import "@/assets/css/common.scss";
+.createTask {
+  height: 100%;
+  padding: 15px 0;
+  display: flex;
+  flex-direction: column;
+  .el-form {
+    flex: 1;
+    overflow: auto;
+    .input-name {
+      width: 217px;
+    }
+    .el-divider {
+      margin-top: 10px;
+    }
+    .el-row {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    /deep/ .el-badge__content {
+      height: auto;
+    }
+    .import {
+      display: flex;
+      .import-label {
+        min-width: 150px;
+      }
+      .import-content {
+        flex: 1;
+      }
+      .import-radio /deep/ {
+        display: flex;
+        .el-radio__input {
+          padding-top: 13px;
+        }
+        .el-radio__label {
+          display: flex;
+          .import-radio_label {
+            padding-top: 13px;
+            min-width: 100px;
+          }
+          .import-radio_content {
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
+  .allowTime {
+    margin-bottom: 12px;
+  }
+  .conversion_task {
+    color: #606266;
+    .input-name {
+      width: 100px;
+    }
+    .form-conversion-suffix {
+      margin: 10px;
+    }
+  }
+  .timing {
+    margin-top: 6px;
+    display: flex;
+    color: #606266;
+    flex-direction: column;
+    .el-date-editor {
+      margin-right: 10px;
+    }
+  }
+  .form-item_upload {
+    display: flex;
+    align-items: center;
+    .form-uploader {
+      flex: 1;
+      overflow: hidden;
+      margin-right: 20px;
+      position: relative;
+    }
+    .el-select {
+      margin-right: 20px;
+      /deep/ .el-input__inner {
+        margin-right: 20px;
+      }
+    }
+    .el-tooltip {
+      position: absolute;
+      right: -30px;
+    }
+    .el-icon-question {
+      font-size: 20px;
+    }
+  }
+  .no-high {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  .bottom {
+    padding: 5px 40px;
+    button + button {
+      margin-left: 20px;
+    }
+  }
+  .dialog-opportunity /deep/ {
+    .search-input {
+      width: 170px;
+    }
+    .el-dialog {
+      width: 85vw;
+      max-width: none;
+      height: 85vh;
+      .toolbar {
+        padding: 20px;
+      }
+      .el-dialog__body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+      }
+    }
+  }
+}
+</style>
