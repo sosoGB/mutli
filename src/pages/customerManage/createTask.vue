@@ -576,7 +576,7 @@ export default {
         background: 'rgba(255, 255, 255, 0.3)'
       })
       param.append('file', file)
-      const url = '/qbzz/manage/api/check/union'
+      const url = '/sdmulti/qbzz/manage/api/check/union'
       return this.$request
         .uploadPost(url, param, config)
         .then((res) => {
@@ -647,7 +647,7 @@ export default {
       param.append('pFile', this.ulCom)
       param.append('rFile', this.ulRel)
       param.append('unionVO', JSON.stringify(this.unionVO))
-      const url = '/qbzz/manage/api/check/union'
+      const url = '/sdmulti/qbzz/manage/api/check/union'
       return this.$request
         .uploadPost(url, param, config)
         .then((res) => {
@@ -666,7 +666,7 @@ export default {
     // 校验并发数
     checkConcurrentNum () {
       this.$request
-        .jsonPost('/task/checkConcurrentNum', {
+        .jsonPost('/sdmulti/task/checkConcurrentNum', {
           concurrentNum: this.createFormData.concurrentNum,
           serviceIds: this.createFormData.outCallPlatformId,
         })
@@ -695,7 +695,7 @@ export default {
     // 查询机器人列表
     fetchRobotList () {
       this.$request
-        .jsonGet('/task/getRobots', {
+        .jsonGet('/sdmulti/task/getRobots', {
           params: {
             userId: this.$store.state.userInfo.userId
           }
@@ -712,7 +712,7 @@ export default {
         }
       })
       this.$request
-        .formGet('/task/getService', {
+        .formGet('/sdmulti/task/getService', {
           robotName: this.selectRobotName
         })
         .then((res) => {
@@ -809,7 +809,7 @@ export default {
       const robotItem = this.robotList.find((item) => {
         return item.id == robotId
       })
-      const res = await this.$request.xmlGet(`task/variable/down/${robotItem.showName}`)
+      const res = await this.$request.xmlGet(`sdmulti/task/variable/down/${robotItem.showName}`)
       const a = document.createElement("a");
       a.download = robotItem.showName + '-文件导入模板.xls'
       a.href = URL.createObjectURL(res);
@@ -820,7 +820,7 @@ export default {
     async handleDownloadTemplate (id) {
       let a = document.createElement('a')
       let res = await this.$request.xmlGet(
-        `/task/template/down/${id}`
+        `/sdmulti/task/template/down/${id}`
       )
       const endStr = id === 1
         ? '共用型导入模板.xls'
@@ -892,7 +892,7 @@ export default {
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.5)'
         })
-        const url = '/task/save'
+        const url = '/sdmulti/task/save'
         let res = await this.$request.jsonPost(url, param, { timeout: 60000 })
         loading && loading.close()
         this.progerssFinish = true

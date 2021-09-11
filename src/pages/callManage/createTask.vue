@@ -586,7 +586,7 @@ export default {
         background: 'rgba(255, 255, 255, 0.3)'
       })
       param.append('file', file)
-      const url = '/qbzz/manage/api/check/union'
+      const url = '/sdmulti/qbzz/manage/api/check/union'
       return this.$request
         .uploadPost(url, param, config)
         .then((res) => {
@@ -657,7 +657,7 @@ export default {
       param.append('pFile', this.ulCom)
       param.append('rFile', this.ulRel)
       param.append('unionVO', JSON.stringify(this.unionVO))
-      const url = '/qbzz/manage/api/check/union'
+      const url = '/sdmulti/qbzz/manage/api/check/union'
       return this.$request
         .uploadPost(url, param, config)
         .then((res) => {
@@ -676,7 +676,7 @@ export default {
     // 校验并发数
     checkConcurrentNum () {
       this.$request
-        .jsonPost('/task/checkConcurrentNum', {
+        .jsonPost('/sdmulti/task/checkConcurrentNum', {
           concurrentNum: this.createFormData.concurrentNum,
           serviceIds: this.createFormData.outCallPlatformId,
         })
@@ -705,7 +705,7 @@ export default {
     // 查询机器人列表
     fetchRobotList () {
       this.$request
-        .jsonGet('/task/getRobots')
+        .jsonGet('/sdmulti/task/getRobots')
         .then((res) => {
           this.robotList = res.data
         })
@@ -713,7 +713,7 @@ export default {
     // 查询客户批次列表
     fetchCusList () {
       this.$request
-        .jsonPost('/qbzz/manage/api/queryAllCus', {
+        .jsonPost('/sdmulti/qbzz/manage/api/queryAllCus', {
           userId: this.$store.state.userInfo.id
         })
         .then((res) => {
@@ -729,7 +729,7 @@ export default {
         }
       })
       this.$request
-        .formGet('/task/getService', {
+        .formGet('/sdmulti/task/getService', {
           robotName: this.selectRobotName
         })
         .then((res) => {
@@ -867,7 +867,7 @@ export default {
     async handleDownloadTemplate (id) {
       let a = document.createElement('a')
       let res = await this.$request.xmlGet(
-        `/task/template/down/${id}`
+        `/sdmulti/task/template/down/${id}`
       )
       const endStr = id === 1
         ? '共用型变量.xls'
@@ -998,7 +998,7 @@ export default {
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.5)'
         })
-        const url = '/task/save'
+        const url = '/sdmulti/task/save'
         let res = await this.$request.post(url, param, { timeout: 60000 })
         loading && loading.close()
         this.progerssFinish = true
@@ -1118,7 +1118,7 @@ export default {
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
       })
-      let res = await this.$request.get('/plan/startup', {
+      let res = await this.$request.get('/sdmulti/plan/startup', {
         params: {
           planId
         },

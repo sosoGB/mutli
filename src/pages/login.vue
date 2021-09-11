@@ -82,7 +82,7 @@ export default {
           this.$message.error('验证码输入错误');
           return
         }
-        this.$request.jsonLogin('/qbzz/login', {
+        this.$request.jsonLogin('sdmulti/qbzz/login', {
           mobile: this.loginFormData.username,
           password: this.loginFormData.password
         }).then(res => {

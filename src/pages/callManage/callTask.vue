@@ -572,7 +572,7 @@ export default {
       }
       this.isLoadingPlanList = true
       this.$request
-        .jsonPost('/task/getTaskInfoList', {
+        .jsonPost('/sdmulti/task/getTaskInfoList', {
           userId: this.$store.state.userInfo.userId,
           startTime: this.search.beginDate,
           endTime: this.search.endDate,
@@ -608,7 +608,7 @@ export default {
     // 查询机器人列表
     fetchRobotList () {
       this.$request
-        .jsonGet('/task/getRobots', {
+        .jsonGet('/sdmulti/task/getRobots', {
           params: {
             userId: this.$store.state.userInfo.userId
           }
@@ -621,7 +621,7 @@ export default {
     handleRun (taskId) {
       this.isLoadingPlanList = true
       this.$request
-        .jsonPost('/task/updateStatus', {
+        .jsonPost('/sdmulti/task/updateStatus', {
           status: 1,
           taskId,
           userId: this.$store.state.userInfo.id,
@@ -641,7 +641,7 @@ export default {
     // 点击暂停按钮
     handlePause (taskId) {
       this.$request
-        .jsonPost('/task/updateStatus', {
+        .jsonPost('/sdmulti/task/updateStatus', {
           status: 3,
           taskId,
           userId: this.$store.state.userInfo.id,
@@ -657,7 +657,7 @@ export default {
     },
     // 点击下载按钮
     async handleExport (taskId) {
-      const res = await this.$request.xml('/task/export', { taskId })
+      const res = await this.$request.xml('/sdmulti/task/export', { taskId })
       const a = document.createElement('a')
       a.download = '未呼号码+失败号码.xls'
       a.href = URL.createObjectURL(res)
@@ -693,7 +693,7 @@ export default {
           robotId: this.editFormData.robotId,
           activeNums: this.editFormData.activeNumber.join(',')
         }
-        this.$request.post('/plan/update', param).then((res) => {
+        this.$request.post('/sdmulti/plan/update', param).then((res) => {
           if (res.code === '0') {
             this.$message.success('编辑任务成功')
             this.fetchTaskList()
@@ -827,7 +827,7 @@ export default {
       }
       const res = await this.$request({
         method: 'post',
-        url: '/plan/reCall/create',
+        url: '/sdmulti/plan/reCall/create',
         timeout: '3600000',
         headers: {
           'X-Requested-With': 'XMLHttpRequest',
@@ -875,7 +875,7 @@ export default {
           background: 'rgba(255, 255, 255, 0.3)'
         })
         this.$request
-          .post('/plan/adddial', param, { timeout: 1200000 })
+          .post('/sdmulti/plan/adddial', param, { timeout: 1200000 })
           .then((res) => {
             const now = Date.now()
             if (res.code === '0') {
@@ -1019,7 +1019,7 @@ export default {
       param.append('code', robotId)
       param.append('userId', this.$store.state.userInfo.userId)
       return this.$request
-        .post('/customer/file', param, config)
+        .post('/sdmulti/customer/file', param, config)
         .then((res) => {
           if (res.code === '0') {
             return Promise.resolve(res.data)
@@ -1071,7 +1071,7 @@ export default {
       let res = await this.$request({
         method: 'get',
         responseType: 'blob',
-        url: 'variable/down/' + robotId + '/false'
+        url: '/sdmulti/variable/down/' + robotId + '/false'
       })
       a.download = robotItem.showName + '-文件导入模板.xls'
       a.href = URL.createObjectURL(res)

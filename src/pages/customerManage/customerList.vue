@@ -255,7 +255,7 @@ export default {
     },
     // 查询结果下载 
     async ctDownload ({ userId, uuid, type }) {
-      const res = await this.$request.xml('/qbzz/manage/api/download', {
+      const res = await this.$request.xml('/sdmulti/qbzz/manage/api/download', {
         userId,
         uuid,
         type,
@@ -305,7 +305,7 @@ export default {
         return
       }
       this.isLoading = true
-      this.$request.jsonPost('/qbzz/manage/api/queryCus', {
+      this.$request.jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
         startTime: this.search.startTime || null,

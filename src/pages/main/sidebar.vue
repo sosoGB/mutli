@@ -40,15 +40,7 @@ export default {
             {
               name: '客户批次管理',
               route: '/main/customerManage/customerList'
-            },
-            // {
-            //   name: '账号管理',
-            //   route: '/main/accountManagement/accountList'
-            // },
-            // {
-            //   name: '角色管理',
-            //   route: '/main/roleManagement/roleList'
-            // }
+            }
           ]
         },
         {
@@ -67,55 +59,7 @@ export default {
               route: '/main/callManage/callTask',
             },
           ],
-        },
-        // {
-        //   name: '商机线索',
-        //   route: '/main/opportunity',
-        //   actived: true,
-        //   activeIcon: require('@/assets/image/sidebar_opportunity.png'),
-        //   inactiveIcon: require('@/assets/image/sidebar_opportunity.png'),
-        //   hidden: isPartial,
-        //   children: [
-        //     {
-        //       name: '商机线索客户',
-        //       route: '/main/opportunity/customer',
-        //     },
-        //     {
-        //       name: '商机名单',
-        //       route: '/main/opportunity/sheet',
-        //     },
-        //   ],
-        // },
-        // {
-        //   name: '运营报表',
-        //   route: '/main/operationReport',
-        //   actived: true,
-        //   activeIcon: require('@/assets/image/sidebar_operationReport.png'),
-        //   inactiveIcon: require('@/assets/image/sidebar_operationReport.png'),
-        //   children: [
-        //     {
-        //       name: '运营报表',
-        //       route: '/main/operationReport/reportList',
-        //     },
-        //   ],
-        // },
-        // {
-        //   name: '话术管理',
-        //   route: '/main/trick',
-        //   actived: true,
-        //   activeIcon: require('@/assets/image/sidebar_trick.png'),
-        //   inactiveIcon: require('@/assets/image/sidebar_trick.png'),
-        //   children: [
-        //     {
-        //       name: '产品类话术',
-        //       route: '/main/trick/product',
-        //     },
-        //     {
-        //       name: '公司服务咨询类话术',
-        //       route: '/main/trick/company',
-        //     },
-        //   ],
-        // },
+        }
       ],
     }
   },
@@ -128,69 +72,10 @@ export default {
     this.isPartial && this.$router.replace('/main/operationReport/reportList')
     if (this.$store.state.userInfo.id === 3) {
       this.menuList.splice(1, 3)
-      // this.menuList[0].children.push(
-      //   {
-      //     name: '交易统计',
-      //     route: '/main/accountManagement/deal'
-      //   },
-      //   {
-      //     name: '历史流量统计',
-      //     route: '/main/operationReport/flowQuota'
-      //   },
-      //   {
-      //     name: '当前流量统计',
-      //     route: '/main/operationReport/curFlowQuota'
-      //   }
-      // )
-      // this.menuList[0].children = [
-      //   {
-      //     name: '历史流量统计',
-      //     route: '/main/operationReport/flowQuota',
-      //   },
-      //   {
-      //     name: '当前流量统计',
-      //     route: '/main/operationReport/curFlowQuota',
-      //   },
-      // ]
     }
-    // if (this.$store.state.userInfo.id === 21) {
-    //   //易宝临时项目特殊处理
-    //   // require('@/assets/css/yibao/index.css')
-    //   // require('@/assets/css/yibao-sidebar.scss')
-    //   import('@/assets/css/yibao/index.css')
-    //   import('@/assets/css/yibao-sidebar.scss')
-    //   document.title = '易宝支付商户管理后台'
-    //   document.querySelector('link').href = '/yee.jpg'
-
-    //   this.menuList = [
-    //     {
-    //       name: '商户管理后台',
-    //       route: '/main/merchant',
-    //       actived: true,
-    //       activeIcon: require('@/assets/image/sidebar_merchant.png'),
-    //       inactiveIcon: require('@/assets/image/sidebar_merchant.png'),
-    //       children: [
-    //         {
-    //           name: '订单中心',
-    //           route: '/main/merchant/orderList',
-    //         },
-    //         {
-    //           name: '对账中心',
-    //           route: '/main/merchant/accountList',
-    //         },
-    //         {
-    //           name: '结算中心',
-    //           route: '/main/merchant/balanceCenter',
-    //         },
-    //       ],
-    //     },
-    //   ]
-    // } else {
-    //   require('@/assets/css/qibao-sidebar.scss')
-    // }
     require('@/assets/css/qibao-sidebar.scss')
   },
-  
+
   methods: {
     handleSelect (key) {
       if (!key) {
