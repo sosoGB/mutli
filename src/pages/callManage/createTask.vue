@@ -12,14 +12,14 @@
       <el-form-item prop="name" label="任务名称：">
         <el-input v-model.trim="createFormData.name" placeholder="请输入任务名称" clearable class="input-name"></el-input>
       </el-form-item>
-      <el-form-item prop="" label="客户批次：">
+      <el-form-item prop="customerId" label="客户批次：">
         <div class="input-large form-item_upload">
           <el-select v-model="createFormData.customerId" @change="handleChangeCustomer" placeholder="请选择客户批次" filterable clearable>
             <el-option v-for="(item,index) in cusList" :key="index" :label="item.batch" :value="item.id"></el-option>
           </el-select>
         </div>
       </el-form-item>
-      <el-form-item prop="" label="机器人名称：">
+      <el-form-item prop="robotId" label="机器人名称：">
         <div class="input-large form-item_upload">
           <el-select v-model="createFormData.robotId" @change="handleChangeRobotId" placeholder="请选择机器人名称" filterable clearable>
             <el-option v-for="(item,index) in robotList" :key="index" :label="item.showName" :value="item.id"></el-option>
@@ -48,10 +48,11 @@
       </el-form-item>
       <el-form-item prop="importRelVar" label="变量校验：" v-show="ulCom && ulRel">
         <div class="input-large form-item_upload">
-          <el-button @click="handleCheckVar()" type="primary">变量校验</el-button>
+          <el-button @click="handleCheckVar()" type="primary" size="mini" v-show="!varResult">变量校验</el-button>
+          <el-button type="success" size="mini" v-show="varResult">校验成功</el-button>
         </div>
       </el-form-item>
-      <el-form-item prop="" label="总并发数量：">
+      <el-form-item prop="concurrentNum" label="总并发数量：">
         <el-input v-model.trim="createFormData.concurrentNum" placeholder="" clearable class="input-name"></el-input>
       </el-form-item>
       <el-form-item prop="type" label="外呼启动方式：">
@@ -298,6 +299,9 @@ export default {
           { required: true, message: '请输入任务名称', trigger: 'blur' },
           { max: 20, message: '不得超过20个字符', trigger: 'blur' }
         ],
+        customerId: [
+          { required: true, message: '请选择客户批次', trigger: 'blur' }
+        ],
         robotId: [
           { required: true, message: '请选择机器人名称', trigger: 'blur' }
         ],
@@ -328,6 +332,27 @@ export default {
             trigger: 'blur'
           }
         ],
+        concurrentNum
+          : [
+            {
+              validator: (rule, value, callback) => {
+                if (!this.createFormData.concurrentNum) {
+                  callback(new Error('请输入总并发数量'))
+                }
+                this.$request
+                  .jsonPost('/sdmulti/task/checkConcurrentNum', {
+                    concurrentNum: this.createFormData.concurrentNum,
+                    serviceIds: this.createFormData.outCallPlatformId,
+                  })
+                  .then((res) => {
+                    if (res.code === '0' && res.data === false) {
+                      callback(new Error(res.message))
+                    }
+                  })
+              },
+              trigger: 'blur'
+            }
+          ],
         conversionInterval: [
           {
             validator: (rule, value, callback) => {
@@ -642,6 +667,14 @@ export default {
     },
     // 变量校验
     handleCheckVar () {
+      if (!this.createFormData.robotId) {
+        this.$message.warning('请先选择机器人名称')
+        return
+      }
+      if (!this.createFormData.outCallPlatformId) {
+        this.$message.warning('请先选择外呼平台')
+        return
+      }
       let param = new FormData()
       const config = {
         headers: {
@@ -1010,104 +1043,6 @@ export default {
           loading && loading.close()
           this.dialogVisible = false
         }
-        // const now = Date.now()
-        // if (res.code === '0') {
-        //   if (
-        //     now - window._mtimestamp < 5000 &&
-        //     this.$store.state.userInfo.encMobile
-        //   ) {
-        //     setTimeout(async () => {
-        //       this.dialogVisible = false
-        //       if (this.createFormData.importMethod === 'file') {
-        //         const infos = Object.keys(res.data.info)
-        //         const h = this.$createElement
-        //         this.$message({
-        //           message: h('div', null, [
-        //             h('p', null, [
-        //               h('span', null, `${infos[0]}：`),
-        //               h(
-        //                 'span',
-        //                 { style: 'color: #F56C6C' },
-        //                 res.data.info[infos[0]]
-        //               )
-        //             ]),
-        //             h('p', null, [
-        //               h('span', null, '错误数量：'),
-        //               h('span', { style: 'color: #F56C6C' }, this.errorNum)
-        //             ]),
-        //             h('p', null, [
-        //               h('span', null, `${infos[1]}：`),
-        //               h(
-        //                 'span',
-        //                 { style: 'color: #F56C6C' },
-        //                 res.data.info[infos[1]]
-        //               )
-        //             ])
-        //           ]),
-        //           type: 'success',
-        //           duration: 8000
-        //         })
-        //       } else {
-        //         this.$message.success('新增任务成功')
-        //       }
-        //       if (param.type === '自动启动') {
-        //         await this.handleRun(res.data.data.id)
-        //       }
-        //       this.backtrack()
-        //     }, 5000 + window._mtimestamp - now)
-        //   } else {
-        //     this.dialogVisible = false
-        //     if (this.createFormData.importMethod === 'file') {
-        //       const infos = Object.keys(res.data.info)
-        //       const h = this.$createElement
-        //       this.$message({
-        //         message: h('div', null, [
-        //           h('p', null, [
-        //             h('span', null, `${infos[0]}：`),
-        //             h(
-        //               'span',
-        //               { style: 'color: #F56C6C' },
-        //               res.data.info[infos[0]]
-        //             )
-        //           ]),
-        //           h('p', null, [
-        //             h('span', null, '错误数量：'),
-        //             h('span', { style: 'color: #F56C6C' }, this.errorNum)
-        //           ]),
-        //           h('p', null, [
-        //             h('span', null, `${infos[1]}：`),
-        //             h(
-        //               'span',
-        //               { style: 'color: #F56C6C' },
-        //               res.data.info[infos[1]]
-        //             )
-        //           ])
-        //         ]),
-        //         type: 'success',
-        //         duration: 8000
-        //       })
-        //     } else {
-        //       this.$message.success('新增任务成功')
-        //     }
-        //     if (param.type === '自动启动') {
-        //       await this.handleRun(res.data.data.id)
-        //     }
-        //     this.backtrack()
-        //   }
-        // } else {
-        //   if (
-        //     now - window._mtimestamp < 2000 &&
-        //     this.$store.state.userInfo.encMobile
-        //   ) {
-        //     setTimeout(() => {
-        //       this.dialogVisible = false
-        //       this.$message.error(res.message)
-        //     }, 1000)
-        //   } else {
-        //     this.dialogVisible = false
-        //     this.$message.error(res.message)
-        //   }
-        // }
       })
     },
     // 启动任务
@@ -1133,7 +1068,7 @@ export default {
     },
     // 返回任务列表页
     backtrack () {
-      this.$router.replace('customerList')
+      this.$router.replace('callTask')
     },
     // 任务启动时间focus事件
     handleStartTimeFocus () {

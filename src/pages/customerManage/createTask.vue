@@ -42,9 +42,11 @@
           <el-button @click="handleDownloadTemplate(2)" type="primary">下载模板</el-button>
         </div>
       </el-form-item>
+
       <el-form-item prop="importRelVar" label="变量校验：" v-show="ulCom && ulRel">
         <div class="input-large form-item_upload">
-          <el-button @click="handleCheckVar()" type="primary">变量校验</el-button>
+          <el-button @click="handleCheckVar()" type="primary" size="mini" v-show="!varResult">变量校验</el-button>
+          <el-button type="success" size="mini" v-show="varResult">校验成功</el-button>
         </div>
       </el-form-item>
       <el-form-item prop="concurrentNum" label="总并发数量：">
@@ -86,18 +88,7 @@
             <el-button type="primary" size="mini" icon="el-icon-plus" @click.prevent="addDomain"></el-button>
           </div>
           <div class="allowTime" v-for="domain in allowTime" :key="domain.key">
-            <!-- <el-form-item
-    v-for="(domain, index) in allowTime"
-    :key="domain.key"
-    :prop="'allowTime.' + index + '.start'"
-  >
-    <el-input v-model="domain.start"></el-input><el-button @click.prevent="removeDomain(domain)">删除</el-button>
-  </el-form-item> -->
-            <!-- <el-form-item>
-    <el-button @click="addDomain">新增域名</el-button>
-  </el-form-item> -->
-
-            <el-time-select v-model="domain.allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+            <el-time-select v-model="domain.allowstartTime" popper-class="startTimer" :picker-options="{
                 start: '08:00',
                 step: '00:10',
                 end: '20:50'
@@ -236,10 +227,8 @@ export default {
       allowstartTime: '',//允许开始时间
       allowendTime: '',//允许结束时间
       errorNum: 0, //错误号码数量
-      jsons: [], //文件导入之后的数据
       robotList: [], // 可选机器人列表
       OutCallPlatformList: [],//可选外呼平台列表
-      activeNumberList: [], // 可选线路
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
       recallResultList: [
@@ -282,10 +271,6 @@ export default {
         importComVar: [],//共用型变量导入
         importRelVar: [],//关系型变量导入
         customerList: [], // 用户列表
-        opportunityAvailable: true, // 是否可导入商机名单
-        importOpportunityList: [], // 所选商机名单
-        importOpportunityFile: [], // 文件方式导入商机名单
-        variableMap: null, // 商机名单变量表
         callSingle: 1, // 呼叫去重
         recallFlag: 0, // 自动失败重呼
         recallResult: [], // 通话结果
@@ -305,12 +290,26 @@ export default {
         robotId: [
           { required: true, message: '请选择机器人名称', trigger: 'blur' }
         ],
-        activeNumber: [
-          { required: true, message: '请选择线路', trigger: 'blur' }
-        ],
         concurrentNum
           : [
-            { required: true, message: '请输入总并发数量', trigger: 'blur' }
+            {
+              validator: (rule, value, callback) => {
+                if (!this.createFormData.concurrentNum) {
+                  callback(new Error('请输入总并发数量'))
+                }
+                this.$request
+                  .jsonPost('/sdmulti/task/checkConcurrentNum', {
+                    concurrentNum: this.createFormData.concurrentNum,
+                    serviceIds: this.createFormData.outCallPlatformId,
+                  })
+                  .then((res) => {
+                    if (res.code === '0' && res.data === false) {
+                      callback(new Error(res.message))
+                    }
+                  })
+              },
+              trigger: 'blur'
+            }
           ],
         recallInterval: [
           {
@@ -390,21 +389,6 @@ export default {
             trigger: 'blur'
           }
         ],
-        importOpportunityList: [
-          {
-            validator: (rule, value, callback) => {
-              if (
-                this.createFormData.importMethod === 'opportunity' &&
-                !value.length
-              ) {
-                callback(new Error('请选择商机名单'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          }
-        ],
         importOpportunityFile: [
           {
             validator: (rule, value, callback) => {
@@ -438,33 +422,6 @@ export default {
       datePicker: {
         disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
       },
-      dialogOpportunityVisible: false, // 导入商机名单弹窗可见性
-      opportunityTagList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
-      opportunityStatusList: [
-        {
-          label: '未呼叫',
-          value: 0
-        },
-        {
-          label: '已呼叫',
-          value: 1
-        }
-      ],
-      opportunitySearch: {
-        tag: null,
-        status: null,
-        number: null,
-        beginTime: null,
-        endTime: null
-      },
-      opportunityPagination: {
-        currentPage: 1,
-        total: 1,
-        pageSize: 10
-      },
-      opportunityList: [], // 商机名单
-      isLoadingOpportunityList: false, // 商机名单表格loading效果
-      isCheckDown: false,
       allowTime: [],
       allowTimes: [],
       dynamicValidateForm: {
@@ -503,34 +460,12 @@ export default {
         return
       }
       this.ulRel = files[0]
-    },
-    'createFormData.importOpportunityFile' (files) {
-      if (!files || !files.length) return
-      if (!this.createFormData.robotId) {
-        this.$message.warning('请先选择机器人名称')
-        this.createFormData.importOpportunityFile = []
-        return
-      }
-      if (!this.validateFile(files[0])) {
-        this.createFormData.importOpportunityFile = []
-        return
-      }
-      this.transpileFile(files[0], this.createFormData.robotId, true).then(
-        (res) => {
-          this.createFormData.variableMap = res
-        },
-        () => {
-          this.createFormData.variableMap = null
-          this.createFormData.importOpportunityFile = []
-        }
-      )
     }
   },
   created () {
     //把数组由字符串转化成数字
     const param = this.$route.query.name
     const search = this.$route.query.search
-    console.log(search, '==========')
     let distList = []
     let customerInfos = []
     param.forEach(item => {
@@ -632,6 +567,14 @@ export default {
     },
     // 变量校验
     handleCheckVar () {
+      if (!this.createFormData.robotId) {
+        this.$message.warning('请先选择机器人名称')
+        return
+      }
+      if (!this.createFormData.outCallPlatformId) {
+        this.$message.warning('请先选择外呼平台')
+        return
+      }
       let param = new FormData()
       const config = {
         headers: {
@@ -676,22 +619,6 @@ export default {
           }
         })
     },
-    onCheckDown (event) {
-      this.isCheckDown = true
-      // else {
-      //   this.createFormData.activeNumber.splice(index, 1)
-      // }
-      event.preventDefault() // 阻止默认行为
-      event.stopPropagation() // 阻止事件冒泡
-    },
-    onMoveOn (event, id) {
-      const index = this.createFormData.activeNumber.indexOf(id)
-      if (index == -1) {
-        this.createFormData.activeNumber.push(id)
-      }
-      event.preventDefault() // 阻止默认行为
-      event.stopPropagation() // 阻止事件冒泡
-    },
     // 查询机器人列表
     fetchRobotList () {
       this.$request
@@ -720,22 +647,9 @@ export default {
         })
     },
     // 切换机器人名称
-    handleChangeRobotId (id) {
+    handleChangeRobotId () {
+      this.OutCallPlatformList = []
       this.fetchOutCallPlatformList()
-      let item = this.robotList.find((item) => {
-        return item.id === id
-      })
-      this.createFormData.opportunityAvailable = item.businessUsable
-      !item.businessUsable && (this.createFormData.importMethod = 'file')
-    },
-    // 切换多选框全选按钮
-    toggleSelectAll (target, list, field) {
-      let newTarget = [],
-        length = target.length
-      if (!target || length !== list.length) {
-        newTarget = list.map((item) => item[field] + '')
-      }
-      target.splice(0, length, ...newTarget)
     },
     // 全选/取消全选通话结果
     handleCheckAllCallResult (formData) {
@@ -761,45 +675,6 @@ export default {
       }
       return true
     },
-    // 解析已上传文件 -- isOpportunity：是否商机名单
-    transpileFile (file, robotId, isOpportunity) {
-      let param = new FormData()
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-      const loading = this.$loading({
-        lock: true,
-        text: '正在解析，请稍候',
-        spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
-      })
-      param.append('file', file)
-      if (isOpportunity) {
-        param.append('variableType', 'true')
-        param.append('robotId', robotId)
-      } else {
-        param.append('userId', this.$store.state.userInfo.userId)
-        param.append('code', robotId)
-      }
-      const url = isOpportunity
-        ? '/businessChance/uploadFile'
-        : '/customer/file'
-      return this.$request
-        .post(url, param, config)
-        .then((res) => {
-          if (res.code === '0') {
-            return Promise.resolve(res.data)
-          } else {
-            this.$message.warning(res.message)
-            return Promise.reject([])
-          }
-        })
-        .finally(() => {
-          loading.close()
-        })
-    },
     // 点击下载机器人变量模板
     async handleDownload (robotId) {
       if (!robotId) {
@@ -823,8 +698,8 @@ export default {
         `/sdmulti/task/template/down/${id}`
       )
       const endStr = id === 1
-        ? '共用型导入模板.xls'
-        : '关系型导入模板.xls'
+        ? '共用型变量.xls'
+        : '关系型变量.xls'
       a.download = endStr
       a.href = URL.createObjectURL(res)
       a.click()
@@ -904,104 +779,6 @@ export default {
           loading && loading.close()
           this.dialogVisible = false
         }
-        // const now = Date.now()
-        // if (res.code === '0') {
-        //   if (
-        //     now - window._mtimestamp < 5000 &&
-        //     this.$store.state.userInfo.encMobile
-        //   ) {
-        //     setTimeout(async () => {
-        //       this.dialogVisible = false
-        //       if (this.createFormData.importMethod === 'file') {
-        //         const infos = Object.keys(res.data.info)
-        //         const h = this.$createElement
-        //         this.$message({
-        //           message: h('div', null, [
-        //             h('p', null, [
-        //               h('span', null, `${infos[0]}：`),
-        //               h(
-        //                 'span',
-        //                 { style: 'color: #F56C6C' },
-        //                 res.data.info[infos[0]]
-        //               )
-        //             ]),
-        //             h('p', null, [
-        //               h('span', null, '错误数量：'),
-        //               h('span', { style: 'color: #F56C6C' }, this.errorNum)
-        //             ]),
-        //             h('p', null, [
-        //               h('span', null, `${infos[1]}：`),
-        //               h(
-        //                 'span',
-        //                 { style: 'color: #F56C6C' },
-        //                 res.data.info[infos[1]]
-        //               )
-        //             ])
-        //           ]),
-        //           type: 'success',
-        //           duration: 8000
-        //         })
-        //       } else {
-        //         this.$message.success('新增任务成功')
-        //       }
-        //       if (param.type === '自动启动') {
-        //         await this.handleRun(res.data.data.id)
-        //       }
-        //       this.backtrack()
-        //     }, 5000 + window._mtimestamp - now)
-        //   } else {
-        //     this.dialogVisible = false
-        //     if (this.createFormData.importMethod === 'file') {
-        //       const infos = Object.keys(res.data.info)
-        //       const h = this.$createElement
-        //       this.$message({
-        //         message: h('div', null, [
-        //           h('p', null, [
-        //             h('span', null, `${infos[0]}：`),
-        //             h(
-        //               'span',
-        //               { style: 'color: #F56C6C' },
-        //               res.data.info[infos[0]]
-        //             )
-        //           ]),
-        //           h('p', null, [
-        //             h('span', null, '错误数量：'),
-        //             h('span', { style: 'color: #F56C6C' }, this.errorNum)
-        //           ]),
-        //           h('p', null, [
-        //             h('span', null, `${infos[1]}：`),
-        //             h(
-        //               'span',
-        //               { style: 'color: #F56C6C' },
-        //               res.data.info[infos[1]]
-        //             )
-        //           ])
-        //         ]),
-        //         type: 'success',
-        //         duration: 8000
-        //       })
-        //     } else {
-        //       this.$message.success('新增任务成功')
-        //     }
-        //     if (param.type === '自动启动') {
-        //       await this.handleRun(res.data.data.id)
-        //     }
-        //     this.backtrack()
-        //   }
-        // } else {
-        //   if (
-        //     now - window._mtimestamp < 2000 &&
-        //     this.$store.state.userInfo.encMobile
-        //   ) {
-        //     setTimeout(() => {
-        //       this.dialogVisible = false
-        //       this.$message.error(res.message)
-        //     }, 1000)
-        //   } else {
-        //     this.dialogVisible = false
-        //     this.$message.error(res.message)
-        //   }
-        // }
       })
     },
     // 返回任务列表页

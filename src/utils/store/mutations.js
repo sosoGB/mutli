@@ -1,3 +1,5 @@
+import { setItem } from '@/utils/storage'
+
 export default {
   // 切换菜单展开/收起
   toggleMenuExpand (state, isExpand) {
@@ -5,7 +7,7 @@ export default {
   },
   // 保存用户信息
   saveUserInfo (state, info) {
-    state.userInfo = info;
-    // window.localStorage.setItem("useInfo", state.userInfo)
+    state.userInfo = info
+    setItem('user', state.userInfo)
   }
 }

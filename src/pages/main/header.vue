@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <!-- <div class="toggle" :class="{'expand': !isMenuExpand, 'collapse': isMenuExpand}" @click="toggleMenuExpand"></div> -->
+    <div class="toggle" :class="{'expand': !isMenuExpand, 'collapse': isMenuExpand}" @click="toggleMenuExpand"></div>
     <div></div>
     <div class="userInfo">
       <div class="avatar">

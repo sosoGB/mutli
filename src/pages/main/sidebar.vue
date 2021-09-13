@@ -1,7 +1,7 @@
 <template>
   <div class="menu-wrap">
     <div class="menu-logo" :class="{ expand: isMenuExpand, collapse: !isMenuExpand }" @click="$router.push('/main')"></div>
-    <el-menu router unique-opened class="menu" :default-active="$route.path" :collapse="!isMenuExpand" @select="handleSelect">
+    <el-menu router unique-opened class="menu" :default-active="$route.path" :collapse="!isMenuExpand">
       <template v-for="menu in menuList">
         <el-submenu :index="menu.route" v-if="!menu.hidden && menu.children && menu.children.length" :key="menu.name" popper-class="submenu-popup">
           <template slot="title" class="menu-item">
@@ -74,15 +74,7 @@ export default {
       this.menuList.splice(1, 3)
     }
     require('@/assets/css/qibao-sidebar.scss')
-  },
-
-  methods: {
-    handleSelect (key) {
-      if (!key) {
-        window.open('/dataBoard.html', '_blank')
-      }
-    },
-  },
+  }
 }
 </script>
 <style lang="scss" scoped></style>

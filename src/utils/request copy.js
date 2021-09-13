@@ -2,30 +2,44 @@ import axios from 'axios';
 import qs from 'qs'
 import { Message } from 'element-ui'
 import store from '@/utils/store'
-const userInfo = store.state.userInfo
+
 const instance = axios.create({
-  // timeout: 20000,
+  timeout: 20000,
   baseURL: process.env.VUE_APP_BASE_API
 });
-// 请求拦截器
-instance.interceptors.request.use(
-  function (config) {
-    const user = store.state.userInfo
-    if (user) {
-      config.headers.token = `${user.token}`
+let pending = []; // 请求标识
+let cancelToken = axios.CancelToken; // 请求取消函数
+const userInfo = store.state.userInfo
+// 防止重复请求
+let removePending = (ever) => {
+  for (let p in pending) {
+    if (pending[p].u === ever.url + '&' + ever.method) {
+      pending[p].f();
+      pending.splice(p, 1);
     }
-    // Do something before request is sent
-    return config
-  },
-  function (error) {
-    // Do something with request error
-    return Promise.reject(error)
   }
-)
+}
 
-// 响应拦截器
+// request拦截器
+instance.interceptors.request.use(
+  config => {
+    removePending(config);
+    config.cancelToken = new cancelToken(c => {
+      pending.push({
+        u: config.url + '&' + config.method,
+        f: c
+      });
+    });
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+// response拦截器
 instance.interceptors.response.use(
   response => {
+    removePending(response.config);
     if (response.data instanceof Blob) {
       return response.data
     }
@@ -37,9 +51,9 @@ instance.interceptors.response.use(
     }
     return response.data
   },
-  async error => {
+  error => {
     if (error.response.status == 302) {
-      localStorage.removeItem("user");
+      localStorage.removeItem("useInfo");
       Message.error('请先登录');
       location.href = ''
     } else {
@@ -89,6 +103,7 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'token': userInfo.token
       }
     })
   },
@@ -111,6 +126,7 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
+        'token': userInfo.token
       }
     })
   },
@@ -124,6 +140,7 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
+        'token': userInfo.token
       }
     })
   },
@@ -163,6 +180,7 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
+        'token': userInfo.token
       }
     })
   },
@@ -200,6 +218,7 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
+        'token': userInfo.token
       }
     })
   },
@@ -212,6 +231,7 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'multipart/form-data',
+        'token': userInfo.token
       }
     })
   },

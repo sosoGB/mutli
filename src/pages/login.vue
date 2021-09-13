@@ -86,7 +86,7 @@ export default {
           mobile: this.loginFormData.username,
           password: this.loginFormData.password
         }).then(res => {
-          if (res.code == 0) {
+          if (res.code === '0') {
             this.$store.commit('saveUserInfo', res.data)
             this.$router.push({ path: '/main/' })
           }

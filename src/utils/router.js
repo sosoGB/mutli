@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 Vue.use(Router)
 
-const accessInfo = () => import(/* webpackChunkName: "accessInfo" */ '../pages/accountManagement/accessInfo.vue')
 const routes = [
   {
     path: '/',
@@ -10,11 +9,11 @@ const routes = [
   },
   {
     path: '/login',
-    component: () => import(/* webpackChunkName: "login" */ '../pages/login')
+    component: () => import('../pages/login')
   },
   {
     path: '/main',
-    component: () => import(/* webpackChunkName: "main" */ '../pages/main/index'),
+    component: () => import('../pages/main/index'),
     children: [
       {
         path: '',
@@ -29,22 +28,22 @@ const routes = [
         meta: {
           keepAlive: true
         },
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/customerManage/customerList.vue')
+        component: () => import('../pages/customerManage/customerList.vue')
       },
       {
         path: 'customerManage/createTask',
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/customerManage/createTask.vue')
+        component: () => import('../pages/customerManage/createTask.vue')
       },
       {
         path: 'callManage/callstrategy',
         meta: {
           keepAlive: true
         },
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/callManage/callStrategy.vue')
+        component: () => import('../pages/callManage/callStrategy.vue')
       },
       {
         path: 'callManage/createStrategy',
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/callManage/createStrategy.vue')
+        component: () => import('../pages/callManage/createStrategy.vue')
       },
 
       {
@@ -52,40 +51,11 @@ const routes = [
         meta: {
           keepAlive: true
         },
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/callManage/callTask.vue')
+        component: () => import('../pages/callManage/callTask.vue')
       },
       {
         path: 'callManage/createTask',
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/callManage/createTask.vue')
-      },
-
-      {
-        path: 'accountManagement/seeAccess',
-        component: accessInfo
-      },
-      {
-        path: 'accountManagement/accountList',
-        component: () => import(/* webpackChunkName: "accountList" */ '../pages/accountManagement/accountList.vue')
-      },
-      {
-        path: 'accountManagement/deal',
-        component: () => import(/* webpackChunkName: "deal" */ '../pages/accountManagement/deal.vue')
-      },
-      {
-        path: 'accountManagement/addAccount',
-        component: () => import(/* webpackChunkName: "addAccount" */ '../pages/accountManagement/addAccount.vue')
-      },
-      {
-        path: 'accountManagement/editInfo',
-        component: () => import(/* webpackChunkName: "editInfo" */ '../pages/accountManagement/editInfo.vue')
-      },
-      {
-        path: 'accountManagement/permissionManagement',
-        component: () => import(/* webpackChunkName: "permissionManagement" */ '../pages/accountManagement/permissionManagement.vue')
-      },
-      {
-        path: 'accountManagement/listDownLoad',
-        component: () => import(/* webpackChunkName: "listDownLoad" */ '../pages/accountManagement/listDownload.vue')
+        component: () => import('../pages/callManage/createTask.vue')
       }
     ]
   },
