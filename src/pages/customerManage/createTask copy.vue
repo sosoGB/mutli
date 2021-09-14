@@ -217,11 +217,11 @@ export default {
   },
   data () {
     return {
+      checkVar: false,
       selectCtNum: 0, //已选客户数量
       selectRobotName: null, //已选机器人名称
       ulCom: null,
       ulRel: null,
-      checkVar: '',
       unionVO: null,//变量校验参数
       customerInfoVOs: null,
       varResult: null,//校验结果
@@ -299,18 +299,20 @@ export default {
                   callback(new Error('请输入总并发数量'))
                 }
                 else {
-                  callback()
+                  // this.$request
+                  //   .jsonPost('/sdmulti/task/checkConcurrentNum', {
+                  //     concurrentNum: this.createFormData.concurrentNum,
+                  //     serviceIds: this.createFormData.outCallPlatformId,
+                  //   })
+                  //   .then((res) => {
+                  //     if (res.code === '0' && res.data === false) {
+                  //       callback(new Error(res.message))
+                  //       return
+                  //     } else {
+                  //       return
+                  //     }
+                  //   })
                 }
-                // this.$request
-                //   .jsonPost('/sdmulti/task/checkConcurrentNum', {
-                //     concurrentNum: this.createFormData.concurrentNum,
-                //     serviceIds: this.createFormData.outCallPlatformId,
-                //   })
-                //   .then((res) => {
-                //     if (res.code === '0' && res.data === false) {
-                //       callback(new Error(res.message))
-                //     }
-                //   })
               },
               trigger: 'blur'
             }
@@ -467,6 +469,7 @@ export default {
     }
   },
   created () {
+    this.fetchRobotList()
     //把数组由字符串转化成数字
     const param = this.$route.query.name
     const search = this.$route.query.search
@@ -498,7 +501,7 @@ export default {
     this.selectCtNum = numList.reduce(function (prev, cur) {
       return prev + cur
     })
-    this.fetchRobotList()
+
   },
   methods: {
     testFile (file) {
@@ -519,6 +522,7 @@ export default {
       return this.$request
         .uploadPost(url, param, config)
         .then((res) => {
+          console.log(res)
           if (res.code === '0') {
             return Promise.resolve(res.data)
           } else {
@@ -761,32 +765,27 @@ export default {
         //   param.conversionrecallSpace = this.createFormData.conversionrecallInterval
         //   param.conversionrecallMaxNum = this.createFormData.conversionrecallMaxNum
         // }
-        let loading,
-          ltext = '正在创建，请稍候'
-        loading = this.$loading({
-          lock: true,
-          text: ltext,
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.5)'
-        })
+        // console.log('zheng===============')
+        // let loading,
+        //   ltext = '正在创建，请稍候'
+        // loading = this.$loading({
+        //   lock: true,
+        //   text: ltext,
+        //   spinner: 'el-icon-loading',
+        //   background: 'rgba(0, 0, 0, 0.5)'
+        // })
         const url = '/sdmulti/task/save'
-        // let res = await this.$request.jsonPost(url, param)
-        // if (res.code === '0') {
-        //   this.$message.success('新增任务成功')
-        // }
+        let res = await this.$request.jsonPost(url, param, { timeout: 60000 })
         // loading && loading.close()
-        return this.$request
-          .jsonPost(url, param).then((res) => {
-            if (res.code === '0') {
-              this.$message.success('新增任务成功')
-            }
-            else {
-              return Promise.reject([])
-            }
-          })
-          .finally(() => {
-            loading.close()
-          })
+        this.progerssFinish = true
+        if (res.code === '0') {
+          this.$message.success('新增任务成功')
+          this.dialogVisible = false
+        }
+        else {
+          // loading && loading.close()
+          this.dialogVisible = false
+        }
       })
     },
     // 返回任务列表页
