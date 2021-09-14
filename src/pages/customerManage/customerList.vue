@@ -103,7 +103,7 @@
         <el-table-column :resizable="false" prop="successCt" label="转化后取消的客户数量" width="180" align="center"></el-table-column>
         <el-table-column :resizable="false" label="操作" min-width="240" fixed="right" align="center">
           <template slot-scope="scope">
-            <el-button @click="ctDownload(scope.row)">客户下载</el-button>
+            <el-button @click="ctDownload(scope.row)" :disabled="$store.state.cusListState === 'loading'">{{$store.state.cusListState === 'loading' ? '正在下载' : '客户下载'}}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -115,6 +115,7 @@
   </div>
 </template>
 <script>
+import util from '@/service/util'
 import filter from '@/service/filter.js'
 import keepAlive from '@/utils/mixins/keepAlive.js' //用于从详情页返回列表页仍然返回之前页面
 export default {
@@ -255,6 +256,14 @@ export default {
     },
     // 查询结果下载 
     async ctDownload ({ userId, uuid, type }) {
+      console.log(userId, uuid, type)
+      this.$message.warning('客户信息包含内容较多，导出时间会有影响，请见谅！')
+      const wsId = util.idGenerator()
+      localStorage.setItem('cusListId', wsId)
+      this.$store.dispatch('getExportListState', {
+        wsId,
+        mutation: 'saveCusListState'
+      })
       const res = await this.$request.xml('/sdmulti/qbzz/manage/api/download', {
         userId,
         uuid,

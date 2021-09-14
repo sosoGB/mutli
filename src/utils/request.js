@@ -29,16 +29,16 @@ instance.interceptors.response.use(
     if (response.data instanceof Blob) {
       return response.data
     }
-    if (response.data.code != 0) {
-      Message.error(response.data.msg)
-      if (response.data.code === 403) {   //重新登录
+    if (response.data.code != '0') {
+      Message.error(response.data.message)
+      if (response.data.code === '403') {   //重新登录
         location.href = ''
       }
     }
     return response.data
   },
   async error => {
-    if (error.response.status == 302) {
+    if (error.response.status === '302') {
       localStorage.removeItem("user");
       Message.error('请先登录');
       location.href = ''
@@ -187,7 +187,6 @@ export default {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
-        'token': userInfo.token
       }
     })
   },

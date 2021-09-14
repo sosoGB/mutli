@@ -9,5 +9,9 @@ export default {
   saveUserInfo (state, info) {
     state.userInfo = info
     setItem('user', state.userInfo)
-  }
+  },
+  // 保存导出客户列表的状态
+  saveCusListState (state, data) {
+    state.cusListState = data
+  },
 }

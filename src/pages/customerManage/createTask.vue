@@ -294,19 +294,21 @@ export default {
           : [
             {
               validator: (rule, value, callback) => {
-                if (!this.createFormData.concurrentNum) {
+                if (!value) {
                   callback(new Error('请输入总并发数量'))
                 }
-                this.$request
-                  .jsonPost('/sdmulti/task/checkConcurrentNum', {
-                    concurrentNum: this.createFormData.concurrentNum,
-                    serviceIds: this.createFormData.outCallPlatformId,
-                  })
-                  .then((res) => {
-                    if (res.code === '0' && res.data === false) {
-                      callback(new Error(res.message))
-                    }
-                  })
+                else {
+                  this.$request
+                    .jsonPost('/sdmulti/task/checkConcurrentNum', {
+                      concurrentNum: this.createFormData.concurrentNum,
+                      serviceIds: this.createFormData.outCallPlatformId,
+                    })
+                    .then((res) => {
+                      if (res.code === '0' && res.data === false) {
+                        callback(new Error(res.message))
+                      }
+                    })
+                }
               },
               trigger: 'blur'
             }
@@ -463,6 +465,7 @@ export default {
     }
   },
   created () {
+    this.fetchRobotList()
     //把数组由字符串转化成数字
     const param = this.$route.query.name
     const search = this.$route.query.search
@@ -494,7 +497,7 @@ export default {
     this.selectCtNum = numList.reduce(function (prev, cur) {
       return prev + cur
     })
-    this.fetchRobotList()
+
   },
   methods: {
     testFile (file) {
