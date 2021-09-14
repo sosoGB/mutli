@@ -76,30 +76,30 @@
           <span>允许呼叫时段时段：</span>
           <div class="allowTime">
             <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                start: '08:00',
+                start: '07:55',
                 step: '00:10',
-                end: '20:50'
+                end: '22:05'
               }" placeholder="选择时间">
             </el-time-select>
             <el-time-select v-model="allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                start: '08:00',
+                 start: '07:55',
                 step: '00:10',
-                end: '20:50'
+                end: '22:05'
               }" placeholder="选择时间">
             </el-time-select>
             <el-button type="primary" size="mini" icon="el-icon-plus" @click.prevent="addDomain"></el-button>
           </div>
           <div class="allowTime" v-for="domain in allowTime" :key="domain.key">
             <el-time-select v-model="domain.allowstartTime" popper-class="startTimer" :picker-options="{
-                start: '08:00',
+                 start: '07:55',
                 step: '00:10',
-                end: '20:50'
+                end: '22:05'
               }" placeholder="选择时间">
             </el-time-select>
             <el-time-select v-model="domain.allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                start: '08:00',
+                start: '07:55',
                 step: '00:10',
-                end: '20:50'
+                end: '22:05'
               }" placeholder="选择时间">
             </el-time-select>
             <el-button type="danger" size="mini" icon="el-icon-delete" @click.prevent="removeDomain(domain)"></el-button>
@@ -303,16 +303,6 @@ export default {
                 else {
                   callback()
                 }
-                // this.$request
-                //   .jsonPost('/sdmulti/task/checkConcurrentNum', {
-                //     concurrentNum: this.createFormData.concurrentNum,
-                //     serviceIds: this.createFormData.outCallPlatformId,
-                //   })
-                //   .then((res) => {
-                //     if (res.code === '0' && res.data === false) {
-                //       callback(new Error(res.message))
-                //     }
-                //   })
               },
               trigger: 'blur'
             }
@@ -670,9 +660,6 @@ export default {
           this.$message.error('请填写必填字段')
           return
         }
-        // if(this.allowTimes.length===0){
-        //   this.
-        // }
         if (
           this.createFormData.type === '0' &&
           (!this.createFormData.startDate || !this.createFormData.startTime)
