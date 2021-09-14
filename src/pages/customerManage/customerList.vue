@@ -49,9 +49,10 @@
       </div>
       <div class="advanced-item">
         <span class="advanced-label">性别：</span>
-        <el-select v-model="search.sex" placeholder="请选择性别" clearable class="advanced-input">
+        <el-select v-model="search.sex" placeholder="请选择性别" clearable class="advanced-input" multiple>
           <el-option label="男" value="1"></el-option>
           <el-option label="女" value="0"></el-option>
+          <el-option label="未知" value="-1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -73,6 +74,13 @@
       <div class="advanced-item">
         <span class="advanced-label">是否已成功转化：</span>
         <el-select v-model="search.isSuccess" placeholder="请选择" clearable class="advanced-input">
+          <el-option label="是" value="0"></el-option>
+          <el-option label="否" value="1"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">姓名是否为空：</span>
+        <el-select v-model="search.cusName" placeholder="请选择" clearable class="advanced-input">
           <el-option label="是" value="0"></el-option>
           <el-option label="否" value="1"></el-option>
         </el-select>
@@ -103,8 +111,7 @@
         <el-table-column :resizable="false" prop="successCt" label="转化后取消的客户数量" width="180" align="center"></el-table-column>
         <el-table-column :resizable="false" label="操作" min-width="240" fixed="right" align="center">
           <template slot-scope="scope">
-            <el-button @click="ctDownload(scope.row)" :disabled="isDownLoad">{{isDownLoad ? '正在下载' : '客户下载'}}</el-button>
-            <!-- <el-button @click="ctDownload(scope.row)">客户下载</el-button> -->
+            <el-button @click="ctDownload(scope.row)" :disabled="isDownLoad">{{scope.row.isDownLoad ? '正在下载' : '客户下载'}}</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -256,7 +263,9 @@ export default {
       }
     },
     // 查询结果下载 
-    async ctDownload ({ userId, uuid, type }) {
+    async ctDownload (row) {
+      const { userId, uuid, type } = row
+      row.isDownLoad = true
       if (!this.isDownLoad) {
         this.isDownLoad = true
         this.$message.warning('客户信息包含内容较多，下载时间较长，请见谅！')
@@ -279,6 +288,7 @@ export default {
         a.href = URL.createObjectURL(res);
         a.click()
         this.isDownLoad = false
+        row.isDownLoad = false
       }
     },
     //跳转新建任务

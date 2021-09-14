@@ -48,7 +48,7 @@
       </el-form-item>
       <el-form-item prop="importRelVar" label="变量校验：" v-show="ulCom && ulRel">
         <div class="input-large form-item_upload">
-          <el-button @click="handleCheckVar()" type="primary" size="mini" v-show="!varResult">变量校验</el-button>
+          <el-button @click="handleCheckVar()" type="primary" size="mini" v-show="!varResult">{{checkVar?'校验中...':'变量校验'}}</el-button>
           <el-button type="success" size="mini" v-show="varResult">校验成功</el-button>
         </div>
       </el-form-item>
@@ -61,17 +61,19 @@
           <el-radio :label="1">立即启动</el-radio>
           <el-radio :label="2">手动启动</el-radio>
         </el-radio-group>
-        <div v-if="createFormData.type === 0" class="timing">
-          <span>任务启动时间：</span>
-          <div>
-            <el-date-picker v-model="createFormData.startDate" value-format="yyyy-MM-dd" type="date" :editable="false" :picker-options="datePicker" placeholder="选择日期">
-            </el-date-picker>
-            <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+        <div class="timing">
+          <div v-if="createFormData.type === 0">
+            <span>任务启动时间：</span>
+            <div>
+              <el-date-picker v-model="createFormData.startDate" value-format="yyyy-MM-dd" type="date" :editable="false" :picker-options="datePicker" placeholder="选择日期">
+              </el-date-picker>
+              <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
                 start: '08:00',
                 step: '00:10',
                 end: '20:50'
               }" placeholder="选择时间">
-            </el-time-select>
+              </el-time-select>
+            </div>
           </div>
 
           <span>允许呼叫时段时段：</span>
@@ -225,6 +227,7 @@ export default {
       ulRel: '',
       unionVO: {},
       customerInfoVOs: null,
+      checkVar: '',//是否在校验
       varResult: null,//校验结果
       allowstartTime: '',//允许开始时间
       allowendTime: '',//允许结束时间
@@ -511,23 +514,6 @@ export default {
         return
       }
       this.ulCom = files[0]
-      // this.testFile(files[0]).then(
-      //   (res) => {
-      //     this.jsons = res.dataList
-      //     this.errorNum = res.errorNum
-      //     if (res.reminderText) {
-      //       this.$message({
-      //         message: res.reminderText,
-      //         type: 'warning',
-      //         duration: 6000
-      //       })
-      //     }
-      //   },
-      //   () => {
-      //     this.createFormData.customerList = []
-      //     this.createFormData.importComVar = []
-      //   }
-      // )
     },
     // 导入关系型变量
     'createFormData.importRelVar' (files) {
@@ -569,32 +555,10 @@ export default {
         }
       )
     },
-    'createFormData.importOpportunityFile' (files) {
-      if (!files || !files.length) return
-      if (!this.createFormData.robotId) {
-        this.$message.warning('请先选择机器人名称')
-        this.createFormData.importOpportunityFile = []
-        return
-      }
-      if (!this.validateFile(files[0])) {
-        this.createFormData.importOpportunityFile = []
-        return
-      }
-      this.transpileFile(files[0], this.createFormData.robotId, true).then(
-        (res) => {
-          this.createFormData.variableMap = res
-        },
-        () => {
-          this.createFormData.variableMap = null
-          this.createFormData.importOpportunityFile = []
-        }
-      )
-    }
   },
   created () {
     this.fetchRobotList()
     this.fetchCusList()
-    this.fetchActiveNumberList()
   },
   methods: {
     testFile (file) {
@@ -671,40 +635,35 @@ export default {
         this.$message.warning('请先选择机器人名称')
         return
       }
-      if (!this.createFormData.outCallPlatformId) {
+      if (this.createFormData.outCallPlatformId.length === 0) {
         this.$message.warning('请先选择外呼平台')
         return
       }
-      let param = new FormData()
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-      const loading = this.$loading({
-        lock: true,
-        text: '正在校验，请稍候',
-        spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
-      })
-      param.append('pFile', this.ulCom)
-      param.append('rFile', this.ulRel)
-      param.append('unionVO', JSON.stringify(this.unionVO))
-      const url = '/sdmulti/qbzz/manage/api/check/union'
-      return this.$request
-        .uploadPost(url, param, config)
-        .then((res) => {
-          if (res.code === '0') {
-            this.varResult = res.data
-            this.$message.success(res.message)
-          } else {
-            this.$message.warning('校验失败，请重新校验')
-            // return Promise.reject([])
+      if (!this.checkVar) {
+        this.checkVar = true
+        this.$message.warning('正在校验，请勿重复点击校验')
+        let param = new FormData()
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data'
           }
-        })
-        .finally(() => {
-          loading.close()
-        })
+        }
+        param.append('pFile', this.ulCom)
+        param.append('rFile', this.ulRel)
+        param.append('unionVO', JSON.stringify(this.unionVO))
+        const url = '/sdmulti/qbzz/manage/api/check/union'
+        return this.$request
+          .uploadPost(url, param, config)
+          .then((res) => {
+            if (res.code === '0') {
+              this.varResult = res.data
+              this.$message.success(res.message)
+            } else {
+              this.checkVar = false
+              return Promise.reject([])
+            }
+          })
+      }
     },
     // 校验并发数
     checkConcurrentNum () {
@@ -718,22 +677,6 @@ export default {
             this.$message.error(res.message)
           }
         })
-    },
-    onCheckDown (event) {
-      this.isCheckDown = true
-      // else {
-      //   this.createFormData.activeNumber.splice(index, 1)
-      // }
-      event.preventDefault() // 阻止默认行为
-      event.stopPropagation() // 阻止事件冒泡
-    },
-    onMoveOn (event, id) {
-      const index = this.createFormData.activeNumber.indexOf(id)
-      if (index == -1) {
-        this.createFormData.activeNumber.push(id)
-      }
-      event.preventDefault() // 阻止默认行为
-      event.stopPropagation() // 阻止事件冒泡
     },
     // 查询机器人列表
     fetchRobotList () {
@@ -750,8 +693,7 @@ export default {
           userId: this.$store.state.userInfo.id
         })
         .then((res) => {
-          this.cusList = res.data.list
-          console.log(res.data)
+          this.cusList = res.data
         })
     },
     // 根据机器人名称查询外呼平台列表
@@ -769,36 +711,16 @@ export default {
           this.OutCallPlatformList = res.data
         })
     },
-    // 查询线路列表
-    fetchActiveNumberList () {
-      this.$request
-        .get('/line/queryLineAll', {
-          params: {
-            userId: this.$store.state.userInfo.userId,
-            isUsable: true,
-            childType: false
-          }
-        })
-        .then((res) => {
-          this.activeNumberList = res.data
-        })
-    },
     // 切换机器人名称
-    handleChangeRobotId (id) {
+    handleChangeRobotId () {
+      this.OutCallPlatformList = []
       this.fetchOutCallPlatformList()
-      let item = this.robotList.find((item) => {
-        return item.id === id
-      })
-      this.createFormData.opportunityAvailable = item.businessUsable
-      !item.businessUsable && (this.createFormData.importMethod = 'file')
     },
     // 切换批次
     handleChangeCustomer (id) {
       let item = this.cusList.find((item) => {
         return item.id === id
-
       })
-
       var obj = {}
       obj.batch = item.batch
       obj.userId = item.userId
@@ -1006,7 +928,7 @@ export default {
           concurrentNum: this.createFormData.concurrentNum,
           type: this.createFormData.type,
           taskTime: this.createFormData.type === 0 ? taskTime : null,
-          allowTime: this.createFormData.type === 0 ? this.allowTimes : null,
+          allowTime: this.allowTimes,
           callSingle: this.createFormData.callSingle == 1 ? true : false,//呼叫去重
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
@@ -1032,39 +954,19 @@ export default {
           background: 'rgba(0, 0, 0, 0.5)'
         })
         const url = '/sdmulti/task/save'
-        let res = await this.$request.post(url, param, { timeout: 60000 })
-        loading && loading.close()
-        this.progerssFinish = true
-        if (res.code === '0') {
-          this.$message.success('新增任务成功')
-          this.dialogVisible = false
-        }
-        else {
-          loading && loading.close()
-          this.dialogVisible = false
-        }
+        return this.$request
+          .jsonPost(url, param).then((res) => {
+            if (res.code === '0') {
+              this.$message.success('新增任务成功')
+            }
+            else {
+              return Promise.reject([])
+            }
+          })
+          .finally(() => {
+            loading.close()
+          })
       })
-    },
-    // 启动任务
-    async handleRun (planId) {
-      const loading = this.$loading({
-        lock: true,
-        text: '正在启动任务，请稍候',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      })
-      let res = await this.$request.get('/sdmulti/plan/startup', {
-        params: {
-          planId
-        },
-        timeout: 1200000
-      })
-      loading.close()
-      if (res.code === '0') {
-        this.$message.success('任务启动成功')
-      } else {
-        this.$message.error(res.message)
-      }
     },
     // 返回任务列表页
     backtrack () {

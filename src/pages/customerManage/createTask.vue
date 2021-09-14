@@ -58,17 +58,19 @@
           <el-radio :label="1">立即启动</el-radio>
           <el-radio :label="2">手动启动</el-radio>
         </el-radio-group>
-        <div v-if="createFormData.type === 0" class="timing">
-          <span>任务启动时间：</span>
-          <div>
-            <el-date-picker v-model="createFormData.startDate" value-format="yyyy-MM-dd" type="date" :editable="false" :picker-options="datePicker" placeholder="选择日期">
-            </el-date-picker>
-            <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+        <div class="timing">
+          <div v-if="createFormData.type === 0">
+            <span>任务启动时间：</span>
+            <div>
+              <el-date-picker v-model="createFormData.startDate" value-format="yyyy-MM-dd" type="date" :editable="false" :picker-options="datePicker" placeholder="选择日期">
+              </el-date-picker>
+              <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
                 start: '08:00',
                 step: '00:10',
                 end: '20:50'
               }" placeholder="选择时间">
-            </el-time-select>
+              </el-time-select>
+            </div>
           </div>
 
           <span>允许呼叫时段时段：</span>
@@ -221,7 +223,7 @@ export default {
       selectRobotName: null, //已选机器人名称
       ulCom: null,
       ulRel: null,
-      checkVar: '',
+      checkVar: '',//是否在校验
       unionVO: null,//变量校验参数
       customerInfoVOs: null,
       varResult: null,//校验结果
@@ -392,21 +394,6 @@ export default {
             },
             trigger: 'blur'
           }
-        ],
-        importOpportunityFile: [
-          {
-            validator: (rule, value, callback) => {
-              if (
-                this.createFormData.importMethod === 'opportunity' &&
-                !value.length
-              ) {
-                callback(new Error('请选择导入文件'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          }
         ]
       }, // 新增任务表单项校验规则
       beginDateValidator: (search, field) => {
@@ -501,35 +488,6 @@ export default {
     this.fetchRobotList()
   },
   methods: {
-    testFile (file) {
-      let param = new FormData()
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-      const loading = this.$loading({
-        lock: true,
-        text: '正在解析，请稍候',
-        spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
-      })
-      param.append('file', file)
-      const url = '/sdmulti/qbzz/manage/api/check/union'
-      return this.$request
-        .uploadPost(url, param, config)
-        .then((res) => {
-          if (res.code === '0') {
-            return Promise.resolve(res.data)
-          } else {
-            this.$message.warning(res.message)
-            return Promise.reject([])
-          }
-        })
-        .finally(() => {
-          loading.close()
-        })
-    },
     removeDomain (item) {
       var index = this.allowTime.indexOf(item)
       if (index !== -1) {
@@ -602,11 +560,10 @@ export default {
               return Promise.reject([])
             }
           })
-        // .finally(() => {
-        //   this.checkVar = true
-        // })
+          .finally(() => {
+            this.checkVar = false
+          })
       }
-
     },
     // 校验并发数
     checkConcurrentNum () {
@@ -713,6 +670,9 @@ export default {
           this.$message.error('请填写必填字段')
           return
         }
+        // if(this.allowTimes.length===0){
+        //   this.
+        // }
         if (
           this.createFormData.type === '0' &&
           (!this.createFormData.startDate || !this.createFormData.startTime)
@@ -744,7 +704,7 @@ export default {
           concurrentNum: this.createFormData.concurrentNum,
           type: this.createFormData.type,
           taskTime: this.createFormData.type === 0 ? taskTime : null,
-          allowTime: this.createFormData.type === 0 ? this.allowTimes : null,
+          allowTime: this.allowTimes,
           callSingle: this.createFormData.callSingle == 1 ? true : false,//呼叫去重
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
@@ -770,11 +730,6 @@ export default {
           background: 'rgba(0, 0, 0, 0.5)'
         })
         const url = '/sdmulti/task/save'
-        // let res = await this.$request.jsonPost(url, param)
-        // if (res.code === '0') {
-        //   this.$message.success('新增任务成功')
-        // }
-        // loading && loading.close()
         return this.$request
           .jsonPost(url, param).then((res) => {
             if (res.code === '0') {
