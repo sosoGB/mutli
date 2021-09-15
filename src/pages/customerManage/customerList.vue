@@ -332,7 +332,7 @@ export default {
         type: this.search.customerType,
         isCall: Number(this.search.isCall) || null,
         isNewCus: Number(this.search.isNewCus) || null,
-        sex: this.search.sex.map(Number) || null,
+        sex: this.search.sex ? this.search.sex.map(Number) : [],
         minAge: Number(this.search.minAge) || null,
         maxAge: Number(this.search.maxAge) || null,
         isSuccess: Number(this.search.isSuccess) || null,
