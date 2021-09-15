@@ -145,13 +145,13 @@ export default {
         batch: null, //客户批次
         endTime: '', //开始时间
         startTime: '', //结束时间
-        customerType: '', //客户种类
-        isCall: '', //是否已创建外呼任务
-        isNewCus: '', //是否为新客户
+        customerType: null, //客户种类
+        isCall: null, //是否已创建外呼任务
+        isNewCus: null, //是否为新客户
         sex: null, //性别
-        minAge: '', //年龄最小值
-        maxAge: '', //年龄最大值
-        isSuccess: '',//是否已成功转化
+        minAge: null, //年龄最小值
+        maxAge: null, //年龄最大值
+        isSuccess: null,//是否已成功转化
         isName: null,//名字是否为空
       },
       pagination: {
@@ -331,13 +331,13 @@ export default {
         startTime: this.search.startTime ? this.search.startTime + ' 00:00:00' : null,
         endTime: this.search.endTime ? this.search.endTime + ' 23:59:59' : null,
         type: this.search.customerType,
-        isCall: this.search.isCall || null,
-        isNewCus: this.search.isNewCus || null,
-        sex: this.search.sex || null,
-        minAge: this.search.minAge || null,
-        maxAge: this.search.maxAge || null,
-        isSuccess: this.search.isSuccess || null,
-        isName: this.search.isName || null,
+        isCall: this.search.isCall,
+        isNewCus: this.search.isNewCus,
+        sex: this.search.sex,
+        minAge: this.search.minAge,
+        maxAge: this.search.maxAge,
+        isSuccess: this.search.isSuccess,
+        isName: this.search.isName,
         page: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
       })
