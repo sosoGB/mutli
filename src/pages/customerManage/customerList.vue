@@ -142,7 +142,7 @@ export default {
       search: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
-        batch: '', //客户批次
+        batch: null, //客户批次
         endTime: '', //开始时间
         startTime: '', //结束时间
         customerType: '', //客户种类
@@ -179,11 +179,13 @@ export default {
         disabledDate: (current) => Date.now() < current
       },
       endUpdateValidator: {
-        disabledDate: (current) =>
-          (this.search.startTime &&
-            filter.formatDate(current, 'yyyy-MM-dd') <
-            this.search.startTime) ||
-          Date.now() < current
+        disabledDate: (current) => {
+          return (
+            (this.search.startTime &&
+              filter.formatDate(current, 'yyyy-MM-dd') <
+              this.search.startTime)
+          )
+        }
       }
     }
   },
@@ -325,8 +327,8 @@ export default {
       this.$request.jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
-        startTime: this.search.startTime || null,
-        endTime: this.search.endTime || null,
+        startTime: this.search.startTime ? this.search.startTime + ' 23:59:59' : null,
+        endTime: this.search.endTime ? this.search.endTime + ' 23:59:59' : null,
         type: this.search.customerType,
         isCall: Number(this.search.isCall) || null,
         isNewCus: Number(this.search.isNewCus) || null,

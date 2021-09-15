@@ -397,11 +397,12 @@ export default {
         this.pagination.currentPage = 1
       }
       this.isLoadingPlanList = true
+
       this.$request
         .jsonPost('/sdmulti/task/getTaskInfoList', {
           userId: this.$store.state.userInfo.userId,
-          startTime: this.search.beginDate,
-          endTime: this.search.endDate,
+          startTime: this.search.beginDate ? this.search.beginDate + ' 23:59:59' : null,
+          endTime: this.search.endDate ? this.search.endDate + ' 23:59:59' : null,
           name: this.search.planName,
           robotName: this.search.robotName ? this.search.robotName : null,
           status: this.search.taskStatus === '' ? null : this.search.taskStatus,

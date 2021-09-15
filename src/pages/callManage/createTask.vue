@@ -14,7 +14,7 @@
       </el-form-item>
       <el-form-item prop="customerType" label="客户种类：">
         <div class="input-large form-item_upload">
-          <el-select v-model="createFormData.customerType" @change="handleChangeCustomerType" placeholder="请选择客户种类：" filterable clearable>
+          <el-select v-model="createFormData.customerType" @change="handleChangeCustomerType" placeholder="请选择客户种类" filterable clearable>
             <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
             <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
           </el-select>
