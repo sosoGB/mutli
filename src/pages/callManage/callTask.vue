@@ -400,8 +400,8 @@ export default {
       this.$request
         .jsonPost('/sdmulti/task/getTaskInfoList', {
           userId: this.$store.state.userInfo.userId,
-          startTime: this.search.beginDate,
-          endTime: this.search.endDate,
+          startTime: this.search.beginDate ? this.search.beginDate + ' 00:00:00' : null,
+          endTime: this.search.endDate ? this.search.endDate + ' 23:59:59' : null,
           name: this.search.planName,
           robotName: this.search.robotName ? this.search.robotName : null,
           status: this.search.taskStatus === '' ? null : this.search.taskStatus,
@@ -481,7 +481,7 @@ export default {
     async handleExport (taskId) {
       const res = await this.$request.xml('/sdmulti/task/export', { taskId })
       const a = document.createElement('a')
-      a.download = '未呼号码+失败号码.xls'
+      a.download = '未呼号码+失败号码.zip'
       a.href = URL.createObjectURL(res)
       a.click()
     },

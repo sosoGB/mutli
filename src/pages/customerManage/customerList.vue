@@ -36,23 +36,23 @@
       <div class="advanced-item">
         <span class="advanced-label">是否已创建外呼任务：</span>
         <el-select v-model="search.isCall" placeholder="请选择" clearable class="advanced-input">
-          <el-option label="是" value="0"></el-option>
-          <el-option label="否" value="1"></el-option>
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">当批是否为新客户：</span>
-        <el-select placeholder="请选择机器人名称" v-model="search.isNewCus" class="advanced-input">
-          <el-option label="是" value="0"></el-option>
-          <el-option label="否" value="1"></el-option>
+        <el-select placeholder="请选择" clearable v-model="search.isNewCus" class="advanced-input">
+          <el-option label="是" :value="2"></el-option>
+          <el-option label="否" :value="1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">性别：</span>
         <el-select v-model="search.sex" placeholder="请选择性别" clearable class="advanced-input" multiple>
-          <el-option label="男" value="1"></el-option>
-          <el-option label="女" value="0"></el-option>
-          <el-option label="未知" value="-1"></el-option>
+          <el-option label="男" :value="1"></el-option>
+          <el-option label="女" :value="0"></el-option>
+          <el-option label="未知" :value="-1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -74,15 +74,15 @@
       <div class="advanced-item">
         <span class="advanced-label">是否已成功转化：</span>
         <el-select v-model="search.isSuccess" placeholder="请选择" clearable class="advanced-input">
-          <el-option label="是" value="0"></el-option>
-          <el-option label="否" value="1"></el-option>
+          <el-option label="是" :value="2"></el-option>
+          <el-option label="否" :value="1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">姓名是否为空：</span>
-        <el-select v-model="search.cusName" placeholder="请选择" clearable class="advanced-input">
-          <el-option label="是" value="0"></el-option>
-          <el-option label="否" value="1"></el-option>
+        <el-select v-model="search.isName" placeholder="请选择" clearable class="advanced-input">
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
         </el-select>
       </div>
     </div>
@@ -152,6 +152,7 @@ export default {
         minAge: '', //年龄最小值
         maxAge: '', //年龄最大值
         isSuccess: '',//是否已成功转化
+        isName: null,//名字是否为空
       },
       pagination: {
         pageSize: 10,
@@ -330,12 +331,13 @@ export default {
         startTime: this.search.startTime ? this.search.startTime + ' 00:00:00' : null,
         endTime: this.search.endTime ? this.search.endTime + ' 23:59:59' : null,
         type: this.search.customerType,
-        isCall: Number(this.search.isCall) || null,
-        isNewCus: Number(this.search.isNewCus) || null,
-        sex: this.search.sex ? this.search.sex.map(Number) : [],
-        minAge: Number(this.search.minAge) || null,
-        maxAge: Number(this.search.maxAge) || null,
-        isSuccess: Number(this.search.isSuccess) || null,
+        isCall: this.search.isCall || null,
+        isNewCus: this.search.isNewCus || null,
+        sex: this.search.sex || null,
+        minAge: this.search.minAge || null,
+        maxAge: this.search.maxAge || null,
+        isSuccess: this.search.isSuccess || null,
+        isName: this.search.isName || null,
         page: this.pagination.currentPage,
         pageSize: this.pagination.pageSize
       })
