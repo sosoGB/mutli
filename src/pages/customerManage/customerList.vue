@@ -10,9 +10,9 @@
     <div class="toolbar">
       <div class="tool-search">
         <el-input placeholder="客户批次" class="search-component search-input" v-model.trim="search.batch" @keyup.enter.native="fetchTaskList(1)" clearable></el-input>
-        <el-date-picker v-model="search.startTime" class="search-component search-input" type="date" placeholder="开始时间" value-format="yyyy-MM-dd" :picker-options="beginUpdateValidator" :clearable="false"></el-date-picker>
+        <el-date-picker v-model="search.startTime" class="search-component search-input" type="date" placeholder="开始时间" value-format="yyyy-MM-dd" :picker-options="beginUpdateValidator" clearable></el-date-picker>
         <span class="search-delimiter">-</span>
-        <el-date-picker v-model="search.endTime" class="search-component search-input" type="date" placeholder="结束时间" value-format="yyyy-MM-dd" :picker-options="endUpdateValidator" :clearable="false"></el-date-picker>
+        <el-date-picker v-model="search.endTime" class="search-component search-input" type="date" placeholder="结束时间" value-format="yyyy-MM-dd" :picker-options="endUpdateValidator" clearable></el-date-picker>
         <el-button type="primary" class="search-component" @click="
             () => {
               pagination.currentPage = 1
@@ -280,7 +280,7 @@ export default {
           endTime: this.search.endTime || null,
           isCall: Number(this.search.isCall) || null,
           isNewCus: Number(this.search.isNewCus) || null,
-          sex: Number(this.search.sex) || null,
+          sex: this.search.sex.map(Number) || null,
           minAge: Number(this.search.minAge) || null,
           maxAge: Number(this.search.maxAge) || null,
           isSuccess: Number(this.search.isSuccess) || null,
@@ -327,12 +327,12 @@ export default {
       this.$request.jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
-        startTime: this.search.startTime ? this.search.startTime + ' 23:59:59' : null,
+        startTime: this.search.startTime ? this.search.startTime + ' 00:00:00' : null,
         endTime: this.search.endTime ? this.search.endTime + ' 23:59:59' : null,
         type: this.search.customerType,
         isCall: Number(this.search.isCall) || null,
         isNewCus: Number(this.search.isNewCus) || null,
-        sex: Number(this.search.sex) || null,
+        sex: this.search.sex.map(Number) || null,
         minAge: Number(this.search.minAge) || null,
         maxAge: Number(this.search.maxAge) || null,
         isSuccess: Number(this.search.isSuccess) || null,
