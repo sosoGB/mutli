@@ -12,9 +12,17 @@
       <el-form-item prop="name" label="任务名称：">
         <el-input v-model.trim="createFormData.name" placeholder="请输入任务名称" clearable class="input-name"></el-input>
       </el-form-item>
-      <el-form-item prop="customerId" label="客户批次：">
+      <el-form-item prop="customerType" label="客户种类：">
         <div class="input-large form-item_upload">
-          <el-select v-model="createFormData.customerId" @change="handleChangeCustomer" placeholder="请选择客户批次" filterable clearable>
+          <el-select v-model="createFormData.customerType" @change="handleChangeCustomerType" placeholder="请选择客户种类：" filterable clearable>
+            <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
+            <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
+          </el-select>
+        </div>
+      </el-form-item>
+      <el-form-item prop="customerId" label="客户批次：" v-show="createFormData.customerType">
+        <div class="input-large form-item_upload">
+          <el-select v-model="createFormData.customerId" @change="handleChangeCustomer" placeholder="请选择客户批次" filterable multiple collapse-tags clearable>
             <el-option v-for="(item,index) in cusList" :key="index" :label="item.batch" :value="item.id"></el-option>
           </el-select>
         </div>
@@ -22,14 +30,14 @@
       <el-form-item prop="robotId" label="机器人名称：">
         <div class="input-large form-item_upload">
           <el-select v-model="createFormData.robotId" @change="handleChangeRobotId" placeholder="请选择机器人名称" filterable clearable>
-            <el-option v-for="(item,index) in robotList" :key="index" :label="item.showName" :value="item.id"></el-option>
+            <el-option v-for="(item,index) in robotList" :key="index" :label="item" :value="item"></el-option>
           </el-select>
           <el-button @click="handleDownload(createFormData.robotId)" type="primary">下载机器人变量模板</el-button>
         </div>
       </el-form-item>
       <el-form-item prop="" label="外呼平台：" v-if="createFormData.robotId">
         <div class="input-large form-item_upload">
-          <el-select v-model="createFormData.outCallPlatformId" @change="handleChangePlat" placeholder="请选择外呼平台" filterable multiple>
+          <el-select v-model="createFormData.outCallPlatformId" @change="handleChangePlat" placeholder="请选择外呼平台" filterable multiple collapse-tag>
             <el-option v-for="item in OutCallPlatformList" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </div>
@@ -75,7 +83,6 @@
               </el-time-select>
             </div>
           </div>
-
           <span>允许呼叫时段时段：</span>
           <div class="allowTime">
             <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
@@ -222,7 +229,6 @@ export default {
   },
   data () {
     return {
-      selectRobotName: '', //已选机器人名称
       ulCom: '',
       ulRel: '',
       unionVO: {},
@@ -271,6 +277,7 @@ export default {
       ], // 可选通话结果
       createFormData: {
         name: null, // 任务名称
+        customerType: null,//客户种类
         customerId: null, //客户批次id
         robotId: null, // 机器人名称
         outCallPlatformId: [], // 外呼平台名称
@@ -301,6 +308,9 @@ export default {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
           { max: 20, message: '不得超过20个字符', trigger: 'blur' }
+        ],
+        customerType: [
+          { required: true, message: '请选择客户种类', trigger: 'blur' }
         ],
         customerId: [
           { required: true, message: '请选择客户批次', trigger: 'blur' }
@@ -339,19 +349,12 @@ export default {
           : [
             {
               validator: (rule, value, callback) => {
-                if (!this.createFormData.concurrentNum) {
+                if (!value) {
                   callback(new Error('请输入总并发数量'))
                 }
-                this.$request
-                  .jsonPost('/sdmulti/task/checkConcurrentNum', {
-                    concurrentNum: this.createFormData.concurrentNum,
-                    serviceIds: this.createFormData.outCallPlatformId,
-                  })
-                  .then((res) => {
-                    if (res.code === '0' && res.data === false) {
-                      callback(new Error(res.message))
-                    }
-                  })
+                else {
+                  callback()
+                }
               },
               trigger: 'blur'
             }
@@ -579,7 +582,6 @@ export default {
       return this.$request
         .uploadPost(url, param, config)
         .then((res) => {
-          console.log(res)
           if (res.code === '0') {
             return Promise.resolve(res.data)
           } else {
@@ -595,6 +597,7 @@ export default {
       var index = this.allowTime.indexOf(item)
       if (index !== -1) {
         this.allowTime.splice(index, 1)
+        this.allowTimes.splice(index, 1)
       }
     },
     addDomain () {
@@ -663,6 +666,9 @@ export default {
               return Promise.reject([])
             }
           })
+          .finally(() => {
+            this.checkVar = false
+          })
       }
     },
     // 校验并发数
@@ -681,7 +687,7 @@ export default {
     // 查询机器人列表
     fetchRobotList () {
       this.$request
-        .jsonGet('/sdmulti/task/getRobots')
+        .jsonGet('/sdmulti/task/getRobotNames')
         .then((res) => {
           this.robotList = res.data
         })
@@ -690,7 +696,8 @@ export default {
     fetchCusList () {
       this.$request
         .jsonPost('/sdmulti/qbzz/manage/api/queryAllCus', {
-          userId: this.$store.state.userInfo.id
+          userId: this.$store.state.userInfo.id,
+          type: this.createFormData.customerType
         })
         .then((res) => {
           this.cusList = res.data
@@ -698,14 +705,9 @@ export default {
     },
     // 根据机器人名称查询外呼平台列表
     fetchOutCallPlatformList () {
-      this.robotList.forEach(item => {
-        if (this.createFormData.robotId === item.id) {
-          this.selectRobotName = item.showName
-        }
-      })
       this.$request
         .formGet('/sdmulti/task/getService', {
-          robotName: this.selectRobotName
+          robotName: this.createFormData.robotId
         })
         .then((res) => {
           this.OutCallPlatformList = res.data
@@ -716,19 +718,25 @@ export default {
       this.OutCallPlatformList = []
       this.fetchOutCallPlatformList()
     },
+    // 选择客户类型后查询客户批次
+    handleChangeCustomerType () {
+      this.fetchCusList()
+    },
     // 切换批次
-    handleChangeCustomer (id) {
-      let item = this.cusList.find((item) => {
-        return item.id === id
-      })
-      var obj = {}
-      obj.batch = item.batch
-      obj.userId = item.userId
-      obj.uuid = item.uuid
+    handleChangeCustomer (list) {
       let customerInfos = []
-      customerInfos.push(obj)
+      list.forEach(cusId => {
+        let item = this.cusList.find((item) => {
+          return item.id === cusId
+        })
+        var obj = {}
+        obj.batch = item.batch
+        obj.userId = item.userId
+        obj.uuid = item.uuid
+        customerInfos.push(obj)
+      })
       this.customerInfoVOs = customerInfos
-      this.unionVO.customerInfos = obj
+      this.unionVO.customerInfos = this.customerInfoVOs
     },
     // 切换多选框全选按钮
     toggleSelectAll (target, list, field) {
@@ -808,12 +816,10 @@ export default {
         this.$message.warning('请先选择机器人名称')
         return
       }
-      const robotItem = this.robotList.find((item) => {
-        return item.id == robotId
-      })
-      const res = await this.$request.xmlGet(`task/variable/down/${robotItem.showName}`)
+      let robotName = this.createFormData.robotId
+      const res = await this.$request.xmlGet(`task/variable/down/${robotName}`)
       const a = document.createElement("a");
-      a.download = robotItem.showName + '-文件导入模板.xls'
+      a.download = robotName + '-机器人模板.xls'
       a.href = URL.createObjectURL(res);
       a.click();
     },
@@ -923,7 +929,7 @@ export default {
         const param = {
           userId: this.$store.state.userInfo.userId,
           name: this.createFormData.name,
-          robotName: this.selectRobotName,
+          robotName: this.createFormData.robotId,
           calls: this.createFormData.outCallPlatformId,
           concurrentNum: this.createFormData.concurrentNum,
           type: this.createFormData.type,
@@ -958,6 +964,7 @@ export default {
           .jsonPost(url, param).then((res) => {
             if (res.code === '0') {
               this.$message.success('新增任务成功')
+              this.$router.replace('/main/callManage/callTask')
             }
             else {
               return Promise.reject([])
