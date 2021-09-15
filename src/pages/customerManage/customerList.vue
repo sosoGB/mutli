@@ -308,10 +308,11 @@ export default {
         this.$message.warning('只可针对同一客户种类新建外呼任务，请重新选择！')
         return
       }
+      const pagination = this.pagination
       const search = this.search
       this.$router.push({
         path: 'createTask',
-        query: { name: this.checkedTableRow, search: search }
+        query: { name: this.checkedTableRow, search, pagination }
       })
     },
     // 查询列表

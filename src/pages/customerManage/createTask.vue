@@ -447,6 +447,7 @@ export default {
     //把数组由字符串转化成数字
     const param = this.$route.query.name
     const search = this.$route.query.search
+    const pagination = this.$route.query.pagination
     let distList = []
     let customerInfos = []
     param.forEach(item => {
@@ -461,9 +462,12 @@ export default {
       obj.isCall = search.isCall
       obj.isNewCus = search.isNewCus
       obj.isSuccess = search.isSuccess
+      obj.isName = search.isName
       obj.sex = search.sex
       obj.minAge = search.minAge
       obj.maxAge = search.maxAge
+      obj.page = pagination.currentPage
+      obj.pageSize = pagination.pageSize
       customerInfos.push(obj)
     })
     let vo = {}
