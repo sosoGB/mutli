@@ -83,7 +83,7 @@
               </el-time-select>
             </div>
           </div>
-          <span>允许呼叫时段时段：</span>
+          <span>允许呼叫时段：</span>
           <div class="allowTime">
             <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
                  start: '07:55',
