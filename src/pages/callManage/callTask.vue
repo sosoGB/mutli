@@ -410,7 +410,7 @@ export default {
           taskId: this.search.taskId
         })
         .then((res) => {
-          this.isLoadingPlanList = false
+         
           if (!res.data) {
             if (res.message) {
               this.$message.error('获取任务列表失败-' + res.message)
@@ -429,6 +429,9 @@ export default {
                 : false
           })
           this.pagination.total = res.data.total
+        })
+         .finally(() => {
+             this.isLoadingPlanList = false
         })
     },
     // 查询机器人列表
