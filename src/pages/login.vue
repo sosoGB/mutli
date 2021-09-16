@@ -10,7 +10,7 @@
       </div>
       <el-form :model="loginFormData" ref="loginForm" :rules="loginFormRules" :class="{active: true}" class="form-login">
         <div class="row-title">
-          账号登录
+          多服务自动外呼平台
         </div>
         <div class="row-logo">
           <img src="@/assets/image/qibao.png">

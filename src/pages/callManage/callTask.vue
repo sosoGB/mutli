@@ -66,7 +66,7 @@
         <el-table-column label="开始时间" width="180" align="center">
           <template slot-scope="scope">
             <span>{{
-              scope.row.beginTime | formatDate('yyyy-MM-dd hh:mm:ss')
+              scope.row.beginTime 
             }}</span>
           </template>
         </el-table-column>
