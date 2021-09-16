@@ -3,54 +3,125 @@
     <!-- 面包屑导航 -->
     <div class="nav">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }">客户批次管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }"
+          >首页</el-breadcrumb-item
+        >
+        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }"
+          >客户批次管理</el-breadcrumb-item
+        >
         <el-breadcrumb-item>新建任务</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-    <el-form :model="createFormData" ref="createForm" :rules="createFormRule" label-width="150px">
+    <el-form
+      :model="createFormData"
+      ref="createForm"
+      :rules="createFormRule"
+      label-width="150px"
+    >
       <el-form-item prop="name" label="任务名称：">
-        <el-input v-model.trim="createFormData.name" placeholder="请输入任务名称" clearable class="input-name"></el-input>
+        <el-input
+          v-model.trim="createFormData.name"
+          placeholder="请输入任务名称"
+          clearable
+          class="input-name"
+        ></el-input>
       </el-form-item>
       <el-form-item prop="selectCtNum" label="已选客户数量：">
-        <span>{{selectCtNum}}</span>
+        <span>{{ selectCtNum }}</span>
       </el-form-item>
       <el-form-item prop="robotName" label="机器人名称：">
         <div class="input-large form-item_upload">
-          <el-select v-model="createFormData.robotName" @change="handleChangeRobotName" placeholder="请选择机器人名称" filterable clearable>
-            <el-option v-for="(item,index) in robotList" :key="index" :label="item" :value="item"></el-option>
+          <el-select
+            v-model="createFormData.robotName"
+            @change="handleChangeRobotName"
+            placeholder="请选择机器人名称"
+            filterable
+            clearable
+          >
+            <el-option
+              v-for="(item, index) in robotList"
+              :key="index"
+              :label="item"
+              :value="item"
+            ></el-option>
           </el-select>
-          <el-button @click="handleDownload(createFormData.robotName)" type="primary">下载机器人变量模板</el-button>
+          <el-button
+            @click="handleDownload(createFormData.robotName)"
+            type="primary"
+            >下载机器人变量模板</el-button
+          >
         </div>
       </el-form-item>
-      <el-form-item prop="outCallPlatformId" label="外呼平台：" v-if="createFormData.robotName">
+      <el-form-item
+        prop="outCallPlatformId"
+        label="外呼平台："
+        v-if="createFormData.robotName"
+      >
         <div class="input-large form-item_upload">
-          <el-select v-model="createFormData.outCallPlatformId" @change="handleChangePlat" placeholder="请选择外呼平台" filterable multiple>
-            <el-option v-for="item in OutCallPlatformList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          <el-select
+            v-model="createFormData.outCallPlatformId"
+            @change="handleChangePlat"
+            placeholder="请选择外呼平台"
+            filterable
+            multiple
+          >
+            <el-option
+              v-for="item in OutCallPlatformList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
           </el-select>
         </div>
       </el-form-item>
       <el-form-item prop="importComVar" label="共用型变量：">
         <div class="input-large form-item_upload">
-          <file-uploader class="form-uploader" :uploaded.sync="createFormData.importComVar"></file-uploader>
-          <el-button @click="handleDownloadTemplate(1)" type="primary">下载模板</el-button>
+          <file-uploader
+            class="form-uploader"
+            :uploaded.sync="createFormData.importComVar"
+          ></file-uploader>
+          <el-button @click="handleDownloadTemplate(1)" type="primary"
+            >下载模板</el-button
+          >
         </div>
       </el-form-item>
       <el-form-item prop="importRelVar" label="关系型变量：">
         <div class="input-large form-item_upload">
-          <file-uploader class="form-uploader" :uploaded.sync="createFormData.importRelVar"></file-uploader>
-          <el-button @click="handleDownloadTemplate(2)" type="primary">下载模板</el-button>
+          <file-uploader
+            class="form-uploader"
+            :uploaded.sync="createFormData.importRelVar"
+          ></file-uploader>
+          <el-button @click="handleDownloadTemplate(2)" type="primary"
+            >下载模板</el-button
+          >
         </div>
       </el-form-item>
 
-      <el-form-item prop="importRelVar" label="变量校验：" v-show="ulCom && ulRel">
+      <el-form-item
+        prop="importRelVar"
+        label="变量校验："
+        v-show="ulCom && ulRel"
+      >
         <div class="input-large form-item_upload">
-          <el-button @click="handleCheckVar()" type="primary" size="mini" v-show="!varResult">{{checkVar?'校验中...':'变量校验'}}</el-button>
-          <el-button type="success" size="mini" v-show="varResult">校验成功</el-button>
+          <el-button
+            @click="handleCheckVar()"
+            type="primary"
+            size="mini"
+            v-show="!varResult"
+            >{{ checkVar ? "校验中..." : "变量校验" }}</el-button
+          >
+          <el-button type="success" size="mini" v-show="varResult"
+            >校验成功</el-button
+          >
         </div>
       </el-form-item>
       <el-form-item prop="concurrentNum" label="总并发数量：">
-        <el-input v-model.trim="createFormData.concurrentNum" placeholder="" clearable class="input-name"></el-input>
+        <el-input
+          v-model.trim="createFormData.concurrentNum"
+          placeholder=""
+          clearable
+          class="input-name"
+        ></el-input>
       </el-form-item>
       <el-form-item prop="type" label="外呼启动方式：">
         <el-radio-group v-model="createFormData.type">
@@ -62,50 +133,98 @@
           <div v-if="createFormData.type === 0">
             <span>任务启动时间：</span>
             <div>
-              <el-date-picker v-model="createFormData.startDate" value-format="yyyy-MM-dd" type="date" :editable="false" :picker-options="datePicker" placeholder="选择日期">
+              <el-date-picker
+                v-model="createFormData.startDate"
+                value-format="yyyy-MM-dd"
+                type="date"
+                :editable="false"
+                :picker-options="datePicker"
+                placeholder="选择日期"
+              >
               </el-date-picker>
-              <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                start: '08:00',
-                step: '00:10',
-                end: '20:50'
-              }" placeholder="选择时间">
+              <el-time-select
+                v-model="createFormData.startTime"
+                popper-class="startTimer"
+                @focus="handleStartTimeFocus"
+                :picker-options="{
+                  start: '08:00',
+                  step: '00:10',
+                  end: '20:50',
+                }"
+                placeholder="选择时间"
+              >
               </el-time-select>
             </div>
           </div>
 
           <span>允许呼叫时段：</span>
           <div class="allowTime">
-            <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+            <el-time-select
+              v-model="allowstartTime"
+              popper-class="startTimer"
+              @focus="handleStartTimeFocus"
+              :picker-options="{
                 start: '07:55',
                 step: '00:10',
-                end: '22:05'
-              }" placeholder="选择时间">
+                end: '22:05',
+              }"
+              placeholder="选择时间"
+            >
             </el-time-select>
-            <el-time-select v-model="allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                 start: '07:55',
+            <el-time-select
+              v-model="allowendTime"
+              popper-class="startTimer"
+              @focus="handleStartTimeFocus"
+              :picker-options="{
+                start: '07:55',
                 step: '00:10',
-                end: '22:05'
-              }" placeholder="选择时间">
+                end: '22:05',
+              }"
+              placeholder="选择时间"
+            >
             </el-time-select>
-            <el-button type="primary" size="mini" icon="el-icon-plus" @click.prevent="addDomain"></el-button>
+            <el-button
+              type="primary"
+              size="mini"
+              icon="el-icon-plus"
+              @click.prevent="addDomain"
+            ></el-button>
           </div>
           <div class="allowTime" v-for="domain in allowTime" :key="domain.key">
-            <el-time-select v-model="domain.allowstartTime" popper-class="startTimer" :picker-options="{
-                 start: '07:55',
-                step: '00:10',
-                end: '22:05'
-              }" placeholder="选择时间">
-            </el-time-select>
-            <el-time-select v-model="domain.allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+            <el-time-select
+              v-model="domain.allowstartTime"
+              popper-class="startTimer"
+              :picker-options="{
                 start: '07:55',
                 step: '00:10',
-                end: '22:05'
-              }" placeholder="选择时间">
+                end: '22:05',
+              }"
+              placeholder="选择时间"
+            >
             </el-time-select>
-            <el-button type="danger" size="mini" icon="el-icon-delete" @click.prevent="removeDomain(domain)"></el-button>
+            <el-time-select
+              v-model="domain.allowendTime"
+              popper-class="startTimer"
+              @focus="handleStartTimeFocus"
+              :picker-options="{
+                start: '07:55',
+                step: '00:10',
+                end: '22:05',
+              }"
+              placeholder="选择时间"
+            >
+            </el-time-select>
+            <el-button
+              type="danger"
+              size="mini"
+              icon="el-icon-delete"
+              @click.prevent="removeDomain(domain)"
+            ></el-button>
           </div>
 
-          <span>为避免打扰用户休息，系统强制默认外呼时间为08:00-12:00,14:00-21:00，请在该时间段内设置</span>
+          <span
+            >为避免打扰用户休息，系统强制默认外呼时间为08:00-12:00,14:00-21:00，请在该时间段内设置</span
+          >
         </div>
       </el-form-item>
       <el-form-item prop="callSingle" label="呼叫去重：">
@@ -122,23 +241,47 @@
         <div v-show="createFormData.recallFlag">
           <p>
             <span class="form-prefix">选择通话结果</span>
-            <span class="clickable" @click="handleCheckAllCallResult(createFormData)">
+            <span
+              class="clickable"
+              @click="handleCheckAllCallResult(createFormData)"
+            >
               {{
                 createFormData.recallResult.length === recallResultList.length
-                  ? '全部取消'
-                  : '全选'
+                  ? "全部取消"
+                  : "全选"
               }}
             </span>
           </p>
           <el-checkbox-group v-model="createFormData.recallResult">
-            <el-checkbox v-for="item in recallResultList" :label="item.key" :key="item.key">{{ item.label }}</el-checkbox>
+            <el-checkbox
+              v-for="item in recallResultList"
+              :label="item.key"
+              :key="item.key"
+              >{{ item.label }}</el-checkbox
+            >
           </el-checkbox-group>
-          <el-form-item label-width="70px" prop="recallInterval" label="重呼间隔">
-            <el-input-number v-model="createFormData.recallInterval" :min="1" :precision="0" size="small" placeholder="请输入重呼间隔"></el-input-number>
+          <el-form-item
+            label-width="70px"
+            prop="recallInterval"
+            label="重呼间隔"
+          >
+            <el-input-number
+              v-model="createFormData.recallInterval"
+              :min="1"
+              :precision="0"
+              size="small"
+              placeholder="请输入重呼间隔"
+            ></el-input-number>
             <span class="form-suffix">分钟</span>
           </el-form-item>
           <el-form-item label-width="70px" prop="recallMaxNum" label="重呼次数">
-            <el-input-number v-model="createFormData.recallMaxNum" :min="1" :precision="0" size="small" placeholder="请输入重呼次数"></el-input-number>
+            <el-input-number
+              v-model="createFormData.recallMaxNum"
+              :min="1"
+              :precision="0"
+              size="small"
+              placeholder="请输入重呼次数"
+            ></el-input-number>
             <span class="form-suffix">次</span>
           </el-form-item>
         </div>
@@ -152,13 +295,24 @@
           <div class="conversion_task">
             <span class="form-prefix">任务创建时间</span>
             <span class="form-conversion-suffix">当前任务创建后</span>
-            <el-input v-model.trim="createFormData.name" placeholder="" clearable class="input-name"></el-input>
+            <el-input
+              v-model.trim="createFormData.name"
+              placeholder=""
+              clearable
+              class="input-name"
+            ></el-input>
             <span class="form-conversion-suffix">天</span>
-            <el-time-select v-model="createFormData.startTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
+            <el-time-select
+              v-model="createFormData.startTime"
+              popper-class="startTimer"
+              @focus="handleStartTimeFocus"
+              :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '20:50'
-              }" placeholder="选择时间">
+                end: '20:50',
+              }"
+              placeholder="选择时间"
+            >
             </el-time-select>
             <el-form-item prop="type">
               <span class="form-prefix">任务启动方式</span>
@@ -174,29 +328,57 @@
                 <el-radio :label="0">否</el-radio>
               </el-radio-group>
             </el-form-item>
-            <div v-show="createFormData.jietongFlag"><span class="form-prefix">选择通话结果</span>
-              <span class="clickable" @click="handleCheckAllCallConversionResult(createFormData)">
+            <div v-show="createFormData.jietongFlag">
+              <span class="form-prefix">选择通话结果</span>
+              <span
+                class="clickable"
+                @click="handleCheckAllCallConversionResult(createFormData)"
+              >
                 {{
-                createFormData.recallResult.length === conversionResultList.length
-                  ? '全部取消'
-                  : '全选'
-              }}
+                  createFormData.recallResult.length ===
+                  conversionResultList.length
+                    ? "全部取消"
+                    : "全选"
+                }}
               </span>
               <el-checkbox-group v-model="createFormData.recallResult">
-                <el-checkbox v-for="item in conversionResultList" :label="item.key" :key="item.key">{{ item.label }}</el-checkbox>
+                <el-checkbox
+                  v-for="item in conversionResultList"
+                  :label="item.key"
+                  :key="item.key"
+                  >{{ item.label }}</el-checkbox
+                >
               </el-checkbox-group>
-              <el-form-item label-width="70px" prop="recallInterval" label="重呼间隔">
-                <el-input-number v-model="createFormData.recallInterval" :min="1" :precision="0" size="small" placeholder="请输入重呼间隔"></el-input-number>
+              <el-form-item
+                label-width="70px"
+                prop="recallInterval"
+                label="重呼间隔"
+              >
+                <el-input-number
+                  v-model="createFormData.recallInterval"
+                  :min="1"
+                  :precision="0"
+                  size="small"
+                  placeholder="请输入重呼间隔"
+                ></el-input-number>
                 <span class="form-suffix">分钟</span>
               </el-form-item>
-              <el-form-item label-width="70px" prop="recallMaxNum" label="重呼次数">
-                <el-input-number v-model="createFormData.recallMaxNum" :min="1" :precision="0" size="small" placeholder="请输入重呼次数"></el-input-number>
+              <el-form-item
+                label-width="70px"
+                prop="recallMaxNum"
+                label="重呼次数"
+              >
+                <el-input-number
+                  v-model="createFormData.recallMaxNum"
+                  :min="1"
+                  :precision="0"
+                  size="small"
+                  placeholder="请输入重呼次数"
+                ></el-input-number>
                 <span class="form-suffix">次</span>
               </el-form-item>
             </div>
-
           </div>
-
         </div>
       </el-form-item>
     </el-form>
@@ -204,7 +386,11 @@
       <el-button type="primary" @click="submitCreateForm">确定</el-button>
       <el-button @click="backtrack">取消</el-button>
     </el-row>
-    <progress-pop :close-on-click-modal="false" :dialog-visible.sync="dialogVisible" :is-finished="progerssFinish"></progress-pop>
+    <progress-pop
+      :close-on-click-modal="false"
+      :dialog-visible.sync="dialogVisible"
+      :is-finished="progerssFinish"
+    ></progress-pop>
   </div>
 </template>
 
@@ -591,7 +777,7 @@ export default {
     },
     // 切换机器人名称
     handleChangeRobotName () {
-      this.OutCallPlatformList = []
+      this.createFormData.outCallPlatformId = []
       this.fetchOutCallPlatformList()
     },
     // 全选/取消全选通话结果
