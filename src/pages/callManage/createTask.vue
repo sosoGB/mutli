@@ -288,10 +288,6 @@ export default {
         importComVar: [],//共用型变量导入
         importRelVar: [],//关系型变量导入
         customerList: [], // 用户列表
-        opportunityAvailable: true, // 是否可导入商机名单
-        importOpportunityList: [], // 所选商机名单
-        importOpportunityFile: [], // 文件方式导入商机名单
-        variableMap: null, // 商机名单变量表
         callSingle: 1, // 呼叫去重
         recallFlag: 0, // 自动失败重呼
         recallResult: [], // 通话结果
@@ -412,36 +408,6 @@ export default {
             },
             trigger: 'blur'
           }
-        ],
-        importOpportunityList: [
-          {
-            validator: (rule, value, callback) => {
-              if (
-                this.createFormData.importMethod === 'opportunity' &&
-                !value.length
-              ) {
-                callback(new Error('请选择商机名单'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          }
-        ],
-        importOpportunityFile: [
-          {
-            validator: (rule, value, callback) => {
-              if (
-                this.createFormData.importMethod === 'opportunity' &&
-                !value.length
-              ) {
-                callback(new Error('请选择导入文件'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          }
         ]
       }, // 新增任务表单项校验规则
       beginDateValidator: (search, field) => {
@@ -461,33 +427,6 @@ export default {
       datePicker: {
         disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
       },
-      dialogOpportunityVisible: false, // 导入商机名单弹窗可见性
-      opportunityTagList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
-      opportunityStatusList: [
-        {
-          label: '未呼叫',
-          value: 0
-        },
-        {
-          label: '已呼叫',
-          value: 1
-        }
-      ],
-      opportunitySearch: {
-        tag: null,
-        status: null,
-        number: null,
-        beginTime: null,
-        endTime: null
-      },
-      opportunityPagination: {
-        currentPage: 1,
-        total: 1,
-        pageSize: 10
-      },
-      opportunityList: [], // 商机名单
-      isLoadingOpportunityList: false, // 商机名单表格loading效果
-      isCheckDown: false,
       allowTime: [],
       allowTimes: [],
       dynamicValidateForm: {
@@ -715,11 +654,12 @@ export default {
     },
     // 切换机器人名称
     handleChangeRobotId () {
-      this.OutCallPlatformList = []
+      this.createFormData.outCallPlatformId = []
       this.fetchOutCallPlatformList()
     },
     // 选择客户类型后查询客户批次
     handleChangeCustomerType () {
+      this.createFormData.customerId = []
       this.fetchCusList()
     },
     // 切换批次
@@ -836,66 +776,6 @@ export default {
       a.download = endStr
       a.href = URL.createObjectURL(res)
       a.click()
-    },
-    // 点击选择导入商机名单
-    handleImportOpportunityList () {
-      this.dialogOpportunityVisible = true
-      this.fetchOpportunityList()
-    },
-    // 查询商机列表
-    fetchOpportunityList () {
-      this.isLoadingOpportunityList = true
-      this.$request
-        .get('/businessChance/getBusinessChanceList', {
-          params: {
-            userId: this.$store.state.userInfo.userId,
-            tag: this.opportunitySearch.tag,
-            status: this.opportunitySearch.status,
-            beginTime: this.opportunitySearch.beginTime,
-            endTime: this.opportunitySearch.endTime,
-            num: this.opportunityPagination.currentPage,
-            size: this.opportunityPagination.pageSize
-          }
-        })
-        .then((res) => {
-          this.opportunityList = res.data.list
-          this.opportunityPagination.total = res.data.count
-          this.opportunitySearch.number = null
-        })
-        .finally(() => {
-          this.isLoadingOpportunityList = false
-        })
-    },
-    // 确认选择商机名单
-    handleConfirmChooseOpportunity () {
-      if (!this.opportunitySearch.number) {
-        this.$message.error('请输入名单数量')
-        return
-      }
-      this.$request
-        .get('/businessChance/getUseBusinessChanceList', {
-          params: {
-            userId: this.$store.state.userInfo.userId,
-            tag: this.opportunitySearch.tag,
-            status: this.opportunitySearch.status,
-            beginTime: this.opportunitySearch.beginTime,
-            endTime: this.opportunitySearch.endTime,
-            number: this.opportunitySearch.number
-          }
-        })
-        .then((res) => {
-          if (res.code !== '0') {
-            this.$message.error(res.message)
-            return
-          }
-          this.createFormData.importOpportunityList = res.data.map((item) => {
-            return {
-              号码: item.mobile,
-              真实号码: item.realMobile
-            }
-          })
-          this.dialogOpportunityVisible = false
-        })
     },
     // 提交新建任务表单
     async submitCreateForm () {

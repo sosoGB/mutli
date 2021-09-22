@@ -50,10 +50,10 @@ export default {
           inactiveIcon: require('@/assets/image/sidebar_opportunity.png'),
           hidden: isPartial,
           children: [
-            {
-              name: '呼叫策略管理',
-              route: '/main/callManage/callStrategy',
-            },
+            // {
+            //   name: '呼叫策略管理',
+            //   route: '/main/callManage/callStrategy',
+            // },
             {
               name: '呼叫任务管理',
               route: '/main/callManage/callTask',

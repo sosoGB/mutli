@@ -479,18 +479,25 @@ export default {
         robotName: [
           { required: true, message: '请选择机器人名称', trigger: 'blur' }
         ],
-        concurrentNum
-          : [
-            {
-              validator: (rule, value, callback) => {
-                if (!value) {
+        concurrentNum: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
                   callback(new Error('请输入总并发数量'))
-                }
-                else {
-                  callback()
+              }else {
+                this.$request.jsonPost('/sdmulti/task/checkConcurrentNum', {
+                    concurrentNum: this.createFormData.concurrentNum,
+                    serviceIds: this.createFormData.outCallPlatformId,
+             })
+        .then((res) => {
+          if (res.code === '0' && res.data === false) {
+            callback(new Error(res.message))
+          }else{
+            callback()
+          }
+        })
                 }
               },
-              trigger: 'blur'
             }
           ],
         recallInterval: [
@@ -599,17 +606,17 @@ export default {
     }
   },
   watch: {
-    'createFormData.concurrentNum': {
-      handler () {
-        if (this.timer) {
-          clearTimeout(this.timer)
-        }
-        this.timer = setTimeout(() => {
-          this.checkConcurrentNum();
-        }, 1500)
-      },
-      deep: true
-    },
+    // 'createFormData.concurrentNum': {
+    //   handler () {
+    //     if (this.timer) {
+    //       clearTimeout(this.timer)
+    //     }
+    //     this.timer = setTimeout(() => {
+    //       this.checkConcurrentNum();
+    //     }, 2500)
+    //   },
+    //   deep: true
+    // },
     // 导入公用型变量
     'createFormData.importComVar' (files) {
       if (!files || !files.length) return
