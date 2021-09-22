@@ -83,7 +83,7 @@
               </el-time-select>
             </div>
           </div>
-          <span>允许呼叫时段：</span>
+          <!-- <span>允许呼叫时段：</span>
           <div class="allowTime">
             <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
                  start: '08:00',
@@ -115,7 +115,7 @@
             <el-button type="danger" size="mini" icon="el-icon-delete" @click.prevent="removeDomain(domain)"></el-button>
           </div>
 
-          <span>为避免打扰用户休息，系统强制默认外呼时间为08:00-12:00,14:00-21:00，请在该时间段内设置</span>
+          <span>为避免打扰用户休息，系统强制默认外呼时间为08:00-12:00,14:00-21:00，请在该时间段内设置</span> -->
         </div>
       </el-form-item>
       <el-form-item prop="callSingle" label="呼叫去重：">
