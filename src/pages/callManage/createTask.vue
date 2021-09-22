@@ -86,16 +86,16 @@
           <span>允许呼叫时段：</span>
           <div class="allowTime">
             <el-time-select v-model="allowstartTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                 start: '07:55',
+                 start: '08:00',
                 step: '00:10',
-                end: '22:05'
-              }" placeholder="选择时间">
+                end: '22:00'
+              }" placeholder="开始时间(含)">
             </el-time-select>
             <el-time-select v-model="allowendTime" popper-class="startTimer" @focus="handleStartTimeFocus" :picker-options="{
-                 start: '07:55',
+                 start: '08:00',
                 step: '00:10',
-                end: '22:05'
-              }" placeholder="选择时间">
+                end: '22:00'
+              }" placeholder="结束时间(含)">
             </el-time-select>
             <el-button type="primary" size="mini" icon="el-icon-plus" @click.prevent="addDomain"></el-button>
           </div>

@@ -164,11 +164,11 @@
               popper-class="startTimer"
               @focus="handleStartTimeFocus"
               :picker-options="{
-                start: '07:55',
+                start: '08:00',
                 step: '00:10',
-                end: '22:05',
+                end: '22:00',
               }"
-              placeholder="选择时间"
+              placeholder="开始时间(含)"
             >
             </el-time-select>
             <el-time-select
@@ -176,11 +176,11 @@
               popper-class="startTimer"
               @focus="handleStartTimeFocus"
               :picker-options="{
-                start: '07:55',
+                start: '08:00',
                 step: '00:10',
-                end: '22:05',
+                end: '22:00',
               }"
-              placeholder="选择时间"
+              placeholder="结束时间(含)"
             >
             </el-time-select>
             <el-button
