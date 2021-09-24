@@ -9,43 +9,163 @@
     </div>
     <div class="toolbar">
       <div class="tool-search">
-        <el-input placeholder="请输入任务名称" class="search-component search-input" v-model.trim="search.planName" @keyup.enter.native="fetchTaskList(1)" clearable></el-input>
-        <el-select v-model="search.taskStatus" placeholder="请选择任务状态" clearable class="search-component search-input">
-          <el-option v-for="(value, key) in taskStatusList" :key="key" :label="value.statusName" :value="key"></el-option>
+        <el-input
+          placeholder="请输入任务名称"
+          class="search-component search-input"
+          v-model.trim="search.planName"
+          @keyup.enter.native="fetchTaskList(1)"
+          clearable
+        ></el-input>
+        <el-select
+          v-model="search.taskStatus"
+          placeholder="请选择任务状态"
+          clearable
+          class="search-component search-input"
+        >
+          <el-option
+            v-for="(value, key) in taskStatusList"
+            :key="key"
+            :label="value.statusName"
+            :value="key"
+          ></el-option>
         </el-select>
-        <el-date-picker v-model="search.beginDate" class="search-component search-input" type="date" placeholder="开始日期" value-format="yyyy-MM-dd" :picker-options="beginDateValidator('search', 'endDate')" clearable></el-date-picker>
+        <el-date-picker
+          v-model="search.beginDate"
+          class="search-component search-input"
+          type="date"
+          placeholder="开始日期"
+          value-format="yyyy-MM-dd"
+          :picker-options="beginDateValidator('search', 'endDate')"
+          clearable
+        ></el-date-picker>
         <span class="search-delimiter">-</span>
-        <el-date-picker v-model="search.endDate" class="search-component search-input" type="date" placeholder="结束日期" value-format="yyyy-MM-dd" :picker-options="endDateValidator('search', 'beginDate')" clearable></el-date-picker>
-        <el-select v-model="search.robotName" placeholder="请选择机器人名称" clearable class="search-component search-input">
-          <el-option v-for="(item,index) in robotList" :key="index" :label="item" :value="item"></el-option>
+        <el-date-picker
+          v-model="search.endDate"
+          class="search-component search-input"
+          type="date"
+          placeholder="结束日期"
+          value-format="yyyy-MM-dd"
+          :picker-options="endDateValidator('search', 'beginDate')"
+          clearable
+        ></el-date-picker>
+        <el-select
+          v-model="search.robotName"
+          placeholder="请选择机器人名称"
+          clearable
+          class="search-component search-input"
+        >
+          <el-option
+            v-for="(item,index) in robotList"
+            :key="index"
+            :label="item"
+            :value="item"
+          ></el-option>
         </el-select>
-        <el-button type="primary" class="search-component" @click="fetchTaskList(1)">搜索</el-button>
+        <el-button
+          type="primary"
+          class="search-component"
+          @click="fetchTaskList(1)"
+        >搜索</el-button>
       </div>
       <div class="tool-button">
-        <el-button @click="$router.push('createTask')" icon="el-icon-plus">新建任务</el-button>
+        <el-button
+          @click="$router.push('createTask')"
+          icon="el-icon-plus"
+        >新建任务</el-button>
       </div>
     </div>
 
     <div class="table">
-      <el-table :data="planList" height="100%" border stripe tooltip-effect="dark" v-loading="isLoadingPlanList" @selection-change="(val) => (checkedTableRow = val)">
-        <el-table-column type="selection" fixed="left" align="center" width="55"></el-table-column>
-        <el-table-column label="序号" align="center" type="index" width="55">
+      <el-table
+        :data="planList"
+        height="100%"
+        border
+        stripe
+        tooltip-effect="dark"
+        v-loading="isLoadingPlanList"
+        @selection-change="(val) => (checkedTableRow = val)"
+      >
+        <el-table-column
+          type="selection"
+          fixed="left"
+          align="center"
+          width="55"
+        ></el-table-column>
+        <el-table-column
+          label="序号"
+          align="center"
+          type="index"
+          width="55"
+        >
         </el-table-column>
-        <el-table-column show-overflow-tooltip prop="name" label="任务名称" width="160" align="center"></el-table-column>
-        <el-table-column show-overflow-tooltip prop="robotName" label="机器人名称" min-width="200" align="center"></el-table-column>
-        <el-table-column show-overflow-tooltip prop="concurrentNum" label="并发数量" min-width="200" align="center"></el-table-column>
-        <el-table-column show-overflow-tooltip prop="calls" label="外呼平台" min-width="200" align="center"></el-table-column>
-        <el-table-column label="任务状态" width="140" align="center">
+        <el-table-column
+          show-overflow-tooltip
+          prop="name"
+          label="任务名称"
+          width="160"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          prop="robotName"
+          label="机器人名称"
+          min-width="200"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          prop="concurrentNum"
+          label="并发数量"
+          min-width="200"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          prop="calls"
+          label="外呼平台"
+          min-width="200"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="任务状态"
+          width="140"
+          align="center"
+        >
           <template slot-scope="scope">
-            <span class="icon-status" :class="scope.row.statusClass">{{
+            <span
+              class="icon-status"
+              :class="scope.row.statusClass"
+            >{{
               scope.row.statusName
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column show-overflow-tooltip prop="phoneCt" label="号码总数" width="160" align="center"></el-table-column>
-        <el-table-column show-overflow-tooltip prop="finishNum" label="已呼数量" width="160" align="center"></el-table-column>
-        <el-table-column show-overflow-tooltip prop="successNum" label="接通数量" width="160" align="center"></el-table-column>
-        <el-table-column label="接通率" width="100" align="center">
+        <el-table-column
+          show-overflow-tooltip
+          prop="phoneCt"
+          label="号码总数"
+          width="160"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          prop="finishNum"
+          label="已呼数量"
+          width="160"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          prop="successNum"
+          label="接通数量"
+          width="160"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          label="接通率"
+          width="100"
+          align="center"
+        >
           <template slot-scope="scope">
             <span>{{
               scope.row.finishNum
@@ -56,36 +176,62 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="定时启动时间" width="180" align="center">
+        <el-table-column
+          label="定时启动时间"
+          width="180"
+          align="center"
+        >
           <template slot-scope="scope">
             <span>{{
               scope.row.taskTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="开始时间" width="180" align="center">
+        <el-table-column
+          label="开始时间"
+          width="180"
+          align="center"
+        >
           <template slot-scope="scope">
             <span>{{
               scope.row.beginTime 
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="结束时间" width="180" align="center">
+        <el-table-column
+          label="结束时间"
+          width="180"
+          align="center"
+        >
           <template slot-scope="scope">
             <span>{{
               scope.row.endTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="280" fixed="right" align="center">
+        <el-table-column
+          label="操作"
+          width="280"
+          fixed="right"
+          align="center"
+        >
           <template slot-scope="scope">
-            <el-button v-if="
+            <el-button
+              v-if="
                   scope.row.status === 0 ||
                   scope.row.status === 3 ||
                   scope.row.status === 4
-              " @click="handleRun(scope.row.id,scope.row.status)">启动</el-button>
-            <el-button v-else-if="scope.row.status === 1" @click="handlePause(scope.row.id,scope.row.status)">暂停</el-button>
-            <el-button v-else-if="scope.row.status === 2" disabled>完成</el-button>
+              "
+              @click="handleRun(scope.row.id,scope.row.status)"
+            >启动</el-button>
+            <el-button
+              v-else-if="scope.row.status === 1"
+              @click="handlePause(scope.row.id,scope.row.status)"
+            >暂停</el-button>
+            <el-button
+              v-else-if="scope.row.status === 2"
+              disabled
+            >完成</el-button>
             <el-button @click="handleExport(scope.row.id)">下载</el-button>
           </template>
         </el-table-column>
@@ -93,29 +239,88 @@
     </div>
 
     <div class="pagination">
-      <el-pagination background @current-change="fetchTaskList" @size-change="fetchTaskList" :page-size.sync="pagination.pageSize" :page-sizes="[10, 20, 50]" :current-page.sync="pagination.currentPage" layout="prev, pager, next, sizes, jumper" :total="pagination.total"></el-pagination>
+      <el-pagination
+        background
+        @current-change="fetchTaskList"
+        @size-change="fetchTaskList"
+        :page-size.sync="pagination.pageSize"
+        :page-sizes="[10, 20, 50]"
+        :current-page.sync="pagination.currentPage"
+        layout="prev, pager, next, sizes, jumper"
+        :total="pagination.total"
+      ></el-pagination>
     </div>
 
-    <el-dialog title="编辑任务" :visible.sync="dialogEditVisible" @close="$refs.editForm.resetFields()" class="ddd">
-      <el-form :model="editFormData" ref="editForm" :rules="editFormRule" label-width="150px">
-        <el-form-item prop="planName" label="任务名称：">
-          <el-input disabled v-model.trim="editFormData.planName" placeholder="请输入任务名称" class="input-large"></el-input>
+    <el-dialog
+      title="编辑任务"
+      :visible.sync="dialogEditVisible"
+      @close="$refs.editForm.resetFields()"
+      class="ddd"
+    >
+      <el-form
+        :model="editFormData"
+        ref="editForm"
+        :rules="editFormRule"
+        label-width="150px"
+      >
+        <el-form-item
+          prop="planName"
+          label="任务名称："
+        >
+          <el-input
+            disabled
+            v-model.trim="editFormData.planName"
+            placeholder="请输入任务名称"
+            class="input-large"
+          ></el-input>
         </el-form-item>
-        <el-form-item prop="robotName" label="机器人名称：">
-          <el-select disabled v-model="editFormData.robotName" placeholder="请选择机器人名称" class="input-large">
-            <el-option v-for="(item,index) in robotList" :key="index" :label="item" :value="item"></el-option>
+        <el-form-item
+          prop="robotName"
+          label="机器人名称："
+        >
+          <el-select
+            disabled
+            v-model="editFormData.robotName"
+            placeholder="请选择机器人名称"
+            class="input-large"
+          >
+            <el-option
+              v-for="(item,index) in robotList"
+              :key="index"
+              :label="item"
+              :value="item"
+            ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="activeNumber" label="线路选取：">
-          <flow-select :options="activeNumberList" popperClass="selectmulti" labelField="lineId" placeholder="请选择线路" v-model="editFormData.activeNumber" class="flow-sel" width="420" @visibleChange="selectToggleDown"></flow-select>
+        <el-form-item
+          prop="activeNumber"
+          label="线路选取："
+        >
+          <flow-select
+            :options="activeNumberList"
+            popperClass="selectmulti"
+            labelField="lineId"
+            placeholder="请选择线路"
+            v-model="editFormData.activeNumber"
+            class="flow-sel"
+            width="420"
+            @visibleChange="selectToggleDown"
+          ></flow-select>
         </el-form-item>
       </el-form>
       <span slot="footer">
         <el-button @click="dialogEditVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitEditForm">确定</el-button>
+        <el-button
+          type="primary"
+          @click="submitEditForm"
+        >确定</el-button>
       </span>
     </el-dialog>
-    <progress-pop :close-on-click-modal="false" :dialog-visible.sync="dialogVisible" :is-finished="progerssFinish"></progress-pop>
+    <progress-pop
+      :close-on-click-modal="false"
+      :dialog-visible.sync="dialogVisible"
+      :is-finished="progerssFinish"
+    ></progress-pop>
   </div>
 </template>
 <script>
@@ -410,7 +615,7 @@ export default {
           taskId: this.search.taskId
         })
         .then((res) => {
-         
+
           if (!res.data) {
             if (res.message) {
               this.$message.error('获取任务列表失败-' + res.message)
@@ -430,8 +635,8 @@ export default {
           })
           this.pagination.total = res.data.total
         })
-         .finally(() => {
-             this.isLoadingPlanList = false
+        .finally(() => {
+          this.isLoadingPlanList = false
         })
     },
     // 查询机器人列表

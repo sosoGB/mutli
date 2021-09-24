@@ -9,116 +9,339 @@
     </div>
     <div class="toolbar">
       <div class="tool-search">
-        <el-input placeholder="客户批次" class="search-component search-input" v-model.trim="search.batch" @keyup.enter.native="fetchTaskList(1)" clearable></el-input>
-        <el-date-picker v-model="search.startTime" class="search-component search-input" type="date" placeholder="开始时间" value-format="yyyy-MM-dd" :picker-options="beginUpdateValidator" clearable></el-date-picker>
+        <el-input
+          placeholder="客户批次"
+          class="search-component search-input"
+          v-model.trim="search.batch"
+          @keyup.enter.native="fetchTaskList(1)"
+          clearable
+        ></el-input>
+        <el-date-picker
+          v-model="search.startTime"
+          class="search-component search-input"
+          type="date"
+          placeholder="开始时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="beginUpdateValidator"
+          clearable
+        ></el-date-picker>
         <span class="search-delimiter">-</span>
-        <el-date-picker v-model="search.endTime" class="search-component search-input" type="date" placeholder="结束时间" value-format="yyyy-MM-dd" :picker-options="endUpdateValidator" clearable></el-date-picker>
-        <el-button type="primary" class="search-component" @click="
+        <el-date-picker
+          v-model="search.endTime"
+          class="search-component search-input"
+          type="date"
+          placeholder="结束时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="endUpdateValidator"
+          clearable
+        ></el-date-picker>
+        <el-button
+          type="primary"
+          class="search-component"
+          @click="
             () => {
               pagination.currentPage = 1
               queryList()
             }
-          ">搜索</el-button>
-        <span class="toggle-advanced" @click="showMoreSearch = !showMoreSearch">{{ showMoreSearch ? '取消' : '高级搜索' }}</span>
+          "
+        >搜索</el-button>
+        <span
+          class="toggle-advanced"
+          @click="showMoreSearch = !showMoreSearch"
+        >{{ showMoreSearch ? '取消' : '高级搜索' }}</span>
       </div>
       <div class="tool-button">
-        <el-button @click="toCreateTask" icon="el-icon-plus">新建任务</el-button>
+        <el-button
+          @click="toCreateTask"
+          icon="el-icon-plus"
+        >新建任务</el-button>
       </div>
     </div>
-    <div v-show="showMoreSearch" class="toolbar-advanced">
+    <div
+      v-show="showMoreSearch"
+      class="toolbar-advanced"
+    >
       <div class="advanced-item">
         <span class="advanced-label">客户种类：</span>
-        <el-select v-model="search.customerType" placeholder="请选择客户类型" clearable class="advanced-input">
-          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
-          <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
+        <el-select
+          v-model="search.customerType"
+          placeholder="请选择客户类型"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            label="水滴医疗险"
+            value="水滴医疗险"
+          ></el-option>
+          <el-option
+            label="水滴公众号吸粉"
+            value="水滴公众号吸粉"
+          ></el-option>
+          <el-option
+            label="水滴长险意向"
+            value="水滴长险意向"
+          ></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">是否已创建外呼任务：</span>
-        <el-select v-model="search.isCall" placeholder="请选择" clearable class="advanced-input">
-          <el-option label="是" :value="1"></el-option>
-          <el-option label="否" :value="0"></el-option>
+        <el-select
+          v-model="search.isCall"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            label="是"
+            :value="1"
+          ></el-option>
+          <el-option
+            label="否"
+            :value="0"
+          ></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">当批是否为新客户：</span>
-        <el-select placeholder="请选择" clearable v-model="search.isNewCus" class="advanced-input">
-          <el-option label="是" :value="2"></el-option>
-          <el-option label="否" :value="1"></el-option>
+        <el-select
+          placeholder="请选择"
+          clearable
+          v-model="search.isNewCus"
+          class="advanced-input"
+        >
+          <el-option
+            label="是"
+            :value="2"
+          ></el-option>
+          <el-option
+            label="否"
+            :value="1"
+          ></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">性别：</span>
-        <el-select v-model="search.sex" placeholder="请选择性别" clearable class="advanced-input" multiple>
-          <el-option label="男" :value="1"></el-option>
-          <el-option label="女" :value="0"></el-option>
-          <el-option label="未知" :value="-1"></el-option>
+        <el-select
+          v-model="search.sex"
+          placeholder="请选择性别"
+          clearable
+          class="advanced-input"
+          multiple
+        >
+          <el-option
+            label="男"
+            :value="1"
+          ></el-option>
+          <el-option
+            label="女"
+            :value="0"
+          ></el-option>
+          <el-option
+            label="未知"
+            :value="-1"
+          ></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">年龄：</span>
-        <el-input v-number placeholder="最小值(含)" v-model="search.minAge" class="advanced-input input_small" @keyup.enter.native="
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.minAge"
+          class="advanced-input input_small"
+          @keyup.enter.native="
             () => {
               pagination.currentPage = 1
               queryList()
             }
-          " clearable></el-input>
+          "
+          clearable
+        ></el-input>
         <span class="delimiter">-</span>
-        <el-input v-number placeholder="最大值(含)" v-model="search.maxAge" class="advanced-input input_small" @keyup.enter.native="
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.maxAge"
+          class="advanced-input input_small"
+          @keyup.enter.native="
             () => {
               pagination.currentPage = 1
               queryList()
             }
-          " clearable></el-input>
+          "
+          clearable
+        ></el-input>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">是否已成功转化：</span>
-        <el-select v-model="search.isSuccess" placeholder="请选择" clearable class="advanced-input">
-          <el-option label="是" :value="2"></el-option>
-          <el-option label="否" :value="1"></el-option>
+        <el-select
+          v-model="search.isSuccess"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            label="是"
+            :value="2"
+          ></el-option>
+          <el-option
+            label="否"
+            :value="1"
+          ></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">姓名是否为空：</span>
-        <el-select v-model="search.isName" placeholder="请选择" clearable class="advanced-input">
-          <el-option label="是" :value="1"></el-option>
-          <el-option label="否" :value="0"></el-option>
+        <el-select
+          v-model="search.isName"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            label="是"
+            :value="1"
+          ></el-option>
+          <el-option
+            label="否"
+            :value="0"
+          ></el-option>
         </el-select>
       </div>
     </div>
     <div class="table">
-      <el-table :data="customerList" ref="table" stripe height="100%" border tooltip-effect="dark" v-loading="isLoading" @select="handleSingleSelect" @select-all="handleAllSelect">
-        <el-table-column type="selection" fixed="left" align="center" width="55"></el-table-column>
-        <el-table-column label="序号" align="center" type="index" :resizable="false" width="70">
+      <el-table
+        :data="customerList"
+        ref="table"
+        stripe
+        height="100%"
+        border
+        tooltip-effect="dark"
+        v-loading="isLoading"
+        @select="handleSingleSelect"
+        @select-all="handleAllSelect"
+      >
+        <el-table-column
+          type="selection"
+          fixed="left"
+          align="center"
+          width="55"
+        ></el-table-column>
+        <el-table-column
+          label="序号"
+          align="center"
+          type="index"
+          :resizable="false"
+          width="70"
+        >
         </el-table-column>
-        <el-table-column :resizable="false" prop="batch" label="客户批次" width="120" align="center"></el-table-column>
-        <el-table-column :resizable="false" prop="type" label="客户种类" width="120" align="center">
+        <el-table-column
+          :resizable="false"
+          prop="batch"
+          label="客户批次"
+          width="120"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="type"
+          label="客户种类"
+          width="120"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column :resizable="false" label="录入时间" width="110" align="center">
+        <el-table-column
+          :resizable="false"
+          label="录入时间"
+          width="110"
+          align="center"
+        >
           <template slot-scope="scope">
             <span>{{
               scope.row.createTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column :resizable="false" prop="initCt" label="入库前获取的客户总数量" width="180" align="center">
+        <el-table-column
+          :resizable="false"
+          prop="initCt"
+          label="入库前获取的客户总数量"
+          width="180"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column :resizable="false" prop="distCt" label="实际入库的客户总数量" width="180" align="center">
+        <el-table-column
+          :resizable="false"
+          prop="distCt"
+          label="实际入库的客户总数量"
+          width="180"
+          align="center"
+        >
         </el-table-column>
-        <el-table-column :resizable="false" prop="newCt" label="实际入库的新客户数量" width="180" align="center"></el-table-column>
-        <el-table-column :resizable="false" prop="callCt" label="已创建呼叫任务的客户数量" width="190" align="center" show-overflow-tooltip></el-table-column>
-        <el-table-column :resizable="false" prop="successCt" label="已成功转化的客户数量" width="180" align="center"></el-table-column>
-        <el-table-column :resizable="false" prop="successCt" label="转化后取消的客户数量" width="180" align="center"></el-table-column>
-        <el-table-column :resizable="false" label="操作" min-width="240" fixed="right" align="center">
+        <el-table-column
+          :resizable="false"
+          prop="newCt"
+          label="实际入库的新客户数量"
+          width="180"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="callCt"
+          label="已创建呼叫任务的客户数量"
+          width="190"
+          align="center"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="successCt"
+          label="已成功转化的客户数量"
+          width="180"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="cancel"
+          label="转化后取消的客户数量"
+          width="180"
+          align="center"
+        >
+          <template slot-scope="">
+            <span>0</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :resizable="false"
+          label="操作"
+          min-width="240"
+          fixed="right"
+          align="center"
+        >
           <template slot-scope="scope">
-            <el-button @click="ctDownload(scope.row)" :disabled="isDownLoad">{{scope.row.isDownLoad ? '正在下载' : '客户下载'}}</el-button>
+            <el-button
+              @click="ctDownload(scope.row)"
+              :disabled="isDownLoad"
+            >{{scope.row.isDownLoad ? '正在下载' : '客户下载'}}</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <div class="pagination">
-      <el-checkbox v-model="isSelectAll" @change="toggleSelectAll">结果页全选</el-checkbox>
-      <el-pagination background @current-change="queryList" @size-change="queryList" :page-size.sync="pagination.pageSize" :page-sizes="[10, 20, 50]" :current-page.sync="pagination.currentPage" layout="prev, pager, next, sizes, jumper" :total="pagination.total"></el-pagination>
+      <el-checkbox
+        v-model="isSelectAll"
+        @change="toggleSelectAll"
+      >结果页全选</el-checkbox>
+      <el-pagination
+        background
+        @current-change="queryList"
+        @size-change="queryList"
+        :page-size.sync="pagination.pageSize"
+        :page-sizes="[10, 20, 50]"
+        :current-page.sync="pagination.currentPage"
+        layout="prev, pager, next, sizes, jumper"
+        :total="pagination.total"
+      ></el-pagination>
     </div>
   </div>
 </template>
@@ -133,7 +356,6 @@ export default {
       isDownLoad: false,//是否在下载
       authExport: false,
       userInfo: this.$store.state.userInfo,
-      detailPages: ['customerInfo', 'followRecords'], //当前页面能跳转的子页面的name数组
       tableShow: [], //控制表格列显示
       searchShow: [], //控制筛选显示
       isSelectAll: false, //是否全选列表结果
@@ -372,7 +594,7 @@ export default {
           }
         })
         .finally(() => {
-            this.isLoading = false
+          this.isLoading = false
         })
     }
   }
