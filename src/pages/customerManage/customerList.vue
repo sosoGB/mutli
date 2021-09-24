@@ -356,6 +356,7 @@ export default {
       isDownLoad: false,//是否在下载
       authExport: false,
       userInfo: this.$store.state.userInfo,
+      detailPages: ['customerInfo', 'followRecords'], //当前页面能跳转的子页面的name数组
       tableShow: [], //控制表格列显示
       searchShow: [], //控制筛选显示
       isSelectAll: false, //是否全选列表结果
