@@ -3,7 +3,9 @@
     <!-- 面包屑导航 -->
     <div class="nav">
       <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }"
+          >首页</el-breadcrumb-item
+        >
         <el-breadcrumb-item>客户批次管理</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -44,23 +46,21 @@
               queryList()
             }
           "
-        >搜索</el-button>
+          >搜索</el-button
+        >
         <span
           class="toggle-advanced"
           @click="showMoreSearch = !showMoreSearch"
-        >{{ showMoreSearch ? '取消' : '高级搜索' }}</span>
+          >{{ showMoreSearch ? '取消' : '高级搜索' }}</span
+        >
       </div>
       <div class="tool-button">
-        <el-button
-          @click="toCreateTask"
-          icon="el-icon-plus"
-        >新建任务</el-button>
+        <el-button @click="toCreateTask" icon="el-icon-plus"
+          >新建任务</el-button
+        >
       </div>
     </div>
-    <div
-      v-show="showMoreSearch"
-      class="toolbar-advanced"
-    >
+    <div v-show="showMoreSearch" class="toolbar-advanced">
       <div class="advanced-item">
         <span class="advanced-label">客户种类：</span>
         <el-select
@@ -69,18 +69,9 @@
           clearable
           class="advanced-input"
         >
-          <el-option
-            label="水滴医疗险"
-            value="水滴医疗险"
-          ></el-option>
-          <el-option
-            label="水滴公众号吸粉"
-            value="水滴公众号吸粉"
-          ></el-option>
-          <el-option
-            label="水滴长险意向"
-            value="水滴长险意向"
-          ></el-option>
+          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
+          <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
+          <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -91,14 +82,8 @@
           clearable
           class="advanced-input"
         >
-          <el-option
-            label="是"
-            :value="1"
-          ></el-option>
-          <el-option
-            label="否"
-            :value="0"
-          ></el-option>
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -109,14 +94,8 @@
           v-model="search.isNewCus"
           class="advanced-input"
         >
-          <el-option
-            label="是"
-            :value="2"
-          ></el-option>
-          <el-option
-            label="否"
-            :value="1"
-          ></el-option>
+          <el-option label="是" :value="2"></el-option>
+          <el-option label="否" :value="1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -128,18 +107,9 @@
           class="advanced-input"
           multiple
         >
-          <el-option
-            label="男"
-            :value="1"
-          ></el-option>
-          <el-option
-            label="女"
-            :value="0"
-          ></el-option>
-          <el-option
-            label="未知"
-            :value="-1"
-          ></el-option>
+          <el-option label="男" :value="1"></el-option>
+          <el-option label="女" :value="0"></el-option>
+          <el-option label="未知" :value="-1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -180,14 +150,8 @@
           clearable
           class="advanced-input"
         >
-          <el-option
-            label="是"
-            :value="2"
-          ></el-option>
-          <el-option
-            label="否"
-            :value="1"
-          ></el-option>
+          <el-option label="是" :value="2"></el-option>
+          <el-option label="否" :value="1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -198,14 +162,8 @@
           clearable
           class="advanced-input"
         >
-          <el-option
-            label="是"
-            :value="1"
-          ></el-option>
-          <el-option
-            label="否"
-            :value="0"
-          ></el-option>
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
         </el-select>
       </div>
     </div>
@@ -319,19 +277,17 @@
           align="center"
         >
           <template slot-scope="scope">
-            <el-button
-              @click="ctDownload(scope.row)"
-              :disabled="isDownLoad"
-            >{{scope.row.isDownLoad ? '正在下载' : '客户下载'}}</el-button>
+            <el-button @click="ctDownload(scope.row)" :disabled="isDownLoad">{{
+              scope.row.isDownLoad ? '正在下载' : '客户下载'
+            }}</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
     <div class="pagination">
-      <el-checkbox
-        v-model="isSelectAll"
-        @change="toggleSelectAll"
-      >结果页全选</el-checkbox>
+      <!-- <el-checkbox v-model="isSelectAll" @change="toggleSelectAll"
+        >结果页全选</el-checkbox
+      > -->
       <el-pagination
         background
         @current-change="queryList"
@@ -351,9 +307,9 @@ import filter from '@/service/filter.js'
 import keepAlive from '@/utils/mixins/keepAlive.js' //用于从详情页返回列表页仍然返回之前页面
 export default {
   mixins: [keepAlive],
-  data () {
+  data() {
     return {
-      isDownLoad: false,//是否在下载
+      isDownLoad: false, //是否在下载
       authExport: false,
       userInfo: this.$store.state.userInfo,
       detailPages: ['customerInfo', 'followRecords'], //当前页面能跳转的子页面的name数组
@@ -371,11 +327,11 @@ export default {
         customerType: null, //客户种类
         isCall: null, //是否已创建外呼任务
         isNewCus: null, //是否为新客户
-        sex: null, //性别
+        sex: [], //性别
         minAge: null, //年龄最小值
         maxAge: null, //年龄最大值
-        isSuccess: null,//是否已成功转化
-        isName: null,//名字是否为空
+        isSuccess: null, //是否已成功转化
+        isName: null //名字是否为空
       },
       pagination: {
         pageSize: 10,
@@ -394,7 +350,7 @@ export default {
           return (
             (this.search.lastFollowBeginTime &&
               filter.formatDate(current, 'yyyy-MM-dd') <
-              this.search.lastFollowBeginTime) ||
+                this.search.lastFollowBeginTime) ||
             Date.now() < current
           )
         }
@@ -405,24 +361,23 @@ export default {
       endUpdateValidator: {
         disabledDate: (current) => {
           return (
-            (this.search.startTime &&
-              filter.formatDate(current, 'yyyy-MM-dd') <
-              this.search.startTime)
+            this.search.startTime &&
+            filter.formatDate(current, 'yyyy-MM-dd') < this.search.startTime
           )
         }
       }
     }
   },
-  created () {
+  created() {
     this.queryList()
   },
-  activated () {
+  activated() {
     //重新进入缓存页面的钩子
     this.queryList()
   },
   methods: {
     // 表格单个行状态切换
-    handleSingleSelect (selection, row) {
+    handleSingleSelect(selection, row) {
       const repeatIndex = this.checkedTableRow.findIndex((item) => {
         return item.row.id === row.id
       })
@@ -440,7 +395,7 @@ export default {
       })
     },
     // 手动勾选全选
-    handleAllSelect (selection) {
+    handleAllSelect(selection) {
       if (this.isSelectAll && selection.length !== 0) {
         selection.forEach((item) => {
           const repeatIndex = this.checkedTableRow.findIndex((repeatItem) => {
@@ -481,44 +436,51 @@ export default {
       }
     },
     // 结果页全选事件
-    toggleSelectAll (val) {
+    toggleSelectAll(val) {
       this.checkedTableRow = []
       this.$refs.table.clearSelection()
       if (val) {
         this.$refs.table.toggleAllSelection()
       }
     },
-    // 查询结果下载 
-    async ctDownload (row) {
+    // 查询结果下载
+    async ctDownload(row) {
       const { userId, uuid, type } = row
       row.isDownLoad = true
       if (!this.isDownLoad) {
         this.isDownLoad = true
         this.$message.warning('客户信息包含内容较多，下载时间较长，请见谅！')
-        const res = await this.$request.xml('/sdmulti/qbzz/manage/api/download', {
-          userId,
-          uuid,
-          type,
-          batch: this.search.batch,
-          startTime: this.search.startTime || null,
-          endTime: this.search.endTime || null,
-          isCall: Number(this.search.isCall) || null,
-          isNewCus: Number(this.search.isNewCus) || null,
-          sex: this.search.sex.map(Number) || null,
-          minAge: Number(this.search.minAge) || null,
-          maxAge: Number(this.search.maxAge) || null,
-          isSuccess: Number(this.search.isSuccess) || null,
-        })
-        const a = document.createElement("a");
-        a.download = '客户批次查询结果.xls';
-        a.href = URL.createObjectURL(res);
+        const sex = this.search.sex.map(Number)
+        if (sex.includes(0)) {
+          sex.push(2)
+        }
+        const res = await this.$request.xml(
+          '/sdmulti/qbzz/manage/api/download',
+          {
+            userId,
+            uuid,
+            type,
+            batch: this.search.batch,
+            startTime: this.search.startTime || null,
+            endTime: this.search.endTime || null,
+            isCall: Number(this.search.isCall) || null,
+            isNewCus: Number(this.search.isNewCus) || null,
+            sex: sex,
+            minAge: Number(this.search.minAge) || null,
+            maxAge: Number(this.search.maxAge) || null,
+            isSuccess: Number(this.search.isSuccess) || null
+          }
+        )
+        const a = document.createElement('a')
+        a.download = '客户批次查询结果.xls'
+        a.href = URL.createObjectURL(res)
         a.click()
         this.isDownLoad = false
         row.isDownLoad = false
       }
     },
     //跳转新建任务
-    toCreateTask () {
+    toCreateTask() {
       if (!this.isSelectAll) {
         if (!this.isSelectAll && this.checkedTableRow.length === 0) {
           this.$message.warning('请选择客户批次')
@@ -526,7 +488,9 @@ export default {
         }
       }
       // 判断勾选的类型是否相同
-      const result = this.checkedTableRow.every(el => el.row.type === this.checkedTableRow[0].row.type)
+      const result = this.checkedTableRow.every(
+        (el) => el.row.type === this.checkedTableRow[0].row.type
+      )
       if (!result) {
         this.$message.warning('只可针对同一客户种类新建外呼任务，请重新选择！')
         return
@@ -539,59 +503,68 @@ export default {
       })
     },
     // 查询列表
-    queryList () {
+    queryList() {
       if (
-        new Date(this.search.endTime) -
-        new Date(this.search.startTime) >
+        new Date(this.search.endTime) - new Date(this.search.startTime) >
         31 * 24 * 3600 * 1000
       ) {
         this.$message.warning('日期跨度不得超过31天')
         return
       }
       this.isLoading = true
-      this.$request.jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
-        userId: this.$store.state.userInfo.id,
-        batch: this.search.batch || null,
-        startTime: this.search.startTime ? this.search.startTime + ' 00:00:00' : null,
-        endTime: this.search.endTime ? this.search.endTime + ' 23:59:59' : null,
-        type: this.search.customerType,
-        isCall: this.search.isCall,
-        isNewCus: this.search.isNewCus,
-        sex: this.search.sex,
-        minAge: this.search.minAge,
-        maxAge: this.search.maxAge,
-        isSuccess: this.search.isSuccess,
-        isName: this.search.isName,
-        page: this.pagination.currentPage,
-        pageSize: this.pagination.pageSize
-      })
+      this.checkedTableRow = []
+      const sex = this.search.sex.map(Number)
+      if (sex.includes(0)) {
+        sex.push(2)
+      }
+      this.$request
+        .jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
+          userId: this.$store.state.userInfo.id,
+          batch: this.search.batch || null,
+          startTime: this.search.startTime
+            ? this.search.startTime + ' 00:00:00'
+            : null,
+          endTime: this.search.endTime
+            ? this.search.endTime + ' 23:59:59'
+            : null,
+          type: this.search.customerType,
+          isCall: this.search.isCall,
+          isNewCus: this.search.isNewCus,
+          sex: sex,
+          minAge: this.search.minAge,
+          maxAge: this.search.maxAge,
+          isSuccess: this.search.isSuccess,
+          isName: this.search.isName,
+          page: this.pagination.currentPage,
+          pageSize: this.pagination.pageSize
+        })
         .then((res) => {
           this.isLoading = false
           this.showMoreSearch = false
           if (res.code == 0) {
             this.customerList = res.data ? res.data.list : []
             this.pagination.total = res.data ? res.data.total : 0
-            if (this.checkedTableRow.length !== 0) {
-              this.$nextTick(() => {
-                const checkedRow = this.checkedTableRow.filter((item) => {
-                  return item.page === this.pagination.currentPage
-                })
-                if (this.isSelectAll) {
-                  this.customerList.forEach((item) => {
-                    this.$refs.table.toggleRowSelection(item)
-                  })
-                }
-                checkedRow.forEach((item) => {
-                  this.$refs.table.toggleRowSelection(
-                    this.customerList[item.index]
-                  )
-                })
-              })
-            } else if (this.isSelectAll) {
-              this.$nextTick(() => {
-                this.$refs.table.toggleAllSelection(true)
-              })
-            }
+            // if (this.checkedTableRow.length !== 0) {
+            //   this.$nextTick(() => {
+            //     const checkedRow = this.checkedTableRow.filter((item) => {
+            //       return item.page === this.pagination.currentPage
+            //     })
+            //     if (this.isSelectAll) {
+            //       this.customerList.forEach((item) => {
+            //         this.$refs.table.toggleRowSelection(item)
+            //       })
+            //     }
+            //     checkedRow.forEach((item) => {
+            //       this.$refs.table.toggleRowSelection(
+            //         this.customerList[item.index]
+            //       )
+            //     })
+            //   })
+            // if (this.isSelectAll) {
+            //   this.$nextTick(() => {
+            //     this.$refs.table.toggleAllSelection(true)
+            //   })
+            // }
           }
         })
         .finally(() => {
@@ -602,14 +575,15 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-@import "@/assets/css/common.scss";
+@import '@/assets/css/common.scss';
 .customerList {
   .tool-search {
     flex: 1;
   }
   .pagination {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
+    flex-direction: row;
     align-items: center;
   }
   .toolbar-advanced {
