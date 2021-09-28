@@ -106,7 +106,6 @@ export default {
         percentNums.push(Math.ceil(Math.random() * 100))
       }
       percentNums.sort((a, b) => b - a)
-      console.log(percentNums)
       return percentNums
     },
     handleClose () {
