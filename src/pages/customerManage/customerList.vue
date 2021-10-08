@@ -499,7 +499,10 @@ export default {
         return
       }
       const pagination = this.pagination
-      const search = this.search
+      const search = { ...this.search }
+      if (!search.sex.length) {
+        search.sex = null
+      }
       this.$router.push({
         path: 'createTask',
         query: { name: this.checkedTableRow, search, pagination }
