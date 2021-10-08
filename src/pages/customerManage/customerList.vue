@@ -327,7 +327,7 @@ export default {
         customerType: null, //客户种类
         isCall: null, //是否已创建外呼任务
         isNewCus: null, //是否为新客户
-        sex: [], //性别
+        sex: null, //性别
         minAge: null, //年龄最小值
         maxAge: null, //年龄最大值
         isSuccess: null, //是否已成功转化
@@ -450,9 +450,12 @@ export default {
       if (!this.isDownLoad) {
         this.isDownLoad = true
         this.$message.warning('客户信息包含内容较多，下载时间较长，请见谅！')
-        const sex = this.search.sex.map(Number)
-        if (sex.includes(0)) {
-          sex.push(2)
+        let sex = null
+        if (this.search.sex && this.search.sex.length) {
+          sex = this.search.sex.map(Number)
+          if (sex.includes(0)) {
+            sex.push(2)
+          }
         }
         const res = await this.$request.xml(
           '/sdmulti/qbzz/manage/api/download',
@@ -513,9 +516,12 @@ export default {
       }
       this.isLoading = true
       this.checkedTableRow = []
-      const sex = this.search.sex.map(Number)
-      if (sex.includes(0)) {
-        sex.push(2)
+      let sex = null
+      if (this.search.sex && this.search.sex.length) {
+        sex = this.search.sex.map(Number)
+        if (sex.includes(0)) {
+          sex.push(2)
+        }
       }
       this.$request
         .jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
