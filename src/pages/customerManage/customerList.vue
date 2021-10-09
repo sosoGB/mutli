@@ -466,13 +466,32 @@ export default {
             batch: this.search.batch,
             startTime: this.search.startTime || null,
             endTime: this.search.endTime || null,
-            isCall: Number(this.search.isCall) || null,
-            isNewCus: Number(this.search.isNewCus) || null,
+            isCall: this.search.isCall,
+            isNewCus: this.search.isNewCus,
             sex: sex,
-            minAge: Number(this.search.minAge) || null,
-            maxAge: Number(this.search.maxAge) || null,
-            isSuccess: Number(this.search.isSuccess) || null,
+            minAge: this.search.minAge,
+            maxAge: this.search.maxAge,
+            isSuccess: this.search.isSuccess,
             isName: this.search.isName
+
+            //   userId: this.$store.state.userInfo.id,
+            // batch: this.search.batch || null,
+            // startTime: this.search.startTime
+            //   ? this.search.startTime + ' 00:00:00'
+            //   : null,
+            // endTime: this.search.endTime
+            //   ? this.search.endTime + ' 23:59:59'
+            //   : null,
+            // type: this.search.customerType,
+            // isCall: this.search.isCall,
+            // isNewCus: this.search.isNewCus,
+            // sex: sex,
+            // minAge: this.search.minAge,
+            // maxAge: this.search.maxAge,
+            // isSuccess: this.search.isSuccess,
+            // isName: this.search.isName,
+            // page: this.pagination.currentPage,
+            // pageSize: this.pagination.pageSize
           }
         )
         const a = document.createElement('a')
