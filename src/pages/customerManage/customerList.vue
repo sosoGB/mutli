@@ -464,8 +464,12 @@ export default {
             uuid,
             type,
             batch: this.search.batch,
-            startTime: this.search.startTime || null,
-            endTime: this.search.endTime || null,
+            startTime: this.search.startTime
+              ? this.search.startTime + ' 00:00:00'
+              : null,
+            endTime: this.search.endTime
+              ? this.search.endTime + ' 23:59:59'
+              : null,
             isCall: this.search.isCall,
             isNewCus: this.search.isNewCus,
             sex: sex,
