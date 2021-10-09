@@ -471,7 +471,8 @@ export default {
             sex: sex,
             minAge: Number(this.search.minAge) || null,
             maxAge: Number(this.search.maxAge) || null,
-            isSuccess: Number(this.search.isSuccess) || null
+            isSuccess: Number(this.search.isSuccess) || null,
+            isName: this.search.isName
           }
         )
         const a = document.createElement('a')
