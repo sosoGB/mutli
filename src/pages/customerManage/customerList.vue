@@ -94,7 +94,7 @@
           v-model="search.isNewCus"
           class="advanced-input"
         >
-          <el-option label="是" :value="2"></el-option>
+          <el-option label="是" :value="0"></el-option>
           <el-option label="否" :value="1"></el-option>
         </el-select>
       </div>
