@@ -914,6 +914,14 @@ export default {
               return Promise.reject([])
             }
           })
+          .catch((err) => {
+            this.$alert(err.response.data.message || '系统错误', '错误提示', {
+              confirmButtonText: '确定',
+              callback: () => {
+                this.$router.replace('/main/callManage/callTask')
+              }
+            })
+          })
           .finally(() => {
             loading.close()
           })

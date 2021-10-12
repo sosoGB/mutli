@@ -4,7 +4,9 @@
     <div class="nav">
       <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item :to="{ path: '/main' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/main/callManage/callTask' }">呼叫任务管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/main/callManage/callTask' }"
+          >呼叫任务管理</el-breadcrumb-item
+        >
         <el-breadcrumb-item>新建任务</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -14,10 +16,7 @@
       :rules="createFormRule"
       label-width="150px"
     >
-      <el-form-item
-        prop="name"
-        label="任务名称："
-      >
+      <el-form-item prop="name" label="任务名称：">
         <el-input
           v-model.trim="createFormData.name"
           placeholder="请输入任务名称"
@@ -25,10 +24,7 @@
           class="input-name"
         ></el-input>
       </el-form-item>
-      <el-form-item
-        prop="customerType"
-        label="客户种类："
-      >
+      <el-form-item prop="customerType" label="客户种类：">
         <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.customerType"
@@ -37,10 +33,7 @@
             filterable
             clearable
           >
-            <el-option
-              label="水滴医疗险"
-              value="水滴医疗险"
-            ></el-option>
+            <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
             <el-option
               label="水滴公众号吸粉"
               value="水滴公众号吸粉"
@@ -64,7 +57,7 @@
             clearable
           >
             <el-option
-              v-for="(item,index) in cusList"
+              v-for="(item, index) in cusList"
               :key="index"
               :label="item.batch"
               :value="item.id"
@@ -72,10 +65,7 @@
           </el-select>
         </div>
       </el-form-item>
-      <el-form-item
-        prop="robotId"
-        label="机器人名称："
-      >
+      <el-form-item prop="robotId" label="机器人名称：">
         <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.robotId"
@@ -85,7 +75,7 @@
             clearable
           >
             <el-option
-              v-for="(item,index) in robotList"
+              v-for="(item, index) in robotList"
               :key="index"
               :label="item"
               :value="item"
@@ -94,14 +84,11 @@
           <el-button
             @click="handleDownload(createFormData.robotId)"
             type="primary"
-          >下载机器人变量模板</el-button>
+            >下载机器人变量模板</el-button
+          >
         </div>
       </el-form-item>
-      <el-form-item
-        prop=""
-        label="外呼平台："
-        v-if="createFormData.robotId"
-      >
+      <el-form-item prop="" label="外呼平台：" v-if="createFormData.robotId">
         <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.outCallPlatformId"
@@ -120,34 +107,26 @@
           </el-select>
         </div>
       </el-form-item>
-      <el-form-item
-        prop="importComVar"
-        label="共用型变量："
-      >
+      <el-form-item prop="importComVar" label="共用型变量：">
         <div class="input-large form-item_upload">
           <file-uploader
             class="form-uploader"
             :uploaded.sync="createFormData.importComVar"
           ></file-uploader>
-          <el-button
-            @click="handleDownloadTemplate(1)"
-            type="primary"
-          >下载模板</el-button>
+          <el-button @click="handleDownloadTemplate(1)" type="primary"
+            >下载模板</el-button
+          >
         </div>
       </el-form-item>
-      <el-form-item
-        prop="importRelVar"
-        label="关系型变量："
-      >
+      <el-form-item prop="importRelVar" label="关系型变量：">
         <div class="input-large form-item_upload">
           <file-uploader
             class="form-uploader"
             :uploaded.sync="createFormData.importRelVar"
           ></file-uploader>
-          <el-button
-            @click="handleDownloadTemplate(2)"
-            type="primary"
-          >下载模板</el-button>
+          <el-button @click="handleDownloadTemplate(2)" type="primary"
+            >下载模板</el-button
+          >
         </div>
       </el-form-item>
       <el-form-item
@@ -161,18 +140,14 @@
             type="primary"
             size="mini"
             v-show="!varResult"
-          >{{checkVar?'校验中...':'变量校验'}}</el-button>
-          <el-button
-            type="success"
-            size="mini"
-            v-show="varResult"
-          >校验成功</el-button>
+            >{{ checkVar ? '校验中...' : '变量校验' }}</el-button
+          >
+          <el-button type="success" size="mini" v-show="varResult"
+            >校验成功</el-button
+          >
         </div>
       </el-form-item>
-      <el-form-item
-        prop="concurrentNum"
-        label="总并发数量："
-      >
+      <el-form-item prop="concurrentNum" label="总并发数量：">
         <el-input
           v-model.trim="createFormData.concurrentNum"
           placeholder=""
@@ -180,10 +155,7 @@
           class="input-name"
         ></el-input>
       </el-form-item>
-      <el-form-item
-        prop="type"
-        label="外呼启动方式："
-      >
+      <el-form-item prop="type" label="外呼启动方式：">
         <el-radio-group v-model="createFormData.type">
           <el-radio :label="0">定时启动</el-radio>
           <el-radio :label="1">立即启动</el-radio>
@@ -207,10 +179,10 @@
                 popper-class="startTimer"
                 @focus="handleStartTimeFocus"
                 :picker-options="{
-                start: '08:00',
-                step: '00:10',
-                end: '20:50'
-              }"
+                  start: '08:00',
+                  step: '00:10',
+                  end: '20:50'
+                }"
                 placeholder="选择时间"
               >
               </el-time-select>
@@ -251,19 +223,13 @@
           <span>为避免打扰用户休息，系统强制默认外呼时间为08:00-12:00,14:00-21:00，请在该时间段内设置</span> -->
         </div>
       </el-form-item>
-      <el-form-item
-        prop="callSingle"
-        label="呼叫去重："
-      >
+      <el-form-item prop="callSingle" label="呼叫去重：">
         <el-radio-group v-model="createFormData.callSingle">
           <el-radio :label="1">是</el-radio>
           <el-radio :label="0">否</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item
-        prop="recallFlag"
-        label="自动失败重呼："
-      >
+      <el-form-item prop="recallFlag" label="自动失败重呼：">
         <el-radio-group v-model="createFormData.recallFlag">
           <el-radio :label="1">是</el-radio>
           <el-radio :label="0">否</el-radio>
@@ -287,7 +253,8 @@
               v-for="item in recallResultList"
               :label="item.key"
               :key="item.key"
-            >{{ item.label }}</el-checkbox>
+              >{{ item.label }}</el-checkbox
+            >
           </el-checkbox-group>
           <el-form-item
             label-width="70px"
@@ -303,11 +270,7 @@
             ></el-input-number>
             <span class="form-suffix">分钟</span>
           </el-form-item>
-          <el-form-item
-            label-width="70px"
-            prop="recallMaxNum"
-            label="重呼次数"
-          >
+          <el-form-item label-width="70px" prop="recallMaxNum" label="重呼次数">
             <el-input-number
               v-model="createFormData.recallMaxNum"
               :min="1"
@@ -319,10 +282,7 @@
           </el-form-item>
         </div>
       </el-form-item>
-      <el-form-item
-        prop="conversionFlag"
-        label="转化失败重呼："
-      >
+      <el-form-item prop="conversionFlag" label="转化失败重呼：">
         <el-radio-group v-model="createFormData.conversionFlag">
           <el-radio :label="1">是</el-radio>
           <el-radio :label="0">否</el-radio>
@@ -364,23 +324,26 @@
                 <el-radio :label="0">否</el-radio>
               </el-radio-group>
             </el-form-item>
-            <div v-show="createFormData.jietongFlag"><span class="form-prefix">选择通话结果</span>
+            <div v-show="createFormData.jietongFlag">
+              <span class="form-prefix">选择通话结果</span>
               <span
                 class="clickable"
                 @click="handleCheckAllCallConversionResult(createFormData)"
               >
                 {{
-                createFormData.recallResult.length === conversionResultList.length
-                  ? '全部取消'
-                  : '全选'
-              }}
+                  createFormData.recallResult.length ===
+                  conversionResultList.length
+                    ? '全部取消'
+                    : '全选'
+                }}
               </span>
               <el-checkbox-group v-model="createFormData.recallResult">
                 <el-checkbox
                   v-for="item in conversionResultList"
                   :label="item.key"
                   :key="item.key"
-                >{{ item.label }}</el-checkbox>
+                  >{{ item.label }}</el-checkbox
+                >
               </el-checkbox-group>
               <el-form-item
                 label-width="70px"
@@ -411,17 +374,12 @@
                 <span class="form-suffix">次</span>
               </el-form-item>
             </div>
-
           </div>
-
         </div>
       </el-form-item>
     </el-form>
     <el-row class="bottom">
-      <el-button
-        type="primary"
-        @click="submitCreateForm"
-      >确定</el-button>
+      <el-button type="primary" @click="submitCreateForm">确定</el-button>
       <el-button @click="backtrack">取消</el-button>
     </el-row>
     <progress-pop
@@ -441,21 +399,21 @@ export default {
     FileUploader,
     ProgressPop
   },
-  data () {
+  data() {
     return {
       ulCom: '',
       ulRel: '',
       unionVO: {},
       customerInfoVOs: null,
-      checkVar: '',//是否在校验
-      varResult: null,//校验结果
-      allowstartTime: '',//允许开始时间
-      allowendTime: '',//允许结束时间
+      checkVar: '', //是否在校验
+      varResult: null, //校验结果
+      allowstartTime: '', //允许开始时间
+      allowendTime: '', //允许结束时间
       errorNum: 0, //错误号码数量
       jsons: [], //文件导入之后的数据
       robotList: [], // 可选机器人列表
       cusList: [], // 可选批次列表
-      OutCallPlatformList: [],//可选外呼平台列表
+      OutCallPlatformList: [], //可选外呼平台列表
       activeNumberList: [], // 可选线路
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
@@ -491,16 +449,16 @@ export default {
       ], // 可选通话结果
       createFormData: {
         name: null, // 任务名称
-        customerType: null,//客户种类
+        customerType: null, //客户种类
         customerId: null, //客户批次id
         robotId: null, // 机器人名称
         outCallPlatformId: [], // 外呼平台名称
-        concurrentNum: null,//并发数量
+        concurrentNum: null, //并发数量
         activeNumber: null, // 线路
         importMethod: 'file', // 导入方式
         importFile: [], // 文件导入
-        importComVar: [],//共用型变量导入
-        importRelVar: [],//关系型变量导入
+        importComVar: [], //共用型变量导入
+        importRelVar: [], //关系型变量导入
         customerList: [], // 用户列表
         callSingle: 1, // 呼叫去重
         recallFlag: 0, // 自动失败重呼
@@ -511,7 +469,7 @@ export default {
         startDate: null, // 启动日期
         startTime: null, // 启动时间
         conversionFlag: 0, // 转化失败重呼
-        jietongFlag: 0, // 接通失败重呼
+        jietongFlag: 0 // 接通失败重呼
       },
       // 新建任务表单项
       createFormRule: {
@@ -555,20 +513,18 @@ export default {
             trigger: 'blur'
           }
         ],
-        concurrentNum
-          : [
-            {
-              validator: (rule, value, callback) => {
-                if (!value) {
-                  callback(new Error('请输入总并发数量'))
-                }
-                else {
-                  callback()
-                }
-              },
-              trigger: 'blur'
-            }
-          ],
+        concurrentNum: [
+          {
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback(new Error('请输入总并发数量'))
+              } else {
+                callback()
+              }
+            },
+            trigger: 'blur'
+          }
+        ],
         conversionInterval: [
           {
             validator: (rule, value, callback) => {
@@ -644,26 +600,28 @@ export default {
       allowTime: [],
       allowTimes: [],
       dynamicValidateForm: {
-        domains: [{
-          value: ''
-        }]
+        domains: [
+          {
+            value: ''
+          }
+        ]
       }
     }
   },
   watch: {
     'createFormData.concurrentNum': {
-      handler () {
+      handler() {
         if (this.timer) {
           clearTimeout(this.timer)
         }
         this.timer = setTimeout(() => {
-          this.checkConcurrentNum();
+          this.checkConcurrentNum()
         }, 1500)
       },
       deep: true
     },
     // 导入公用型变量
-    'createFormData.importComVar' (files) {
+    'createFormData.importComVar'(files) {
       if (!files || !files.length) return
       if (!this.validateFile(files[0])) {
         this.createFormData.importComVar = []
@@ -672,17 +630,16 @@ export default {
       this.ulCom = files[0]
     },
     // 导入关系型变量
-    'createFormData.importRelVar' (files) {
+    'createFormData.importRelVar'(files) {
       if (!files || !files.length) return
       if (!this.validateFile(files[0])) {
         this.createFormData.importRelVar = []
         return
       }
       this.ulRel = files[0]
-
     },
     // 上传文件后，提交解析
-    'createFormData.importFile' (files) {
+    'createFormData.importFile'(files) {
       if (!files || !files.length) return
       if (!this.createFormData.robotId) {
         this.$message.warning('请先选择机器人名称')
@@ -710,14 +667,14 @@ export default {
           this.createFormData.importFile = []
         }
       )
-    },
+    }
   },
-  created () {
+  created() {
     this.fetchRobotList()
     this.fetchCusList()
   },
   methods: {
-    testFile (file) {
+    testFile(file) {
       let param = new FormData()
       const config = {
         headers: {
@@ -746,33 +703,33 @@ export default {
           loading.close()
         })
     },
-    removeDomain (item) {
+    removeDomain(item) {
       var index = this.allowTime.indexOf(item)
       if (index !== -1) {
         this.allowTime.splice(index, 1)
         this.allowTimes.splice(index, 1)
       }
     },
-    addDomain () {
+    addDomain() {
       if (!this.allowstartTime || !this.allowendTime) {
         this.$message.warning('请选择正确的时间添加')
         return
       }
       this.allowTimes.push(
-        this.allowstartTime + ':00-' + this.allowendTime + ':00',
+        this.allowstartTime + ':00-' + this.allowendTime + ':00'
       )
       this.allowTime.push({
         allowstartTime: this.allowstartTime,
-        allowendTime: this.allowendTime,
+        allowendTime: this.allowendTime
       })
       this.allowstartTime = ''
       this.allowendTime = ''
     },
     // 选择外呼平台
-    handleChangePlat (select) {
+    handleChangePlat(select) {
       if (select) {
         let platforms = []
-        select.forEach(item => {
+        select.forEach((item) => {
           let plat = this.OutCallPlatformList.find((list) => {
             return list.id === item
           })
@@ -786,7 +743,7 @@ export default {
       }
     },
     // 变量校验
-    handleCheckVar () {
+    handleCheckVar() {
       if (!this.createFormData.robotId) {
         this.$message.warning('请先选择机器人名称')
         return
@@ -825,11 +782,11 @@ export default {
       }
     },
     // 校验并发数
-    checkConcurrentNum () {
+    checkConcurrentNum() {
       this.$request
         .jsonPost('/sdmulti/task/checkConcurrentNum', {
           concurrentNum: this.createFormData.concurrentNum,
-          serviceIds: this.createFormData.outCallPlatformId,
+          serviceIds: this.createFormData.outCallPlatformId
         })
         .then((res) => {
           if (res.code === '0' && res.data === false) {
@@ -838,15 +795,13 @@ export default {
         })
     },
     // 查询机器人列表
-    fetchRobotList () {
-      this.$request
-        .jsonGet('/sdmulti/task/getRobotNames')
-        .then((res) => {
-          this.robotList = res.data
-        })
+    fetchRobotList() {
+      this.$request.jsonGet('/sdmulti/task/getRobotNames').then((res) => {
+        this.robotList = res.data
+      })
     },
     // 查询客户批次列表
-    fetchCusList () {
+    fetchCusList() {
       this.$request
         .jsonPost('/sdmulti/qbzz/manage/api/queryAllCus', {
           userId: this.$store.state.userInfo.id,
@@ -857,7 +812,7 @@ export default {
         })
     },
     // 根据机器人名称查询外呼平台列表
-    fetchOutCallPlatformList () {
+    fetchOutCallPlatformList() {
       this.$request
         .formGet('/sdmulti/task/getService', {
           robotName: this.createFormData.robotId
@@ -867,19 +822,19 @@ export default {
         })
     },
     // 切换机器人名称
-    handleChangeRobotId () {
+    handleChangeRobotId() {
       this.createFormData.outCallPlatformId = []
       this.fetchOutCallPlatformList()
     },
     // 选择客户类型后查询客户批次
-    handleChangeCustomerType () {
+    handleChangeCustomerType() {
       this.createFormData.customerId = []
       this.fetchCusList()
     },
     // 切换批次
-    handleChangeCustomer (list) {
+    handleChangeCustomer(list) {
       let customerInfos = []
-      list.forEach(cusId => {
+      list.forEach((cusId) => {
         let item = this.cusList.find((item) => {
           return item.id === cusId
         })
@@ -893,7 +848,7 @@ export default {
       this.unionVO.customerInfos = this.customerInfoVOs
     },
     // 切换多选框全选按钮
-    toggleSelectAll (target, list, field) {
+    toggleSelectAll(target, list, field) {
       let newTarget = [],
         length = target.length
       if (!target || length !== list.length) {
@@ -902,7 +857,7 @@ export default {
       target.splice(0, length, ...newTarget)
     },
     // 全选/取消全选通话结果
-    handleCheckAllCallResult (formData) {
+    handleCheckAllCallResult(formData) {
       if (formData.recallResult.length === this.recallResultList.length) {
         formData.recallResult = []
       } else {
@@ -910,15 +865,17 @@ export default {
       }
     },
     // 全选/取消全选通话结果
-    handleCheckAllCallConversionResult (formData) {
+    handleCheckAllCallConversionResult(formData) {
       if (formData.recallResult.length === this.conversionResultList.length) {
         formData.recallResult = []
       } else {
-        formData.recallResult = this.conversionResultList.map((item) => item.key)
+        formData.recallResult = this.conversionResultList.map(
+          (item) => item.key
+        )
       }
     },
     // 验证文件可用性
-    validateFile (file) {
+    validateFile(file) {
       if (file.size > 1024 * 1024 * 5) {
         this.$message.error('文件不得超过5M')
         return false
@@ -926,7 +883,7 @@ export default {
       return true
     },
     // 解析已上传文件 -- isOpportunity：是否商机名单
-    transpileFile (file, robotId, isOpportunity) {
+    transpileFile(file, robotId, isOpportunity) {
       let param = new FormData()
       const config = {
         headers: {
@@ -965,34 +922,32 @@ export default {
         })
     },
     // 点击下载机器人变量模板
-    async handleDownload (robotId) {
+    async handleDownload(robotId) {
       if (!robotId) {
         this.$message.warning('请先选择机器人名称')
         return
       }
       let robotName = this.createFormData.robotId
-      const res = await this.$request.xmlGet(`sdmulti/task/variable/down/${robotName}`)
-      const a = document.createElement("a");
+      const res = await this.$request.xmlGet(
+        `sdmulti/task/variable/down/${robotName}`
+      )
+      const a = document.createElement('a')
       a.download = robotName + '-机器人模板.xls'
-      a.href = URL.createObjectURL(res);
-      a.click();
+      a.href = URL.createObjectURL(res)
+      a.click()
     },
 
     // 点击下载模板 --isOpportunity：是否商机名单 /task/template/down/{type}
-    async handleDownloadTemplate (id) {
+    async handleDownloadTemplate(id) {
       let a = document.createElement('a')
-      let res = await this.$request.xmlGet(
-        `/sdmulti/task/template/down/${id}`
-      )
-      const endStr = id === 1
-        ? '共用型变量.xls'
-        : '关系型变量.xls'
+      let res = await this.$request.xmlGet(`/sdmulti/task/template/down/${id}`)
+      const endStr = id === 1 ? '共用型变量.xls' : '关系型变量.xls'
       a.download = endStr
       a.href = URL.createObjectURL(res)
       a.click()
     },
     // 提交新建任务表单
-    async submitCreateForm () {
+    async submitCreateForm() {
       this.$refs.createForm.validate(async (isValid) => {
         if (!isValid) {
           this.$message.error('请填写必填字段')
@@ -1012,10 +967,7 @@ export default {
           this.createFormData.startTime +
           ':00'
         const timeSeconds = new Date(taskTime).getTime()
-        if (
-          this.createFormData.type === 0 &&
-          timeSeconds < Date.now()
-        ) {
+        if (this.createFormData.type === 0 && timeSeconds < Date.now()) {
           this.$message.error('启动时间不能早于当前时间')
           return
         }
@@ -1029,7 +981,7 @@ export default {
           type: this.createFormData.type,
           taskTime: this.createFormData.type === 0 ? taskTime : null,
           allowTime: this.allowTimes,
-          callSingle: this.createFormData.callSingle == 1 ? true : false,//呼叫去重
+          callSingle: this.createFormData.callSingle == 1 ? true : false, //呼叫去重
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
           customerInfoVOs: this.customerInfoVOs
@@ -1055,14 +1007,22 @@ export default {
         })
         const url = '/sdmulti/task/save'
         return this.$request
-          .jsonPost(url, param).then((res) => {
+          .jsonPost(url, param)
+          .then((res) => {
             if (res.code === '0') {
               this.$message.success('新增任务成功')
               this.$router.replace('/main/callManage/callTask')
-            }
-            else {
+            } else {
               return Promise.reject([])
             }
+          })
+          .catch((err) => {
+            this.$alert(err.response.data.message || '系统错误', '错误提示', {
+              confirmButtonText: '确定',
+              callback: () => {
+                this.$router.replace('/main/callManage/callTask')
+              }
+            })
           })
           .finally(() => {
             loading.close()
@@ -1070,11 +1030,11 @@ export default {
       })
     },
     // 返回任务列表页
-    backtrack () {
+    backtrack() {
       this.$router.replace('callTask')
     },
     // 任务启动时间focus事件
-    handleStartTimeFocus () {
+    handleStartTimeFocus() {
       this.$nextTick(() => {
         const items = document
           .querySelector('.startTimer')
@@ -1091,7 +1051,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/css/common.scss";
+@import '@/assets/css/common.scss';
 .createTask {
   height: 100%;
   padding: 15px 0;
