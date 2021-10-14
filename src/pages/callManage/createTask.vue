@@ -475,7 +475,7 @@ export default {
       createFormRule: {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
-          { max: 20, message: '不得超过20个字符', trigger: 'blur' }
+          { max: 40, message: '不得超过40个字符', trigger: 'blur' }
         ],
         customerType: [
           { required: true, message: '请选择客户种类', trigger: 'blur' }
