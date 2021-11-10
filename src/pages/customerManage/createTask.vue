@@ -26,37 +26,30 @@
           class="input-name"
         ></el-input>
       </el-form-item>
-      <el-form-item prop="selectCtNum" label="已选客户数量：">
-        <span>{{ selectCtNum }}</span>
+      <el-form-item label="外呼客户数量：" prop="customerNum">
+        <span>共{{ selectCtNum }},从第</span>
+        <el-input
+          type="number"
+          size="small"
+          :min="1"
+          :max="selectCtNum"
+          @input="checkLastNum"
+          v-model="createFormData.customerNum"
+          style="width:80px;"
+        ></el-input>
+        <span>-第</span>
+        <el-input
+          type="number"
+          size="small"
+          :min="1"
+          :max="selectCtNum"
+          @input="lastNumOnInput"
+          v-model="createFormData.customerNum2"
+          style="width:80px;"
+        ></el-input>
+        <span>个进行选取</span>
       </el-form-item>
-      <el-form-item prop="robotName" label="机器人名称：">
-        <div class="input-large form-item_upload">
-          <el-select
-            v-model="createFormData.robotName"
-            @change="handleChangeRobotName"
-            placeholder="请选择机器人名称"
-            filterable
-            clearable
-          >
-            <el-option
-              v-for="(item, index) in robotList"
-              :key="index"
-              :label="item"
-              :value="item"
-            ></el-option>
-          </el-select>
-          <el-button
-            @click="handleDownload(createFormData.robotName)"
-            type="primary"
-            >下载机器人变量模板</el-button
-          >
-        </div>
-      </el-form-item>
-      <el-form-item
-        prop="outCallPlatformId"
-        label="外呼平台："
-        v-if="createFormData.robotName"
-      >
+      <el-form-item prop="outCallPlatformId" label="外呼平台：">
         <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.outCallPlatformId"
@@ -74,6 +67,33 @@
           </el-select>
         </div>
       </el-form-item>
+      <el-form-item
+        prop="robotName"
+        label="机器人名称："
+        v-if="createFormData.outCallPlatformId.length"
+      >
+        <div class="input-large form-item_upload">
+          <el-select
+            v-model="createFormData.robotName"
+            placeholder="请选择机器人名称"
+            filterable
+            clearable
+          >
+            <el-option
+              v-for="item in robotList"
+              :key="item.id"
+              :label="item.showName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+          <el-button
+            @click="handleDownload(createFormData.robotName)"
+            type="primary"
+            >下载机器人变量模板</el-button
+          >
+        </div>
+      </el-form-item>
+
       <el-form-item prop="importComVar" label="共用型变量：">
         <div class="input-large form-item_upload">
           <file-uploader
@@ -123,6 +143,71 @@
           class="input-name"
         ></el-input>
       </el-form-item>
+      <el-form-item prop="weeks" label="外呼周期：">
+        <el-checkbox-group
+          v-model="createFormData.weeks"
+          style="display:inline-block;"
+        >
+          <el-checkbox
+            v-for="item in dateList"
+            :label="item.value"
+            :key="item.value"
+            style="width:80px;"
+            >{{ item.name }}</el-checkbox
+          >
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item prop="times" label="外呼时间段：">
+        <div style="font-size:12px;color:#999;">
+          请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
+        </div>
+        <div
+          v-for="(item, index) in createFormData.times"
+          :key="index"
+          style="margin-bottom:10px;"
+        >
+          <el-time-select
+            placeholder="起始时间"
+            v-model="item.startTime"
+            :clearable="false"
+            :picker-options="{
+              start: '00:00',
+              step: '00:10',
+              end: '23:50'
+            }"
+          >
+          </el-time-select>
+          <span>-</span>
+          <el-time-select
+            placeholder="结束时间"
+            v-model="item.endTime"
+            :clearable="false"
+            :picker-options="{
+              start: '00:10',
+              step: '00:10',
+              end: '24:00',
+              minTime: item.startTime
+            }"
+          >
+          </el-time-select>
+          <el-button
+            v-if="index == 0"
+            icon="el-icon-plus"
+            type="primary"
+            @click="addTimeRange"
+            size="mini"
+            style="margin-left:20px;"
+          ></el-button>
+          <el-button
+            v-else
+            icon="el-icon-minus"
+            type="danger"
+            @click="deleteTimeRange(index)"
+            style="margin-left:20px;"
+            size="mini"
+          ></el-button>
+        </div>
+      </el-form-item>
       <el-form-item prop="type" label="外呼启动方式：">
         <el-radio-group v-model="createFormData.type">
           <el-radio :label="0">定时启动</el-radio>
@@ -145,59 +230,24 @@
               <el-time-select
                 v-model="createFormData.startTime"
                 popper-class="startTimer"
-                @focus="handleStartTimeFocus"
                 :picker-options="{
                   start: '08:00',
                   step: '00:10',
-                  end: '20:50'
+                  end: '22:00'
                 }"
                 placeholder="选择时间"
               >
               </el-time-select>
             </div>
           </div>
-
-          <!-- <span>允许呼叫时段：</span>
-          <div class="allowTime">
-            <el-time-select
-              v-model="allowstartTime"
-              popper-class="startTimer"
-              @focus="handleStartTimeFocus"
-              :picker-options="{
-                start: '08:00',
-                step: '00:10',
-                end: '22:00',
-              }"
-              placeholder="开始时间(含)"
-            >
-            </el-time-select>
-            <el-time-select
-              v-model="allowendTime"
-              popper-class="startTimer"
-              @focus="handleStartTimeFocus"
-              :picker-options="{
-                start: '08:00',
-                step: '00:10',
-                end: '22:00',
-              }"
-              placeholder="结束时间(含)"
-            >
-            </el-time-select>
-            <el-button
-              type="primary"
-              size="mini"
-              icon="el-icon-plus"
-              @click.prevent="addDomain"
-            ></el-button>
-          </div> -->
           <div class="allowTime" v-for="domain in allowTime" :key="domain.key">
             <el-time-select
               v-model="domain.allowstartTime"
               popper-class="startTimer"
               :picker-options="{
-                start: '07:55',
+                start: '08:00',
                 step: '00:10',
-                end: '22:05'
+                end: '22:00'
               }"
               placeholder="选择时间"
             >
@@ -205,7 +255,6 @@
             <el-time-select
               v-model="domain.allowendTime"
               popper-class="startTimer"
-              @focus="handleStartTimeFocus"
               :picker-options="{
                 start: '07:55',
                 step: '00:10',
@@ -301,11 +350,10 @@
             <el-time-select
               v-model="createFormData.startTime"
               popper-class="startTimer"
-              @focus="handleStartTimeFocus"
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '20:50'
+                end: '22:00'
               }"
               placeholder="选择时间"
             >
@@ -446,7 +494,18 @@ export default {
         { label: '用户未响应', key: '22' },
         { label: '其他', key: '7,11,14,15,16,19,20,21' }
       ], // 可选通话结果
+      dateList: [
+        { name: '星期一', value: 0 },
+        { name: '星期二', value: 1 },
+        { name: '星期三', value: 2 },
+        { name: '星期四', value: 3 },
+        { name: '星期五', value: 4 },
+        { name: '星期六', value: 5 },
+        { name: '星期日', value: 6 }
+      ],
       createFormData: {
+        customerNum: 1,
+        customerNum2: '',
         name: null, // 任务名称
         robotName: null, // 机器人名称
         outCallPlatformId: [], // 外呼平台名称
@@ -465,13 +524,58 @@ export default {
         startDate: null, // 启动日期
         startTime: null, // 启动时间
         conversionFlag: 0, // 转化失败重呼
-        jietongFlag: 0 // 接通失败重呼
+        jietongFlag: 0, // 接通失败重呼
+        weeks: [0, 1, 2, 3, 4, 5, 6],
+        times: [{ startTime: '08:00', endTime: '22:00' }]
       }, // 新建任务表单项
       createFormRule: {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
           { max: 40, message: '不得超过40个字符', trigger: 'blur' }
         ],
+        customerNum: [
+          {
+            required: true,
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback(new Error('请输入外呼客户数量'))
+              } else if (value > this.selectCtNum) {
+                callback(new Error('输入值不可大于最大客户数量'))
+              } else {
+                callback()
+              }
+            }
+          }
+        ],
+        times: [
+          {
+            validator: (rule, value, callback) => {
+              value.forEach((e, index) => {
+                if (!e.startTime || !e.endTime) {
+                  callback(new Error('请输入完整的外呼时段'))
+                }
+                if (e.startTime > e.endTime) {
+                  callback(new Error('同组外呼时段结束时间不能早于开始时间'))
+                }
+                for (let i = index + 1; i < value.length; i++) {
+                  const element = value[i]
+                  let flag =
+                    (element.startTime >= e.startTime &&
+                      element.startTime <= e.endTime) ||
+                    (element.endTime >= e.startTime &&
+                      element.endTime <= e.endTime)
+                  if (flag) {
+                    callback(new Error('外呼时段存在重复区间，请修改'))
+                  }
+                }
+              })
+              callback()
+            }
+          }
+        ],
+        // weeks: [
+        //   { required: true, message: '请选择允许的外呼周期', trigger: 'change' }
+        // ],
         robotName: [
           { required: true, message: '请选择机器人名称', trigger: 'blur' }
         ],
@@ -680,9 +784,46 @@ export default {
     this.selectCtNum = numList.reduce(function(prev, cur) {
       return prev + cur
     })
-    this.fetchRobotList()
+    this.createFormData.customerNum2 = this.selectCtNum
+    // this.fetchRobotList()
+    this.fetchPlatFormList()
   },
   methods: {
+    lastNumOnInput(e) {
+      if (!isNaN(parseInt(e)) && e > this.selectCtNum) {
+        this.createFormData.customerNum2 = this.selectCtNum
+      }
+      if (!isNaN(parseInt(e)) && e < this.createFormData.customerNum) {
+        this.createFormData.customerNum2 = this.createFormData.customerNum
+      }
+      this.varResult = null
+    },
+    checkLastNum(e) {
+      if (
+        !isNaN(parseInt(e)) &&
+        this.createFormData.customerNum2 < parseInt(e) &&
+        parseInt(e) <= this.selectCtNum
+      ) {
+        this.createFormData.customerNum2 = parseInt(e)
+      }
+      if (!isNaN(parseInt(e)) && parseInt(e) < 1) {
+        this.createFormData.customerNum = 1
+      }
+      if (!isNaN(parseInt(e)) && parseInt(e) > this.selectCtNum) {
+        this.createFormData.customerNum = this.selectCtNum
+      }
+      this.varResult = null
+    },
+    addTimeRange() {
+      if (this.createFormData.times.length > 3) return
+      this.createFormData.times.push({
+        startTime: '',
+        endTime: ''
+      })
+    },
+    deleteTimeRange(index) {
+      this.createFormData.times.splice(index, 1)
+    },
     removeDomain(item) {
       var index = this.allowTime.indexOf(item)
       this.allowTime.splice(index, 1)
@@ -718,6 +859,8 @@ export default {
           platforms.push(obj)
         })
         this.unionVO.platforms = platforms
+        this.createFormData.robotName = ''
+        this.fetchRobotList()
       }
     },
     // 变量校验
@@ -742,6 +885,8 @@ export default {
         param.append('pFile', this.ulCom)
         param.append('rFile', this.ulRel)
         param.append('unionVO', JSON.stringify(this.unionVO))
+        param.append('start', this.createFormData.customerNum)
+        param.append('end', this.createFormData.customerNum2)
         const url = '/sdmulti/qbzz/manage/api/check/union'
         return this.$request
           .uploadPost(url, param, config)
@@ -774,25 +919,32 @@ export default {
     },
     // 查询机器人列表
     fetchRobotList() {
-      this.$request.jsonGet('/sdmulti/task/getRobotNames').then((res) => {
-        this.robotList = res.data
+      let serviceInfos = this.OutCallPlatformList.filter((e) => {
+        return this.createFormData.outCallPlatformId.includes(e.id)
+      }).map((e) => {
+        let a = { ...e }
+        delete a.status
+        return a
+      })
+      let fd = new FormData()
+      fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
+      this.$request
+        .uploadPost('/sdmulti/task/getRobotsByService', fd)
+        .then((res) => {
+          this.robotList = res.data
+        })
+    },
+    //称查询外呼平台列表
+    fetchPlatFormList() {
+      this.$request.formGet('/sdmulti/service/info/all').then((res) => {
+        this.OutCallPlatformList = res.data
       })
     },
-    // 根据机器人名称查询外呼平台列表
-    fetchOutCallPlatformList() {
-      this.$request
-        .formGet('/sdmulti/task/getService', {
-          robotName: this.createFormData.robotName
-        })
-        .then((res) => {
-          this.OutCallPlatformList = res.data
-        })
-    },
-    // 切换机器人名称
-    handleChangeRobotName() {
-      this.createFormData.outCallPlatformId = []
-      this.fetchOutCallPlatformList()
-    },
+    // // 切换机器人名称
+    // handleChangeRobotName() {
+    //   this.createFormData.outCallPlatformId = []
+    //   this.fetchOutCallPlatformList()
+    // },
     // 全选/取消全选通话结果
     handleCheckAllCallResult(formData) {
       if (formData.recallResult.length === this.recallResultList.length) {
@@ -868,6 +1020,9 @@ export default {
           this.$message.error('启动时间不能早于当前时间')
           return
         }
+        let times = this.createFormData.times
+          .map((e) => e.startTime + ':00-' + e.endTime + ':00')
+          .join(',')
         // 保存参数
         const param = {
           userId: this.$store.state.userInfo.userId,
@@ -882,7 +1037,11 @@ export default {
           callSingle: this.createFormData.callSingle == 1 ? true : false, //呼叫去重
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
-          customerInfoVOs: this.customerInfoVOs
+          customerInfoVOs: this.customerInfoVOs,
+          weeks: this.createFormData.weeks.join(','),
+          times,
+          start: this.createFormData.customerNum,
+          end: this.createFormData.customerNum2
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {

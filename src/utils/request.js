@@ -92,6 +92,21 @@ export default {
       }
     })
   },
+  formHardGet (url, params = {}) {
+    return instance({
+      method: 'get',
+      url,
+      withCredentials: true,
+      params,
+      paramsSerializer: params => {
+        return qs.stringify(params, { indices: false })
+      },
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      }
+    })
+  },
   instance (url, params = {}) {
     return instance({
       method: 'get',

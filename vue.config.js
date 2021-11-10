@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2021-09-27 09:39:26
+ * @LastEditTime: 2021-11-09 10:44:21
+ * @LastEditors: Please set LastEditors
+ * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEhttp://192.168.0.154:9021/swagger-ui.html#/
+ * @FilePath: \mutli\vue.config.js
+ */
 const path = require('path')
 function resolve (dir) { return path.join(__dirname, dir) }
 module.exports = {
@@ -35,7 +43,8 @@ module.exports = {
     disableHostCheck: true,
     port: 8080,
     allowedHosts: [
-      'http://test.sdmanage.qibot-ai.com/'
+      'http://test.sdmanage.qibot-ai.com/',
+      // 'http://192.168.0.154:9021/',
       //   'http://192.168.0.154:9021/'
       //  'http://192.168.0.128:9021/'
 

@@ -15,7 +15,6 @@
           placeholder="客户批次"
           class="search-component search-input"
           v-model.trim="search.batch"
-          @keyup.enter.native="fetchTaskList(1)"
           clearable
         ></el-input>
         <el-date-picker
@@ -57,6 +56,9 @@
       <div class="tool-button">
         <el-button @click="toCreateTask" icon="el-icon-plus"
           >新建任务</el-button
+        >
+        <el-button @click="toListPullSet" icon="el-icon-setting"
+          >名单拉取</el-button
         >
       </div>
     </div>
@@ -166,6 +168,95 @@
           <el-option label="否" :value="0"></el-option>
         </el-select>
       </div>
+      <div class="advanced-item">
+        <span class="advanced-label">意向分级标签：</span>
+        <el-input
+          placeholder="请输入意向分级标签，用逗号隔开"
+          v-model="search.tag"
+          class="advanced-input large-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">历史最高通话时长/s：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.startMaxTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.endMaxTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">最近通话时长/s：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.startTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.endTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">意向分级等级：</span>
+        <el-checkbox-group
+          v-model="selectIntentTags"
+          style="display:inline-block;"
+        >
+          <el-checkbox
+            v-for="range in intentTags"
+            :label="range"
+            :key="range"
+            style="width:80px;"
+          ></el-checkbox>
+        </el-checkbox-group>
+      </div>
     </div>
     <div class="table">
       <el-table
@@ -270,6 +361,25 @@
           </template>
         </el-table-column>
         <el-table-column
+          prop="finishCt"
+          label="已完成呼叫任务的接通数量"
+          width="180"
+          align="center"
+        >
+        </el-table-column>
+        <el-table-column
+          prop="successPercent"
+          label="接通转化率"
+          width="180"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <div>
+              {{ scope.row.successPercent * 100 + '%' }}
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column
           :resizable="false"
           label="操作"
           min-width="240"
@@ -299,6 +409,49 @@
         :total="pagination.total"
       ></el-pagination>
     </div>
+    <el-dialog
+      title="名单自动拉取设置"
+      :visible.sync="listPullDialogVisible"
+      v-if="listPullDialogVisible"
+    >
+      <el-form
+        :model="pullForm"
+        label-width="170px"
+        label-position="right"
+        :rules="rules"
+        ref="pullForm"
+      >
+        <el-form-item label="名单拉取方式：" prop="type">
+          <el-radio-group v-model="pullForm.type">
+            <el-radio :label="1">定时拉取</el-radio>
+            <el-radio :label="2">立即拉取</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="最大拉取名单数目/条：" prop="number">
+          <el-input type="number" v-model="pullForm.number"></el-input>
+        </el-form-item>
+        <el-form-item
+          label="自动拉取名单时间："
+          v-if="pullForm.type == 1"
+          prop="autoPullTime"
+        >
+          <el-time-select
+            v-model="pullForm.autoPullTime"
+            :picker-options="{
+              start: '00:00',
+              step: '00:30',
+              end: '23:30'
+            }"
+            placeholder="选择时间"
+          >
+          </el-time-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closePullDialog">取 消</el-button>
+        <el-button type="primary" @click="handleDialogConfirm">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -318,6 +471,28 @@ export default {
       isSelectAll: false, //是否全选列表结果
       ifCheckAll: false, //是否选中所有
       showMoreSearch: false, //是否显示高级搜索
+      intentTags: ['A', 'B', 'C', 'D', 'E', 'F'],
+      selectIntentTags: [],
+      pullForm: {
+        type: '',
+        number: '',
+        autoPullTime: ''
+      },
+      rules: {
+        type: [
+          { required: true, message: '请选择名单拉取方式', trigger: 'change' }
+        ],
+        number: [
+          { required: true, message: '请输入最大拉取条数', trigger: 'blur' }
+        ],
+        autoPullTime: [
+          {
+            required: true,
+            message: '请选择自动拉取名单时间',
+            trigger: 'change'
+          }
+        ]
+      },
       search: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
@@ -331,8 +506,14 @@ export default {
         minAge: null, //年龄最小值
         maxAge: null, //年龄最大值
         isSuccess: null, //是否已成功转化
-        isName: null //名字是否为空
+        isName: null, //名字是否为空
+        tag: '', //
+        startMaxTalkTime: null,
+        endMaxTalkTime: null,
+        startTalkTime: null,
+        endTalkTime: null
       },
+      listPullDialogVisible: false,
       pagination: {
         pageSize: 10,
         currentPage: 1,
@@ -376,6 +557,60 @@ export default {
     this.queryList()
   },
   methods: {
+    closePullDialog() {
+      for (const key in this.pullForm) {
+        this.pullForm[key] = ''
+      }
+      this.listPullDialogVisible = false
+    },
+    handleDialogConfirm() {
+      this.$refs.pullForm.validate(async (valid) => {
+        if (!valid) return
+        if (this.pullForm.type == 1) {
+          let url = '/sdmulti/fetch/setCron'
+          this.$request
+            .formPost(url, {
+              timeStr: this.pullForm.autoPullTime + ':00',
+              batchSize: this.pullForm.number
+            })
+            .then((res) => {
+              if (res.code == '0') {
+                this.$message.success('名单自动拉取设置成功')
+              } else {
+                this.$message.error(res.message)
+              }
+            })
+        } else {
+          let url = '/sdmulti/fetch/pullNow'
+          this.$request
+            .formPost(url, {
+              batchSize: this.pullForm.number
+            })
+            .then((res) => {
+              if (res.code == '0') {
+                // this.$message.success('自动拉取')
+                if (res.data == 0) {
+                  this.$message.error('名单拉取数量为0，请确认是否已下发名单')
+                } else {
+                  this.$message.success(
+                    '名单拉取成功，拉取数目为' + res.data + '条'
+                  )
+                }
+              } else {
+                this.$message.error(res.message)
+              }
+            })
+        }
+
+        for (const key in this.pullForm) {
+          this.pullForm[key] = ''
+        }
+        this.listPullDialogVisible = false
+      })
+    },
+    toListPullSet() {
+      this.listPullDialogVisible = true
+    },
     // 表格单个行状态切换
     handleSingleSelect(selection, row) {
       const repeatIndex = this.checkedTableRow.findIndex((item) => {
@@ -476,7 +711,13 @@ export default {
             minAge: this.search.minAge,
             maxAge: this.search.maxAge,
             isSuccess: this.search.isSuccess,
-            isName: this.search.isName
+            isName: this.search.isName,
+            tag: this.search.tag,
+            aiCategory: this.selectIntentTags.join(','),
+            startMaxTalkTime: this.search.startMaxTalkTime,
+            endMaxTalkTime: this.search.endMaxTalkTime,
+            startTalkTime: this.search.startTalkTime,
+            endTalkTime: this.search.endTalkTime
 
             //   userId: this.$store.state.userInfo.id,
             // batch: this.search.batch || null,
@@ -569,7 +810,13 @@ export default {
           isSuccess: this.search.isSuccess,
           isName: this.search.isName,
           page: this.pagination.currentPage,
-          pageSize: this.pagination.pageSize
+          pageSize: this.pagination.pageSize,
+          tag: this.search.tag,
+          aiCategory: this.selectIntentTags.join(','),
+          startMaxTalkTime: this.search.startMaxTalkTime,
+          endMaxTalkTime: this.search.endMaxTalkTime,
+          startTalkTime: this.search.startTalkTime,
+          endTalkTime: this.search.endTalkTime
         })
         .then((res) => {
           this.isLoading = false
@@ -639,6 +886,9 @@ export default {
       width: 320px;
       &.input_small {
         width: 147px;
+      }
+      &.large-input {
+        width: 600px;
       }
     }
     .delimiter {

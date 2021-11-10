@@ -65,30 +65,7 @@
           </el-select>
         </div>
       </el-form-item>
-      <el-form-item prop="robotId" label="机器人名称：">
-        <div class="input-large form-item_upload">
-          <el-select
-            v-model="createFormData.robotId"
-            @change="handleChangeRobotId"
-            placeholder="请选择机器人名称"
-            filterable
-            clearable
-          >
-            <el-option
-              v-for="(item, index) in robotList"
-              :key="index"
-              :label="item"
-              :value="item"
-            ></el-option>
-          </el-select>
-          <el-button
-            @click="handleDownload(createFormData.robotId)"
-            type="primary"
-            >下载机器人变量模板</el-button
-          >
-        </div>
-      </el-form-item>
-      <el-form-item prop="" label="外呼平台：" v-if="createFormData.robotId">
+      <el-form-item prop="" label="外呼平台：">
         <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.outCallPlatformId"
@@ -105,6 +82,32 @@
               :value="item.id"
             ></el-option>
           </el-select>
+        </div>
+      </el-form-item>
+      <el-form-item
+        prop="robotId"
+        label="机器人名称："
+        v-if="createFormData.outCallPlatformId.length"
+      >
+        <div class="input-large form-item_upload">
+          <el-select
+            v-model="createFormData.robotId"
+            placeholder="请选择机器人名称"
+            filterable
+            clearable
+          >
+            <el-option
+              v-for="item in robotList"
+              :key="item.id"
+              :label="item.showName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+          <el-button
+            @click="handleDownload(createFormData.robotId)"
+            type="primary"
+            >下载机器人变量模板</el-button
+          >
         </div>
       </el-form-item>
       <el-form-item prop="importComVar" label="共用型变量：">
@@ -155,6 +158,71 @@
           class="input-name"
         ></el-input>
       </el-form-item>
+      <el-form-item prop="weeks" label="外呼周期：">
+        <el-checkbox-group
+          v-model="createFormData.weeks"
+          style="display:inline-block;"
+        >
+          <el-checkbox
+            v-for="item in dateList"
+            :label="item.value"
+            :key="item.value"
+            style="width:80px;"
+            >{{ item.name }}</el-checkbox
+          >
+        </el-checkbox-group>
+      </el-form-item>
+      <el-form-item prop="times" label="外呼时间段：">
+        <div style="font-size:12px;color:#999;">
+          请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
+        </div>
+        <div
+          v-for="(item, index) in createFormData.times"
+          :key="index"
+          style="margin-bottom:10px;"
+        >
+          <el-time-select
+            placeholder="起始时间"
+            v-model="item.startTime"
+            :clearable="false"
+            :picker-options="{
+              start: '00:00',
+              step: '00:10',
+              end: '23:50'
+            }"
+          >
+          </el-time-select>
+          <span>-</span>
+          <el-time-select
+            placeholder="结束时间"
+            v-model="item.endTime"
+            :clearable="false"
+            :picker-options="{
+              start: '00:10',
+              step: '00:10',
+              end: '24:00',
+              minTime: item.startTime
+            }"
+          >
+          </el-time-select>
+          <el-button
+            v-if="index == 0"
+            icon="el-icon-plus"
+            type="primary"
+            @click="addTimeRange"
+            size="mini"
+            style="margin-left:20px;"
+          ></el-button>
+          <el-button
+            v-else
+            icon="el-icon-minus"
+            type="danger"
+            @click="deleteTimeRange(index)"
+            style="margin-left:20px;"
+            size="mini"
+          ></el-button>
+        </div>
+      </el-form-item>
       <el-form-item prop="type" label="外呼启动方式：">
         <el-radio-group v-model="createFormData.type">
           <el-radio :label="0">定时启动</el-radio>
@@ -177,11 +245,10 @@
               <el-time-select
                 v-model="createFormData.startTime"
                 popper-class="startTimer"
-                @focus="handleStartTimeFocus"
                 :picker-options="{
                   start: '08:00',
                   step: '00:10',
-                  end: '20:50'
+                  end: '22:00'
                 }"
                 placeholder="选择时间"
               >
@@ -301,11 +368,10 @@
             <el-time-select
               v-model="createFormData.startTime"
               popper-class="startTimer"
-              @focus="handleStartTimeFocus"
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '20:50'
+                end: '22:00'
               }"
               placeholder="选择时间"
             >
@@ -447,6 +513,15 @@ export default {
         { label: '用户未响应', key: '22' },
         { label: '其他', key: '7,11,14,15,16,19,20,21' }
       ], // 可选通话结果
+      dateList: [
+        { name: '星期一', value: 0 },
+        { name: '星期二', value: 1 },
+        { name: '星期三', value: 2 },
+        { name: '星期四', value: 3 },
+        { name: '星期五', value: 4 },
+        { name: '星期六', value: 5 },
+        { name: '星期日', value: 6 }
+      ],
       createFormData: {
         name: null, // 任务名称
         customerType: null, //客户种类
@@ -469,7 +544,9 @@ export default {
         startDate: null, // 启动日期
         startTime: null, // 启动时间
         conversionFlag: 0, // 转化失败重呼
-        jietongFlag: 0 // 接通失败重呼
+        jietongFlag: 0, // 接通失败重呼
+        weeks: [0, 1, 2, 3, 4, 5, 6],
+        times: [{ startTime: '08:00', endTime: '22:00' }]
       },
       // 新建任务表单项
       createFormRule: {
@@ -488,6 +565,32 @@ export default {
         ],
         activeNumber: [
           { required: true, message: '请选择线路', trigger: 'blur' }
+        ],
+        times: [
+          {
+            validator: (rule, value, callback) => {
+              value.forEach((e, index) => {
+                if (!e.startTime || !e.endTime) {
+                  callback(new Error('请输入完整的外呼时段'))
+                }
+                if (e.startTime > e.endTime) {
+                  callback(new Error('同组外呼时段结束时间不能早于开始时间'))
+                }
+                for (let i = index + 1; i < value.length; i++) {
+                  const element = value[i]
+                  let flag =
+                    (element.startTime >= e.startTime &&
+                      element.startTime <= e.endTime) ||
+                    (element.endTime >= e.startTime &&
+                      element.endTime <= e.endTime)
+                  if (flag) {
+                    callback(new Error('外呼时段存在重复区间，请修改'))
+                  }
+                }
+              })
+              callback()
+            }
+          }
         ],
         recallInterval: [
           {
@@ -670,10 +773,21 @@ export default {
     }
   },
   created() {
-    this.fetchRobotList()
+    // this.fetchRobotList()
     this.fetchCusList()
+    this.fetchPlatFormList()
   },
   methods: {
+    addTimeRange() {
+      if (this.createFormData.times.length > 3) return
+      this.createFormData.times.push({
+        startTime: '',
+        endTime: ''
+      })
+    },
+    deleteTimeRange(index) {
+      this.createFormData.times.splice(index, 1)
+    },
     testFile(file) {
       let param = new FormData()
       const config = {
@@ -740,6 +854,8 @@ export default {
           platforms.push(obj)
         })
         this.unionVO.platforms = platforms
+        this.createFormData.robotId = ''
+        this.fetchRobotList()
       }
     },
     // 变量校验
@@ -796,8 +912,25 @@ export default {
     },
     // 查询机器人列表
     fetchRobotList() {
-      this.$request.jsonGet('/sdmulti/task/getRobotNames').then((res) => {
-        this.robotList = res.data
+      let serviceInfos = this.OutCallPlatformList.filter((e) => {
+        return this.createFormData.outCallPlatformId.includes(e.id)
+      }).map((e) => {
+        let a = { ...e }
+        delete a.status
+        return a
+      })
+      let fd = new FormData()
+      fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
+      this.$request
+        .uploadPost('/sdmulti/task/getRobotsByService', fd)
+        .then((res) => {
+          this.robotList = res.data
+        })
+    },
+    //称查询外呼平台列表
+    fetchPlatFormList() {
+      this.$request.formGet('/sdmulti/service/info/all').then((res) => {
+        this.OutCallPlatformList = res.data
       })
     },
     // 查询客户批次列表
@@ -820,11 +953,6 @@ export default {
         .then((res) => {
           this.OutCallPlatformList = res.data
         })
-    },
-    // 切换机器人名称
-    handleChangeRobotId() {
-      this.createFormData.outCallPlatformId = []
-      this.fetchOutCallPlatformList()
     },
     // 选择客户类型后查询客户批次
     handleChangeCustomerType() {
@@ -971,6 +1099,9 @@ export default {
           this.$message.error('启动时间不能早于当前时间')
           return
         }
+        let times = this.createFormData.times
+          .map((e) => e.startTime + ':00-' + e.endTime + ':00')
+          .join(',')
         // 保存参数
         const param = {
           userId: this.$store.state.userInfo.userId,
@@ -984,7 +1115,9 @@ export default {
           callSingle: this.createFormData.callSingle == 1 ? true : false, //呼叫去重
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
-          customerInfoVOs: this.customerInfoVOs
+          customerInfoVOs: this.customerInfoVOs,
+          weeks: this.createFormData.weeks.join(','),
+          times
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {
@@ -1020,7 +1153,7 @@ export default {
             this.$alert(err.response.data.message || '系统错误', '错误提示', {
               confirmButtonText: '确定',
               callback: () => {
-                this.$router.replace('/main/callManage/callTask')
+               this.$router.replace('/main/callManage/callTask')
               }
             })
           })
