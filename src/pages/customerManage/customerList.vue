@@ -692,6 +692,7 @@ export default {
             sex.push(2)
           }
         }
+        let aiCategory = this.selectIntentTags.map((e) => e + '类').join(',')
         const res = await this.$request.xml(
           '/sdmulti/qbzz/manage/api/download',
           {
@@ -713,7 +714,7 @@ export default {
             isSuccess: this.search.isSuccess,
             isName: this.search.isName,
             tag: this.search.tag,
-            aiCategory: this.selectIntentTags.join(','),
+            aiCategory,
             startMaxTalkTime: this.search.startMaxTalkTime,
             endMaxTalkTime: this.search.endMaxTalkTime,
             startTalkTime: this.search.startTalkTime,
@@ -795,6 +796,7 @@ export default {
           sex.push(2)
         }
       }
+      let aiCategory = this.selectIntentTags.map((e) => e + '类').join(',')
       this.$request
         .jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
           userId: this.$store.state.userInfo.id,
@@ -816,7 +818,7 @@ export default {
           page: this.pagination.currentPage,
           pageSize: this.pagination.pageSize,
           tag: this.search.tag,
-          aiCategory: this.selectIntentTags.join(','),
+          aiCategory,
           startMaxTalkTime: this.search.startMaxTalkTime,
           endMaxTalkTime: this.search.endMaxTalkTime,
           startTalkTime: this.search.startTalkTime,
