@@ -851,7 +851,6 @@ export default {
     },
     // 选择外呼平台
     handleChangePlat(select) {
-      debugger
       if (select) {
         let platforms = []
         select.forEach((item) => {
