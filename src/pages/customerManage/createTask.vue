@@ -33,7 +33,7 @@
           size="small"
           :min="1"
           :max="selectCtNum"
-          @input="checkLastNum"
+          @change="checkLastNum"
           v-model="createFormData.customerNum"
           style="width:80px;"
         ></el-input>
@@ -43,7 +43,7 @@
           size="small"
           :min="1"
           :max="selectCtNum"
-          @input="lastNumOnInput"
+          @change="lastNumOnInput"
           v-model="createFormData.customerNum2"
           style="width:80px;"
         ></el-input>
@@ -76,8 +76,8 @@
           <el-select
             v-model="createFormData.robotName"
             placeholder="请选择机器人名称"
+            @change="selectRobot"
             filterable
-            clearable
           >
             <el-option
               v-for="item in robotList"
@@ -740,10 +740,11 @@ export default {
     }
   },
   created() {
+    const query = this.$route.query
     //把数组由字符串转化成数字
-    const param = this.$route.query.name
-    const search = this.$route.query.search
-    const pagination = this.$route.query.pagination
+    const param = query.name ? JSON.parse(query.name) : []
+    const search = query.search ? JSON.parse(query.search) : {}
+    const pagination = query.pagination ? JSON.parse(query.pagination) : {}
     let distList = []
     let customerInfos = []
     param.forEach((item) => {
@@ -790,10 +791,13 @@ export default {
   },
   methods: {
     lastNumOnInput(e) {
-      if (!isNaN(parseInt(e)) && e > this.selectCtNum) {
+      if (!isNaN(parseInt(e)) && parseInt(e) > parseInt(this.selectCtNum)) {
         this.createFormData.customerNum2 = this.selectCtNum
       }
-      if (!isNaN(parseInt(e)) && e < this.createFormData.customerNum) {
+      if (
+        !isNaN(parseInt(e)) &&
+        parseInt(e) < parseInt(this.createFormData.customerNum)
+      ) {
         this.createFormData.customerNum2 = this.createFormData.customerNum
       }
       this.varResult = null
@@ -811,6 +815,7 @@ export default {
       }
       if (!isNaN(parseInt(e)) && parseInt(e) > this.selectCtNum) {
         this.createFormData.customerNum = this.selectCtNum
+        this.createFormData.customerNum2 = this.selectCtNum
       }
       this.varResult = null
     },
@@ -846,6 +851,7 @@ export default {
     },
     // 选择外呼平台
     handleChangePlat(select) {
+      debugger
       if (select) {
         let platforms = []
         select.forEach((item) => {
@@ -861,6 +867,13 @@ export default {
         this.unionVO.platforms = platforms
         this.createFormData.robotName = ''
         this.fetchRobotList()
+      }
+    },
+    selectRobot(val) {
+      if (val) {
+        this.unionVO.platforms.forEach((e) => {
+          e.robotId = val
+        })
       }
     },
     // 变量校验

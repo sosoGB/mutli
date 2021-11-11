@@ -93,6 +93,7 @@
           <el-select
             v-model="createFormData.robotId"
             placeholder="请选择机器人名称"
+            @change="selectRobot"
             filterable
             clearable
           >
@@ -858,6 +859,13 @@ export default {
         this.fetchRobotList()
       }
     },
+    selectRobot(val) {
+      if (val) {
+        this.unionVO.platforms.forEach((e) => {
+          e.robotId = val
+        })
+      }
+    },
     // 变量校验
     handleCheckVar() {
       if (!this.createFormData.robotId) {
@@ -1153,7 +1161,7 @@ export default {
             this.$alert(err.response.data.message || '系统错误', '错误提示', {
               confirmButtonText: '确定',
               callback: () => {
-               this.$router.replace('/main/callManage/callTask')
+                this.$router.replace('/main/callManage/callTask')
               }
             })
           })

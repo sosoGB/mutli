@@ -770,7 +770,11 @@ export default {
       }
       this.$router.push({
         path: 'createTask',
-        query: { name: this.checkedTableRow, search, pagination }
+        query: {
+          name: JSON.stringify(this.checkedTableRow),
+          search: JSON.stringify(search),
+          pagination: JSON.stringify(pagination)
+        }
       })
     },
     // 查询列表
