@@ -83,7 +83,7 @@
               v-for="item in robotList"
               :key="item.id"
               :label="item.showName"
-              :value="item.id"
+              :value="item.showName"
             ></el-option>
           </el-select>
           <el-button
@@ -870,8 +870,13 @@ export default {
     },
     selectRobot(val) {
       if (val) {
+        let robot = this.robotList.find((e) => e.showName == val)
+        let robotId
+        if (robot) {
+          robotId = robot.id
+        }
         this.unionVO.platforms.forEach((e) => {
-          e.robotId = val
+          e.robotId = robotId
         })
       }
     },
