@@ -1094,7 +1094,9 @@ export default {
             this.$alert(err.response.data.message || '系统错误', '错误提示', {
               confirmButtonText: '确定',
               callback: () => {
-                this.$router.replace('/main/callManage/callTask')
+                if (err.response.data.code == '300') {
+                  this.$router.replace('/main/callManage/callTask')
+                }
               }
             })
           })
