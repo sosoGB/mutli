@@ -495,13 +495,13 @@ export default {
         { label: '其他', key: '7,11,14,15,16,19,20,21' }
       ], // 可选通话结果
       dateList: [
-        { name: '星期一', value: 0 },
-        { name: '星期二', value: 1 },
-        { name: '星期三', value: 2 },
-        { name: '星期四', value: 3 },
-        { name: '星期五', value: 4 },
-        { name: '星期六', value: 5 },
-        { name: '星期日', value: 6 }
+        { name: '星期一', value: 1 },
+        { name: '星期二', value: 2 },
+        { name: '星期三', value: 3 },
+        { name: '星期四', value: 4 },
+        { name: '星期五', value: 5 },
+        { name: '星期六', value: 6 },
+        { name: '星期日', value: 0 }
       ],
       createFormData: {
         customerNum: 1,
