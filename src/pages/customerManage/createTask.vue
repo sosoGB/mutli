@@ -901,9 +901,11 @@ export default {
         }
         param.append('pFile', this.ulCom)
         param.append('rFile', this.ulRel)
+        this.unionVO.start = this.createFormData.customerNum
+        this.unionVO.end = this.createFormData.customerNum2
         param.append('unionVO', JSON.stringify(this.unionVO))
-        param.append('start', this.createFormData.customerNum)
-        param.append('end', this.createFormData.customerNum2)
+        // param.append('start', this.createFormData.customerNum)
+        // param.append('end', this.createFormData.customerNum2)
         const url = '/sdmulti/qbzz/manage/api/check/union'
         return this.$request
           .uploadPost(url, param, config)
@@ -1056,9 +1058,7 @@ export default {
           platforms: this.varResult, //校验结果
           customerInfoVOs: this.customerInfoVOs,
           weeks: this.createFormData.weeks.join(','),
-          times,
-          start: this.createFormData.customerNum,
-          end: this.createFormData.customerNum2
+          times
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {
