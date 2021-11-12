@@ -410,28 +410,28 @@
       ></el-pagination>
     </div>
     <el-dialog
-      title="名单自动拉取设置"
+      title="名单拉取设置"
       :visible.sync="listPullDialogVisible"
       v-if="listPullDialogVisible"
     >
       <el-form
         :model="pullForm"
-        label-width="170px"
+        label-width="190px"
         label-position="right"
         :rules="rules"
         ref="pullForm"
       >
         <el-form-item label="名单拉取方式：" prop="type">
           <el-radio-group v-model="pullForm.type">
-            <el-radio :label="1">定时拉取</el-radio>
-            <el-radio :label="2">立即拉取</el-radio>
+            <el-radio :label="1">自动拉取</el-radio>
+            <el-radio :label="2">手动拉取</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="最大拉取名单数目/条：" prop="number">
           <el-input type="number" v-model="pullForm.number"></el-input>
         </el-form-item>
         <el-form-item
-          label="自动拉取名单时间："
+          label="每天自动拉取名单时间："
           v-if="pullForm.type == 1"
           prop="autoPullTime"
         >
