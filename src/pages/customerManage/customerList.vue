@@ -471,7 +471,7 @@ export default {
       isSelectAll: false, //是否全选列表结果
       ifCheckAll: false, //是否选中所有
       showMoreSearch: false, //是否显示高级搜索
-      intentTags: ['A', 'B', 'C', 'D', 'E', 'F'],
+      intentTags: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
       selectIntentTags: [],
       pullForm: {
         type: '',
@@ -692,7 +692,7 @@ export default {
             sex.push(2)
           }
         }
-        let aiCategory = this.selectIntentTags.map((e) => e + '类').join(',')
+        let aiCategory = this.selectIntentTags.join(',')
         const res = await this.$request.xml(
           '/sdmulti/qbzz/manage/api/download',
           {
@@ -796,7 +796,7 @@ export default {
           sex.push(2)
         }
       }
-      let aiCategory = this.selectIntentTags.map((e) => e + '类').join(',')
+      let aiCategory = this.selectIntentTags.join(',')
       this.$request
         .jsonPost('/sdmulti/qbzz/manage/api/queryCus', {
           userId: this.$store.state.userInfo.id,
