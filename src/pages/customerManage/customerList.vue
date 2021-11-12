@@ -375,7 +375,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.successPercent * 100 + '%' }}
+              {{ scope.row.successPercent + '%' }}
             </div>
           </template>
         </el-table-column>
@@ -576,6 +576,7 @@ export default {
             .then((res) => {
               if (res.code == '0') {
                 this.$message.success('名单自动拉取设置成功')
+                this.queryList()
               } else {
                 this.$message.error(res.message)
               }
@@ -595,6 +596,7 @@ export default {
                   this.$message.success(
                     '名单拉取成功，拉取数目为' + res.data + '条'
                   )
+                  this.queryList()
                 }
               } else {
                 this.$message.error(res.message)
