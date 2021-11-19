@@ -74,6 +74,7 @@
           <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
           <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
           <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
+          <el-option label="凯森" value="凯森"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">

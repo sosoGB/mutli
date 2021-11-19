@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2021-09-27 09:39:26
+ * @LastEditTime: 2021-11-16 14:03:00
+ * @LastEditors: Please set LastEditors
+ * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @FilePath: \mutli\src\utils\router.js
+ */
 import Vue from 'vue'
 import Router from 'vue-router'
 Vue.use(Router)
@@ -65,6 +73,17 @@ const routes = [
   }
 ]
 
-export default new Router({
+const router = new Router({
   routes
 })
+router.beforeEach((to, from, next) => {
+  const userInfo = localStorage.getItem('user');
+  if (!userInfo && to.path!== '/login') {
+    next({
+      path: '/login'
+    })
+  }
+  next();
+})
+
+export default router
