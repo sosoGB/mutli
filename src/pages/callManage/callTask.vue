@@ -55,7 +55,7 @@
           class="search-component search-input"
         >
           <el-option
-            v-for="(item,index) in robotList"
+            v-for="(item, index) in robotList"
             :key="index"
             :label="item"
             :value="item"
@@ -65,13 +65,13 @@
           type="primary"
           class="search-component"
           @click="fetchTaskList(1)"
-        >搜索</el-button>
+          >搜索</el-button
+        >
       </div>
       <div class="tool-button">
-        <el-button
-          @click="$router.push('createTask')"
-          icon="el-icon-plus"
-        >新建任务</el-button>
+        <el-button @click="$router.push('createTask')" icon="el-icon-plus"
+          >新建任务</el-button
+        >
       </div>
     </div>
 
@@ -91,12 +91,7 @@
           align="center"
           width="55"
         ></el-table-column>
-        <el-table-column
-          label="序号"
-          align="center"
-          type="index"
-          width="55"
-        >
+        <el-table-column label="序号" align="center" type="index" width="55">
         </el-table-column>
         <el-table-column
           show-overflow-tooltip
@@ -126,16 +121,9 @@
           min-width="200"
           align="center"
         ></el-table-column>
-        <el-table-column
-          label="任务状态"
-          width="140"
-          align="center"
-        >
+        <el-table-column label="任务状态" width="140" align="center">
           <template slot-scope="scope">
-            <span
-              class="icon-status"
-              :class="scope.row.statusClass"
-            >{{
+            <span class="icon-status" :class="scope.row.statusClass">{{
               scope.row.statusName
             }}</span>
           </template>
@@ -161,11 +149,7 @@
           width="160"
           align="center"
         ></el-table-column>
-        <el-table-column
-          label="接通率"
-          width="100"
-          align="center"
-        >
+        <el-table-column label="接通率" width="100" align="center">
           <template slot-scope="scope">
             <span>{{
               scope.row.finishNum
@@ -176,62 +160,44 @@
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          label="定时启动时间"
-          width="180"
-          align="center"
-        >
+        <el-table-column label="定时启动时间" width="180" align="center">
           <template slot-scope="scope">
             <span>{{
               scope.row.taskTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          label="开始时间"
-          width="180"
-          align="center"
-        >
+        <el-table-column label="开始时间" width="180" align="center">
           <template slot-scope="scope">
-            <span>{{
-              scope.row.beginTime 
-            }}</span>
+            <span>{{ scope.row.beginTime }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          label="结束时间"
-          width="180"
-          align="center"
-        >
+        <el-table-column label="结束时间" width="180" align="center">
           <template slot-scope="scope">
             <span>{{
               scope.row.endTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          label="操作"
-          width="280"
-          fixed="right"
-          align="center"
-        >
+        <el-table-column label="操作" width="280" fixed="right" align="center">
           <template slot-scope="scope">
             <el-button
               v-if="
-                  scope.row.status === 0 ||
+                scope.row.status === 0 ||
                   scope.row.status === 3 ||
                   scope.row.status === 4
               "
-              @click="handleRun(scope.row.id,scope.row.status)"
-            >启动</el-button>
+              @click="handleRun(scope.row.id, scope.row.status)"
+              >启动</el-button
+            >
             <el-button
               v-else-if="scope.row.status === 1"
-              @click="handlePause(scope.row.id,scope.row.status)"
-            >暂停</el-button>
-            <el-button
-              v-else-if="scope.row.status === 2"
-              disabled
-            >完成</el-button>
+              @click="handlePause(scope.row.id, scope.row.status)"
+              >暂停</el-button
+            >
+            <el-button v-else-if="scope.row.status === 2" disabled
+              >完成</el-button
+            >
             <el-button @click="handleExport(scope.row.id)">下载</el-button>
           </template>
         </el-table-column>
@@ -263,10 +229,7 @@
         :rules="editFormRule"
         label-width="150px"
       >
-        <el-form-item
-          prop="planName"
-          label="任务名称："
-        >
+        <el-form-item prop="planName" label="任务名称：">
           <el-input
             disabled
             v-model.trim="editFormData.planName"
@@ -274,10 +237,7 @@
             class="input-large"
           ></el-input>
         </el-form-item>
-        <el-form-item
-          prop="robotName"
-          label="机器人名称："
-        >
+        <el-form-item prop="robotName" label="机器人名称：">
           <el-select
             disabled
             v-model="editFormData.robotName"
@@ -285,17 +245,14 @@
             class="input-large"
           >
             <el-option
-              v-for="(item,index) in robotList"
+              v-for="(item, index) in robotList"
               :key="index"
               :label="item"
               :value="item"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item
-          prop="activeNumber"
-          label="线路选取："
-        >
+        <el-form-item prop="activeNumber" label="线路选取：">
           <flow-select
             :options="activeNumberList"
             popperClass="selectmulti"
@@ -310,10 +267,7 @@
       </el-form>
       <span slot="footer">
         <el-button @click="dialogEditVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          @click="submitEditForm"
-        >确定</el-button>
+        <el-button type="primary" @click="submitEditForm">确定</el-button>
       </span>
     </el-dialog>
     <progress-pop
@@ -332,7 +286,7 @@ export default {
     FlowSelect,
     ProgressPop
   },
-  data () {
+  data() {
     return {
       authCreate: false,
       authRecall: false,
@@ -430,7 +384,11 @@ export default {
         { label: '线路欠费', key: '17' },
         { label: '请求超时', key: '18' },
         { label: '用户未响应', key: '22' },
-        { label: '其他', key: '7,11,14,15,16,19,20,21' }
+        { label: '黑名单', key: '28' },
+        { label: '呼叫超频', key: '24' },
+        { label: '靓号禁呼', key: '25' },
+        { label: '外呼限制', key: '27' },
+        { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
       ], // 可选通话结果
       editFormData: {
         id: null, // 任务id
@@ -503,7 +461,7 @@ export default {
     }
   },
   watch: {
-    'chaseFormData.importFile' (files) {
+    'chaseFormData.importFile'(files) {
       if (!files || !files.length) return
       if (!this.validateFile(files[0])) {
         this.chaseFormData.importFile = []
@@ -528,19 +486,19 @@ export default {
       )
     }
   },
-  async created () {
+  async created() {
     this.fetchTaskList()
     this.fetchRobotList()
   },
   methods: {
-    beforeSelectBus () {
+    beforeSelectBus() {
       if (this.userInfo.rankCode == 10 && !this.search.suserId) {
         this.$message.error('请先选择所属二级账号')
         this.$refs.busRef.blur()
       }
     },
 
-    selectToggleDown (isShow) {
+    selectToggleDown(isShow) {
       this.$nextTick(() => {
         if (isShow) {
           const el = this.$el.querySelector('.selectmulti')
@@ -553,7 +511,7 @@ export default {
       })
     },
     // 根据全选状态切换呼叫结果
-    checkAllRes () {
+    checkAllRes() {
       this.ifCheckAllRes = !this.ifCheckAllRes
       if (this.ifCheckAllRes) {
         this.recallForm.recallResult = this.recallResultList.map(
@@ -564,7 +522,7 @@ export default {
       }
     },
     // 根据全选状态切换意向分类
-    checkAllCat () {
+    checkAllCat() {
       this.ifCheckAllCat = !this.ifCheckAllCat
       if (this.ifCheckAllCat) {
         this.categoryList.forEach((item) => {
@@ -575,14 +533,14 @@ export default {
       }
     },
     // 根据选择的呼叫结果切换全选状态
-    toggleCheckAllRes () {
+    toggleCheckAllRes() {
       this.ifCheckAllRes =
         this.recallForm.recallResult.length === this.recallResultList.length
           ? true
           : false
     },
     // 切换选择的通话分类
-    toggleSelectedCat (val) {
+    toggleSelectedCat(val) {
       const flag = this.recallForm.selectedCat.includes(val)
       if (flag) {
         const index = this.recallForm.selectedCat.indexOf(val)
@@ -596,7 +554,7 @@ export default {
           : false
     },
     // 查询任务列表
-    fetchTaskList (type) {
+    fetchTaskList(type) {
       if (type === 1) {
         // 筛选搜索页码要重置为1
         this.pagination.currentPage = 1
@@ -605,8 +563,12 @@ export default {
       this.$request
         .jsonPost('/sdmulti/task/getTaskInfoList', {
           userId: this.$store.state.userInfo.userId,
-          startTime: this.search.beginDate ? this.search.beginDate + ' 00:00:00' : null,
-          endTime: this.search.endDate ? this.search.endDate + ' 23:59:59' : null,
+          startTime: this.search.beginDate
+            ? this.search.beginDate + ' 00:00:00'
+            : null,
+          endTime: this.search.endDate
+            ? this.search.endDate + ' 23:59:59'
+            : null,
           name: this.search.planName,
           robotName: this.search.robotName ? this.search.robotName : null,
           status: this.search.taskStatus === '' ? null : this.search.taskStatus,
@@ -615,7 +577,6 @@ export default {
           taskId: this.search.taskId
         })
         .then((res) => {
-
           if (!res.data) {
             if (res.message) {
               this.$message.error('获取任务列表失败-' + res.message)
@@ -629,7 +590,7 @@ export default {
           this.planList.forEach((item) => {
             item.overSixMon =
               Date.now() - new Date(item.beginTime).getTime() >
-                6 * 30 * 24 * 3600 * 1000
+              6 * 30 * 24 * 3600 * 1000
                 ? true
                 : false
           })
@@ -640,21 +601,19 @@ export default {
         })
     },
     // 查询机器人列表
-    fetchRobotList () {
-      this.$request
-        .jsonGet('/sdmulti/task/getRobotNames')
-        .then((res) => {
-          this.robotList = res.data
-        })
+    fetchRobotList() {
+      this.$request.jsonGet('/sdmulti/task/getRobotNames').then((res) => {
+        this.robotList = res.data
+      })
     },
     // 点击启动按钮
-    handleRun (taskId) {
+    handleRun(taskId) {
       this.isLoadingPlanList = true
       this.$request
         .jsonPost('/sdmulti/task/updateStatus', {
           status: 1,
           taskId,
-          userId: this.$store.state.userInfo.id,
+          userId: this.$store.state.userInfo.id
         })
         .then((res) => {
           if (res.code === '0') {
@@ -669,12 +628,12 @@ export default {
         })
     },
     // 点击暂停按钮
-    handlePause (taskId) {
+    handlePause(taskId) {
       this.$request
         .jsonPost('/sdmulti/task/updateStatus', {
           status: 3,
           taskId,
-          userId: this.$store.state.userInfo.id,
+          userId: this.$store.state.userInfo.id
         })
         .then((res) => {
           if (res.code === '0') {
@@ -686,7 +645,7 @@ export default {
         })
     },
     // 点击下载按钮
-    async handleExport (taskId) {
+    async handleExport(taskId) {
       const res = await this.$request.xml('/sdmulti/task/export', { taskId })
       const a = document.createElement('a')
       a.download = '未呼号码+失败号码.zip'
@@ -697,7 +656,7 @@ export default {
      * 点击表格行编辑按钮，唤起编辑弹窗
      * @param data 行数据
      */
-    handleEdit (data) {
+    handleEdit(data) {
       if (data.lineIds && data.lineIds.length) {
         data.lineIds = data.lineIds.map((e) => parseInt(e))
       }
@@ -710,7 +669,7 @@ export default {
       this.dialogEditVisible = true
     },
     // 提交编辑任务表单
-    submitEditForm () {
+    submitEditForm() {
       this.$refs.editForm.validate((isValid) => {
         if (!isValid) {
           this.$message.error('请填写必填字段')
@@ -735,7 +694,7 @@ export default {
       })
     },
     // 验证文件可用性
-    validateFile (file) {
+    validateFile(file) {
       if (file.size > 1024 * 1024 * 5) {
         this.$message.error('文件不得超过5M')
         return false
@@ -743,7 +702,7 @@ export default {
       return true
     },
     // 解析已上传文件
-    transpileFile (file, robotId) {
+    transpileFile(file, robotId) {
       let param = new FormData()
       const config = {
         headers: {
@@ -774,7 +733,7 @@ export default {
         })
     },
     // 点击下载模板
-    async handleDownloadTemplate (robotId) {
+    async handleDownloadTemplate(robotId) {
       if (!robotId) {
         this.$message.warning('请先选择机器人名称')
         return
@@ -801,7 +760,7 @@ export default {
 }
 </style>
 <style lang="scss" scoped>
-@import "@/assets/css/common.scss";
+@import '@/assets/css/common.scss';
 .ddd {
   /deep/ .el-dialog__body {
     overflow: hidden;

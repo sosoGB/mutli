@@ -477,7 +477,11 @@ export default {
         { label: '线路欠费', key: '17' },
         { label: '请求超时', key: '18' },
         { label: '用户未响应', key: '22' },
-        { label: '其他', key: '7,11,14,15,16,19,20,21' }
+        { label: '黑名单', key: '28' },
+        { label: '呼叫超频', key: '24' },
+        { label: '靓号禁呼', key: '25' },
+        { label: '外呼限制', key: '27' },
+        { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
       ], // 可选通话结果
       conversionResultList: [
         { label: '正在通话中', key: '1' },
@@ -492,7 +496,11 @@ export default {
         { label: '线路欠费', key: '17' },
         { label: '请求超时', key: '18' },
         { label: '用户未响应', key: '22' },
-        { label: '其他', key: '7,11,14,15,16,19,20,21' }
+        { label: '黑名单', key: '28' },
+        { label: '呼叫超频', key: '24' },
+        { label: '靓号禁呼', key: '25' },
+        { label: '外呼限制', key: '27' },
+        { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
       ], // 可选通话结果
       dateList: [
         { name: '星期一', value: 1 },
