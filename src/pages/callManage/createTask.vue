@@ -1144,7 +1144,10 @@ export default {
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {
-          param.connectCallResult = this.createFormData.recallResult.map(Number)
+          param.connectCallResult = this.createFormData.recallResult
+            .join(',')
+            .split(',')
+            .map(Number)
           param.timeInterval = this.createFormData.recallInterval
           param.callNum = this.createFormData.recallMaxNum
         }
