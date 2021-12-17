@@ -42,6 +42,7 @@
           @click="
             () => {
               pagination.currentPage = 1
+              clickedSle = true
               queryList()
             }
           "
@@ -463,6 +464,7 @@ export default {
   mixins: [keepAlive],
   data() {
     return {
+      clickedSle: false,
       isDownLoad: false, //是否在下载
       authExport: false,
       userInfo: this.$store.state.userInfo,
@@ -493,6 +495,26 @@ export default {
             trigger: 'change'
           }
         ]
+      },
+      oldSearch: {
+        //查询筛选字段
+        userId: this.$store.state.userInfo.id,
+        batch: null, //客户批次
+        endTime: '', //开始时间
+        startTime: '', //结束时间
+        customerType: null, //客户种类
+        isCall: null, //是否已创建外呼任务
+        isNewCus: null, //是否为新客户
+        sex: null, //性别
+        minAge: null, //年龄最小值
+        maxAge: null, //年龄最大值
+        isSuccess: null, //是否已成功转化
+        isName: null, //名字是否为空
+        tag: '', //
+        startMaxTalkTime: null,
+        endMaxTalkTime: null,
+        startTalkTime: null,
+        endTalkTime: null
       },
       search: {
         //查询筛选字段
@@ -768,8 +790,8 @@ export default {
         return
       }
       const pagination = this.pagination
-      const search = { ...this.search }
-      if (!search.sex.length) {
+      const search = { ...this.oldSearch }
+      if (!search.sex || !search.sex.length) {
         search.sex = null
       }
       this.$router.push({
@@ -783,6 +805,7 @@ export default {
     },
     // 查询列表
     queryList() {
+      Object.assign(this.oldSearch, this.search)
       if (
         new Date(this.search.endTime) - new Date(this.search.startTime) >
         31 * 24 * 3600 * 1000
