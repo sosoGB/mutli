@@ -465,42 +465,42 @@ export default {
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
       recallResultList: [
-        { label: '正在通话中', key: '1' },
-        { label: '用户忙', key: '2' },
-        { label: '无应答', key: '3' },
-        { label: '空号', key: '4' },
-        { label: '关机', key: '5' },
-        { label: '停机', key: '6' },
-        { label: '号码错误', key: '8' },
-        { label: '暂停服务', key: '12' },
-        { label: '暂时无法接通', key: '13' },
-        { label: '线路欠费', key: '17' },
-        { label: '请求超时', key: '18' },
-        { label: '用户未响应', key: '22' },
-        { label: '黑名单', key: '28' },
-        { label: '呼叫超频', key: '24' },
-        { label: '靓号禁呼', key: '25' },
-        { label: '外呼限制', key: '27' },
-        { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
+        // { label: '正在通话中', key: '1' },
+        // { label: '用户忙', key: '2' },
+        // { label: '无应答', key: '3' },
+        // { label: '空号', key: '4' },
+        // { label: '关机', key: '5' },
+        // { label: '停机', key: '6' },
+        // { label: '号码错误', key: '8' },
+        // { label: '暂停服务', key: '12' },
+        // { label: '暂时无法接通', key: '13' },
+        // { label: '线路欠费', key: '17' },
+        // { label: '请求超时', key: '18' },
+        // { label: '用户未响应', key: '22' },
+        // { label: '黑名单', key: '28' },
+        // { label: '呼叫超频', key: '24' },
+        // { label: '靓号禁呼', key: '25' },
+        // { label: '外呼限制', key: '27' },
+        // { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
       ], // 可选通话结果
       conversionResultList: [
-        { label: '正在通话中', key: '1' },
-        { label: '用户忙', key: '2' },
-        { label: '无应答', key: '3' },
-        { label: '空号', key: '4' },
-        { label: '关机', key: '5' },
-        { label: '停机', key: '6' },
-        { label: '号码错误', key: '8' },
-        { label: '暂停服务', key: '12' },
-        { label: '暂时无法接通', key: '13' },
-        { label: '线路欠费', key: '17' },
-        { label: '请求超时', key: '18' },
-        { label: '用户未响应', key: '22' },
-        { label: '黑名单', key: '28' },
-        { label: '呼叫超频', key: '24' },
-        { label: '靓号禁呼', key: '25' },
-        { label: '外呼限制', key: '27' },
-        { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
+        // { label: '正在通话中', key: '1' },
+        // { label: '用户忙', key: '2' },
+        // { label: '无应答', key: '3' },
+        // { label: '空号', key: '4' },
+        // { label: '关机', key: '5' },
+        // { label: '停机', key: '6' },
+        // { label: '号码错误', key: '8' },
+        // { label: '暂停服务', key: '12' },
+        // { label: '暂时无法接通', key: '13' },
+        // { label: '线路欠费', key: '17' },
+        // { label: '请求超时', key: '18' },
+        // { label: '用户未响应', key: '22' },
+        // { label: '黑名单', key: '28' },
+        // { label: '呼叫超频', key: '24' },
+        // { label: '靓号禁呼', key: '25' },
+        // { label: '外呼限制', key: '27' },
+        // { label: '其他', key: '7,11,14,15,16,19,20,21,23,26' }
       ], // 可选通话结果
       dateList: [
         { name: '星期一', value: 1 },
@@ -796,8 +796,24 @@ export default {
     this.createFormData.customerNum2 = this.selectCtNum
     // this.fetchRobotList()
     this.fetchPlatFormList()
+    this.getRecallResultList()
   },
   methods: {
+    getRecallResultList() {
+      // /api/1.0/call/phone/records/call/result/dictionary
+      this.$request
+        .jsonGet('/sdmulti/task/phone/result/dictionary')
+        .then((res) => {
+          let list = Object.keys(res.data).map((label) => {
+            return {
+              label,
+              key: res.data[label]
+            }
+          })
+          this.recallResultList = list
+          this.conversionResultList = list
+        })
+    },
     lastNumOnInput(e) {
       if (!isNaN(parseInt(e)) && parseInt(e) > parseInt(this.selectCtNum)) {
         this.createFormData.customerNum2 = this.selectCtNum
