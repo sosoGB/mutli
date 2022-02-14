@@ -1,20 +1,51 @@
 <template>
   <div class="menu-wrap">
-    <div class="menu-logo" :class="{ expand: isMenuExpand, collapse: !isMenuExpand }" @click="$router.push('/main')"></div>
-    <el-menu router unique-opened class="menu" :default-active="$route.path" :collapse="!isMenuExpand">
+    <div
+      class="menu-logo"
+      :class="{ expand: isMenuExpand, collapse: !isMenuExpand }"
+      @click="$router.push('/main')"
+    ></div>
+    <el-menu
+      router
+      unique-opened
+      class="menu"
+      :default-active="$route.path"
+      :collapse="!isMenuExpand"
+    >
       <template v-for="menu in menuList">
-        <el-submenu :index="menu.route" v-if="!menu.hidden && menu.children && menu.children.length" :key="menu.name" popper-class="submenu-popup">
+        <el-submenu
+          :index="menu.route"
+          v-if="!menu.hidden && menu.children && menu.children.length"
+          :key="menu.name"
+          popper-class="submenu-popup"
+        >
           <template slot="title" class="menu-item">
-            <img :src="menu.actived ? menu.activeIcon : menu.inactiveIcon" alt="icon" class="menu-icon" />
+            <img
+              :src="menu.actived ? menu.activeIcon : menu.inactiveIcon"
+              alt="icon"
+              class="menu-icon"
+            />
             <span>{{ menu.name }}</span>
           </template>
-          <el-menu-item :index="child.route" v-for="child in menu.children" :key="child.name">
+          <el-menu-item
+            :index="child.route"
+            v-for="child in menu.children"
+            :key="child.name"
+          >
             <span slot="title">{{ child.name }}</span>
           </el-menu-item>
         </el-submenu>
-        <el-menu-item :index="menu.route" v-if="!menu.hidden && !menu.children" :key="menu.name">
+        <el-menu-item
+          :index="menu.route"
+          v-if="!menu.hidden && !menu.children"
+          :key="menu.name"
+        >
           <template slot="title" class="menu-item">
-            <img :src="menu.actived ? menu.activeIcon : menu.inactiveIcon" alt="icon" class="menu-icon" />
+            <img
+              :src="menu.actived ? menu.activeIcon : menu.inactiveIcon"
+              alt="icon"
+              class="menu-icon"
+            />
             <span>{{ menu.name }}</span>
           </template>
         </el-menu-item>
@@ -24,7 +55,7 @@
 </template>
 <script>
 export default {
-  data () {
+  data() {
     const isPartial = this.$store.state.userInfo.username === 'report'
     return {
       isPartial,
@@ -38,8 +69,12 @@ export default {
           hidden: isPartial,
           children: [
             {
-              name: '客户批次管理',
+              name: '名单批次管理',
               route: '/main/customerManage/customerList'
+            },
+            {
+              name: '项目批次管理',
+              route: '/main/customerManage/programRosterList'
             }
           ]
         },
@@ -56,19 +91,19 @@ export default {
             // },
             {
               name: '呼叫任务管理',
-              route: '/main/callManage/callTask',
-            },
-          ],
+              route: '/main/callManage/callTask'
+            }
+          ]
         }
-      ],
+      ]
     }
   },
   computed: {
-    isMenuExpand () {
+    isMenuExpand() {
       return this.$store.state.isMenuExpand
-    },
+    }
   },
-  created () {
+  created() {
     this.isPartial && this.$router.replace('/main/operationReport/reportList')
     if (this.$store.state.userInfo.id === 3) {
       this.menuList.splice(1, 3)

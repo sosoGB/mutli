@@ -1,3 +1,11 @@
+<!--
+ * @Author: your name
+ * @Date: 2022-01-21 15:30:34
+ * @LastEditTime: 2022-02-14 17:20:48
+ * @LastEditors: Please set LastEditors
+ * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @FilePath: \mutli\src\pages\programRosterManage\list.vue
+-->
 <template>
   <div class="customerList page-list">
     <!-- 面包屑导航 -->
@@ -6,7 +14,7 @@
         <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }"
           >首页</el-breadcrumb-item
         >
-        <el-breadcrumb-item>名单批次管理</el-breadcrumb-item>
+        <el-breadcrumb-item>项目批次管理</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="toolbar">
@@ -17,33 +25,21 @@
           v-model.trim="search.batch"
           clearable
         ></el-input>
-        <el-select
-          v-model="search.customerType"
-          placeholder="请选择名单来源"
-          clearable
-          class="advanced-input"
-        >
-          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
-          <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
-          <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
-          <el-option label="凯森" value="凯森"></el-option>
-          <el-option label="元保" value="元保"></el-option>
-        </el-select>
         <el-date-picker
-          v-model="search.startTime"
+          v-model="search.repeatTimeStart"
           class="search-component search-input"
           type="date"
-          placeholder="开始时间"
+          placeholder="复用开始时间"
           value-format="yyyy-MM-dd"
           :picker-options="beginUpdateValidator"
           clearable
         ></el-date-picker>
         <span class="search-delimiter">-</span>
         <el-date-picker
-          v-model="search.endTime"
+          v-model="search.repeatTimeEnd"
           class="search-component search-input"
           type="date"
-          placeholder="结束时间"
+          placeholder="复用结束时间"
           value-format="yyyy-MM-dd"
           :picker-options="endUpdateValidator"
           clearable
@@ -60,20 +56,303 @@
           "
           >搜索</el-button
         >
+        <span
+          class="toggle-advanced"
+          @click="showMoreSearch = !showMoreSearch"
+          >{{ showMoreSearch ? '取消' : '高级搜索' }}</span
+        >
       </div>
       <div class="tool-button">
-        <!-- <el-button @click="toCreateTask" icon="el-icon-plus"
+        <el-button @click="toCreateTask" icon="el-icon-plus"
           >新建任务</el-button
-        > -->
-        <el-button @click="listDispatch" icon="el-icon-setting"
-          >名单下发</el-button
         >
-        <el-button @click="toListPullSet" icon="el-icon-setting"
-          >名单拉取</el-button
+        <el-button @click="toManage" icon="el-icon-setting">管理项目</el-button>
+        <el-button @click="toListPullSet" type="primary" icon="el-icon-upload"
+          >上传成功单</el-button
         >
-        <el-button @click="exportList" icon="el-icon-setting"
+        <el-button @click="dowmloadList" type="primary" icon="el-icon-download"
           >列表导出</el-button
         >
+      </div>
+    </div>
+    <div v-show="showMoreSearch" class="toolbar-advanced">
+      <div class="advanced-item">
+        <span class="advanced-label">项目名称：</span>
+        <el-input
+          v-model="search.projectName"
+          placeholder="请输入项目名称"
+          class="advanced-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">名单来源：</span>
+        <el-select
+          v-model="search.type"
+          placeholder="请选择名单来源"
+          clearable
+          class="advanced-input"
+        >
+          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
+          <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
+          <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
+          <el-option label="凯森" value="凯森"></el-option>
+          <el-option label="元保" value="元保"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">销售产品：</span>
+        <el-input
+          v-model="search.product"
+          placeholder="请输入销售产品"
+          class="advanced-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">性别：</span>
+        <el-select
+          v-model="search.sex"
+          placeholder="请选择性别"
+          clearable
+          class="advanced-input"
+          multiple
+        >
+          <el-option label="男" :value="1"></el-option>
+          <el-option label="女" :value="0"></el-option>
+          <el-option label="未知" :value="-1"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">年龄：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.minAge"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.maxAge"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">复用次数：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.repeatCtMin"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.repeatCtMax"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">姓名是否为空：</span>
+        <el-select
+          v-model="search.isName"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">是否已成功转化：</span>
+        <el-select
+          v-model="search.isSuccess"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option label="是" :value="2"></el-option>
+          <el-option label="否" :value="1"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">是否已创建外呼任务：</span>
+        <el-select
+          v-model="search.isCall"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">姓名是否有特殊符号：</span>
+        <el-select
+          placeholder="请选择"
+          clearable
+          v-model="search.nameSpecial"
+          class="advanced-input"
+        >
+          <el-option label="是" :value="0"></el-option>
+          <el-option label="否" :value="1"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">历史最高通话时长/s：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.startMaxTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.endMaxTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">最近通话时长/s：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.startTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.endTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">项目批次创建时间：</span>
+        <el-date-picker
+          v-model="search.createTimeMin"
+          class="search-component search-input"
+          type="date"
+          placeholder="开始时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="beginUpdateValidator"
+          clearable
+        ></el-date-picker>
+        <span class="search-delimiter">-</span>
+        <el-date-picker
+          v-model="search.createTimeMax"
+          class="search-component search-input"
+          type="date"
+          placeholder="结束时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="endUpdateValidator"
+          clearable
+        ></el-date-picker>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">意向分级标签：</span>
+        <el-input
+          placeholder="请输入意向分级标签，用逗号隔开"
+          v-model="search.tag"
+          class="advanced-input large-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">意向分级等级：</span>
+        <el-checkbox-group
+          v-model="selectIntentTags"
+          style="display:inline-block;"
+        >
+          <el-checkbox
+            v-for="range in intentTags"
+            :label="range"
+            :key="range"
+            style="width:80px;"
+          ></el-checkbox>
+        </el-checkbox-group>
       </div>
     </div>
     <div class="table">
@@ -104,6 +383,13 @@
         </el-table-column>
         <el-table-column
           :resizable="false"
+          prop="projectName"
+          label="项目名称"
+          width="120"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
           prop="batch"
           label="客户批次"
           width="120"
@@ -119,23 +405,31 @@
         </el-table-column>
         <el-table-column
           :resizable="false"
-          label="录入时间"
+          prop="product"
+          label="销售产品"
+          width="120"
+          align="center"
+        >
+        </el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="reuseTime"
+          label="复用次数"
+          width="120"
+          align="center"
+        >
+        </el-table-column>
+        <el-table-column
+          :resizable="false"
+          label="最近一次复用时间"
           width="110"
           align="center"
         >
           <template slot-scope="scope">
             <span>{{
-              scope.row.createTime | formatDate('yyyy-MM-dd hh:mm:ss')
+              scope.row.lastReuseTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
-        </el-table-column>
-        <el-table-column
-          :resizable="false"
-          prop="initCt"
-          label="入库前获取的客户总数量"
-          width="180"
-          align="center"
-        >
         </el-table-column>
         <el-table-column
           :resizable="false"
@@ -147,14 +441,15 @@
         </el-table-column>
         <el-table-column
           :resizable="false"
-          prop="newCt"
-          label="实际入库的新客户数量"
-          width="180"
+          prop="callCt"
+          label="已创建呼叫任务的客户数量"
+          width="190"
           align="center"
+          show-overflow-tooltip
         ></el-table-column>
         <el-table-column
           :resizable="false"
-          prop="connectCt"
+          prop="onCt"
           label="已接通的客户数量"
           width="190"
           align="center"
@@ -168,14 +463,14 @@
           align="center"
         ></el-table-column>
         <el-table-column
-          prop="connectPercent"
+          prop="passPercent"
           label="总体接通率"
           width="180"
           align="center"
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.successPercent + '%' }}
+              {{ scope.row.passPercent + '%' }}
             </div>
           </template>
         </el-table-column>
@@ -194,15 +489,12 @@
         <el-table-column
           :resizable="false"
           label="操作"
-          min-width="240"
+          min-width="140"
           fixed="right"
           align="center"
         >
           <template slot-scope="scope">
-            <el-button @click="ctDownload(scope.row)" :disabled="isDownLoad">{{
-              scope.row.isDownLoad ? '正在下载' : '客户下载'
-            }}</el-button>
-            <el-button @click="viewProgram(scope.row)">查看项目</el-button>
+            <el-button @click="lookTask(scope.row)">查看任务</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -265,46 +557,6 @@
         <el-button type="primary" @click="handleDialogConfirm">确 定</el-button>
       </div>
     </el-dialog>
-    <el-dialog
-      title="名单下发"
-      :visible.sync="listDispatchDialogVisible"
-      v-if="listDispatchDialogVisible"
-    >
-      <el-form
-        :model="dispatchForm"
-        label-width="120px"
-        label-position="right"
-        :rules="dispacthFormrules"
-        ref="pullForm"
-      >
-        <el-form-item label="项目名称：" prop="program">
-          <el-select
-            v-model="dispatchForm.program"
-            placeholder="请选择项目名称"
-            clearable
-            class="advanced-input"
-          >
-            <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
-            <el-option
-              label="水滴公众号吸粉"
-              value="水滴公众号吸粉"
-            ></el-option>
-            <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
-            <el-option label="凯森" value="凯森"></el-option>
-            <el-option label="元保" value="元保"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="销售产品：" prop="product">
-          <el-input disabled v-model="dispatchForm.product"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="closeDispatchDialog">取 消</el-button>
-        <el-button type="primary" @click="handleDispatchDialogConfirm"
-          >确 定</el-button
-        >
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script>
@@ -316,7 +568,6 @@ export default {
   data() {
     return {
       clickedSle: false,
-      isDownLoad: false, //是否在下载
       authExport: false,
       userInfo: this.$store.state.userInfo,
       detailPages: ['customerInfo', 'followRecords'], //当前页面能跳转的子页面的name数组
@@ -324,6 +575,9 @@ export default {
       searchShow: [], //控制筛选显示
       isSelectAll: false, //是否全选列表结果
       ifCheckAll: false, //是否选中所有
+      showMoreSearch: false, //是否显示高级搜索
+      intentTags: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
+      selectIntentTags: [],
       pullForm: {
         type: '',
         number: '',
@@ -344,32 +598,59 @@ export default {
           }
         ]
       },
-      dispatchForm: {
-        program: null,
-        product: null
-      },
-      dispacthFormrules: {
-        program: [{ required: true, message: '请选择项目', trigger: 'change' }]
-      },
       oldSearch: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
         batch: null, //客户批次
-        endTime: '', //开始时间
-        startTime: '', //结束时间
-        customerType: null //客户种类
+        repeatTimeEnd: '', //复用开始时间
+        repeatTimeStart: '', //复用结束时间
+        projectName: null, // 项目名称
+        type: null, //名单来源
+        product: null,
+        sex: null, //性别
+        minAge: null, //年龄最小值
+        maxAge: null, //年龄最大值
+        repeatCtMin: null, // 复用次数
+        repeatCtMax: null, // 复用次数
+        isCall: null, //是否已创建外呼任务
+        nameSpecial: null, //是否为新客户
+        isSuccess: null, //是否已成功转化
+        isName: null, //名字是否为空
+        tag: '', //
+        startMaxTalkTime: null,
+        endMaxTalkTime: null,
+        startTalkTime: null,
+        endTalkTime: null,
+        createTimeMin: null,
+        createTimeMax: null
       },
       search: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
-        batch: null, //客户批次
-        endTime: '', //开始时间
-        startTime: '', //结束时间
-        customerType: null //客户种类
+        batch: this.$route.query.batch, //客户批次
+        repeatTimeEnd: '', //开始时间
+        repeatTimeStart: '', //结束时间
+        projectName: '', //项目名称
+        type: null, //名单来源
+        product: null, //销售产品
+        sex: null, //性别
+        minAge: null, //年龄最小值
+        maxAge: null, //年龄最大值
+        repeatCtMin: null, // 复用次数
+        repeatCtMax: null, // 复用次数
+        isCall: null, //是否已创建外呼任务
+        nameSpecial: null, //是否为新客户
+        isSuccess: null, //是否已成功转化
+        isName: null, //名字是否为空
+        tag: '', //
+        startMaxTalkTime: null,
+        endMaxTalkTime: null,
+        startTalkTime: null,
+        endTalkTime: null,
+        createTimeMin: null,
+        createTimeMax: null
       },
       listPullDialogVisible: false,
-      listDispatchDialogVisible: false,
-      programList: [],
       pagination: {
         pageSize: 10,
         currentPage: 1,
@@ -379,27 +660,26 @@ export default {
       customerList: [], //表格填充数据
       isLoading: false,
       checkedTableRow: [], //表格已选中或取消行
-      beginDateValidator: {
-        disabledDate: (current) => Date.now() < current
-      },
-      endDateValidator: {
-        disabledDate: (current) => {
-          return (
-            (this.search.lastFollowBeginTime &&
-              filter.formatDate(current, 'yyyy-MM-dd') <
-                this.search.lastFollowBeginTime) ||
-            Date.now() < current
-          )
-        }
-      },
       beginUpdateValidator: {
         disabledDate: (current) => Date.now() < current
       },
       endUpdateValidator: {
         disabledDate: (current) => {
           return (
-            this.search.startTime &&
-            filter.formatDate(current, 'yyyy-MM-dd') < this.search.startTime
+            this.search.repeatTimeStart &&
+            filter.formatDate(current, 'yyyy-MM-dd') <
+              this.search.repeatTimeStart
+          )
+        }
+      },
+      createTimeMinValidator: {
+        disabledDate: (current) => Date.now() < current
+      },
+      createTimeMaxValidator: {
+        disabledDate: (current) => {
+          return (
+            this.search.createTimeMin &&
+            filter.formatDate(current, 'yyyy-MM-dd') < this.search.createTimeMin
           )
         }
       }
@@ -413,44 +693,10 @@ export default {
     this.queryList()
   },
   methods: {
-    viewProgram(row) {
-      this.$router.push({
-        path: '/main/customerManage/programRosterList',
-        query: {
-          batch: row.batch
-        }
-      })
-    },
-    listDispatch() {
-      if (!this.checkedTableRow.length) {
-        this.$message.error('请至少选择一条数据')
-        return
-      }
-      const type = this.checkedTableRow[0].row.type
-      const someDiff = this.checkedTableRow.some((e) => e.row.type !== type)
-      if (someDiff) {
-        this.$message.error('请选择相同名单来源的数据')
-        return
-      }
-      this.listDispatchDialogVisible = true
-      this.getProgramListByType(type)
-    },
-    getProgramListByType(type) {
-      const url = '/sdmulti/manage/project/list/type?type=' + type
-      this.$request.jsonGet(url).then((res) => {
-        if (res.code == '0') {
-          this.programList = res.data
-        }
-      })
-    },
-    closeDispatchDialog() {
-      for (const key in this.pullForm) {
-        this.pullForm[key] = ''
-      }
-      this.listDispatchDialogVisible = false
-    },
-    handleDispatchDialogConfirm() {
-      this.closeDispatchDialog()
+    lookTask() {},
+    dowmloadList() {},
+    toManage() {
+      this.$router.push('/main/customerManage/programManageList')
     },
     closePullDialog() {
       for (const key in this.pullForm) {
@@ -498,7 +744,11 @@ export default {
               }
             })
         }
-        this.closePullDialog()
+
+        for (const key in this.pullForm) {
+          this.pullForm[key] = ''
+        }
+        this.listPullDialogVisible = false
       })
     },
     toListPullSet() {
@@ -571,36 +821,6 @@ export default {
         this.$refs.table.toggleAllSelection()
       }
     },
-    // 查询结果下载
-    async ctDownload(row) {
-      const { userId, uuid, type } = row
-      row.isDownLoad = true
-      if (!this.isDownLoad) {
-        this.isDownLoad = true
-        this.$message.warning('客户信息包含内容较多，下载时间较长，请见谅！')
-        const res = await this.$request.xml(
-          '/sdmulti/qbzz/manage/api/download',
-          {
-            userId,
-            uuid,
-            type,
-            batch: this.search.batch,
-            startTime: this.search.startTime
-              ? this.search.startTime + ' 00:00:00'
-              : null,
-            endTime: this.search.endTime
-              ? this.search.endTime + ' 23:59:59'
-              : null
-          }
-        )
-        const a = document.createElement('a')
-        a.download = '客户批次查询结果.xls'
-        a.href = URL.createObjectURL(res)
-        a.click()
-        this.isDownLoad = false
-        row.isDownLoad = false
-      }
-    },
     //跳转新建任务
     toCreateTask() {
       if (!this.isSelectAll) {
@@ -619,6 +839,9 @@ export default {
       }
       const pagination = this.pagination
       const search = { ...this.oldSearch }
+      if (!search.sex || !search.sex.length) {
+        search.sex = null
+      }
       this.$router.push({
         path: 'createTask',
         query: {
@@ -632,7 +855,8 @@ export default {
     queryList() {
       Object.assign(this.oldSearch, this.search)
       if (
-        new Date(this.search.endTime) - new Date(this.search.startTime) >
+        new Date(this.search.repeatTimeEnd) -
+          new Date(this.search.repeatTimeStart) >
         31 * 24 * 3600 * 1000
       ) {
         this.$message.warning('日期跨度不得超过31天')
@@ -640,22 +864,69 @@ export default {
       }
       this.isLoading = true
       this.checkedTableRow = []
+      let sex = null
+      if (this.search.sex && this.search.sex.length) {
+        sex = this.search.sex.map(Number)
+        if (sex.includes(0)) {
+          sex.push(2)
+        }
+      }
+      let aiCategory = this.selectIntentTags.join(',')
+      const params = {
+        userId: this.$store.state.userInfo.id,
+        batch: this.search.batch || null,
+        repeatTimeStart: this.search.repeatTimeStart
+          ? this.search.repeatTimeStart + ' 00:00:00'
+          : null,
+        repeatTimeEnd: this.search.repeatTimeEnd
+          ? this.search.repeatTimeEnd + ' 23:59:59'
+          : null,
+        type: this.search.type,
+        projectName: this.search.projectName,
+        product: this.search.product,
+        sex: sex,
+        minAge: this.search.minAge,
+        maxAge: this.search.maxAge,
+        repeatCtMin: this.search.repeatCtMin,
+        repeatCtMax: this.search.repeatCtMax,
+        isCall: this.search.isCall,
+        nameSpecial: this.search.nameSpecial,
+        isSuccess: this.search.isSuccess,
+        isName: this.search.isName,
+        page: this.pagination.currentPage,
+        pageSize: this.pagination.pageSize,
+        tag: this.search.tag,
+        aiCategory,
+        startMaxTalkTime: this.search.startMaxTalkTime,
+        endMaxTalkTime: this.search.endMaxTalkTime,
+        startTalkTime: this.search.startTalkTime,
+        endTalkTime: this.search.endTalkTime,
+        createTimeMin: this.search.createTimeMin,
+        createTimeMax: this.search.createTimeMax
+      }
+      let url = '/sdmulti/project/info/list'
+      //判断是否是简单字段查询
+      if (
+        (!this.search.sex || !this.search.sex.length) &&
+        !this.search.minAge &&
+        !this.search.maxAge &&
+        !this.search.isCall &&
+        !this.search.nameSpecial &&
+        !this.search.isSuccess &&
+        !this.search.isName &&
+        !this.search.tag &&
+        !this.search.startMaxTalkTime &&
+        !this.search.endMaxTalkTime &&
+        !this.search.startTalkTime &&
+        !this.search.endTalkTime
+      ) {
+        url = '/sdmulti/project/info/list/init'
+      }
       this.$request
-        .jsonPost('/sdmulti/qbzz/manage/api/queryCusBatch', {
-          userId: this.$store.state.userInfo.id,
-          batch: this.search.batch || null,
-          startTime: this.search.startTime
-            ? this.search.startTime + ' 00:00:00'
-            : null,
-          endTime: this.search.endTime
-            ? this.search.endTime + ' 23:59:59'
-            : null,
-          type: this.search.customerType,
-          page: this.pagination.currentPage,
-          pageSize: this.pagination.pageSize
-        })
+        .jsonPost(url, params)
         .then((res) => {
           this.isLoading = false
+          this.showMoreSearch = false
           if (res.code == 0) {
             this.customerList = res.data ? res.data.list : []
             this.pagination.total = res.data ? res.data.total : 0
@@ -685,8 +956,7 @@ export default {
         .finally(() => {
           this.isLoading = false
         })
-    },
-    exportList() {}
+    }
   }
 }
 </script>
@@ -724,7 +994,7 @@ export default {
         width: 147px;
       }
       &.large-input {
-        width: 600px;
+        width: 450px;
       }
     }
     .delimiter {
