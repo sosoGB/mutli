@@ -208,9 +208,9 @@
       </el-table>
     </div>
     <div class="pagination">
-      <!-- <el-checkbox v-model="isSelectAll" @change="toggleSelectAll"
+      <el-checkbox v-model="isSelectAll" @change="toggleSelectAll"
         >结果页全选</el-checkbox
-      > -->
+      >
       <el-pagination
         background
         @current-change="queryList"
@@ -284,18 +284,16 @@
             clearable
             class="advanced-input"
           >
-            <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
             <el-option
-              label="水滴公众号吸粉"
-              value="水滴公众号吸粉"
+              v-for="item in programList"
+              :label="item.projectName"
+              :value="item.id"
+              :key="item.id"
             ></el-option>
-            <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
-            <el-option label="凯森" value="凯森"></el-option>
-            <el-option label="元保" value="元保"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="销售产品：" prop="product">
-          <el-input disabled v-model="dispatchForm.product"></el-input>
+        <el-form-item label="销售产品：">
+          <el-input disabled :value="programProduct"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -405,6 +403,25 @@ export default {
       }
     }
   },
+  computed: {
+    programProduct() {
+      if (this.dispatchForm.program) {
+        const item = this.programList.find(
+          (e) => e.id === this.dispatchForm.program
+        )
+        return item.product
+      }
+      return ''
+    }
+  },
+  watch: {
+    listDispatchDialogVisible(val) {
+      if (!val) {
+        this.dispatchForm.program = ''
+        this.programList = []
+      }
+    }
+  },
   created() {
     this.queryList()
   },
@@ -422,6 +439,20 @@ export default {
       })
     },
     listDispatch() {
+      if (this.isSelectAll) {
+        this.checkedTableRow = this.customerList
+          .map((item, index) => {
+            return {
+              page: this.pagination.currentPage,
+              index,
+              row: item
+            }
+          })
+          .filter(
+            (e) => !this.checkedTableRow.find((el) => el.row.id === e.row.id)
+          )
+      }
+      this.isSelectAll = false
       if (!this.checkedTableRow.length) {
         this.$message.error('请至少选择一条数据')
         return
@@ -450,6 +481,29 @@ export default {
       this.listDispatchDialogVisible = false
     },
     handleDispatchDialogConfirm() {
+      if (!this.dispatchForm.program) {
+        this.$message.error('请选择下发项目')
+        return
+      }
+      const item = this.programList.find(
+        (e) => e.id === this.dispatchForm.program
+      )
+      const url = '/sdmulti/project/info/batch/distribute'
+      const params = {
+        batchList: this.checkedTableRow.map((e) => e.row.batch),
+        product: this.programProduct,
+        projectId: item.id,
+        projectName: item.projectName
+      }
+      this.$request.jsonPost(url, params).then((res) => {
+        if (res.code == '0') {
+          this.$message.success('名单下发项目成功')
+          this.listDispatchDialogVisible = false
+          this.queryList()
+        } else {
+          this.$message.error(res.message)
+        }
+      })
       this.closeDispatchDialog()
     },
     closePullDialog() {
@@ -594,7 +648,7 @@ export default {
           }
         )
         const a = document.createElement('a')
-        a.download = '客户批次查询结果.xls'
+        a.download = '名单批次查询结果.xls'
         a.href = URL.createObjectURL(res)
         a.click()
         this.isDownLoad = false
@@ -659,34 +713,53 @@ export default {
           if (res.code == 0) {
             this.customerList = res.data ? res.data.list : []
             this.pagination.total = res.data ? res.data.total : 0
-            // if (this.checkedTableRow.length !== 0) {
-            //   this.$nextTick(() => {
-            //     const checkedRow = this.checkedTableRow.filter((item) => {
-            //       return item.page === this.pagination.currentPage
-            //     })
-            //     if (this.isSelectAll) {
-            //       this.customerList.forEach((item) => {
-            //         this.$refs.table.toggleRowSelection(item)
-            //       })
-            //     }
-            //     checkedRow.forEach((item) => {
-            //       this.$refs.table.toggleRowSelection(
-            //         this.customerList[item.index]
-            //       )
-            //     })
-            //   })
-            // if (this.isSelectAll) {
-            //   this.$nextTick(() => {
-            //     this.$refs.table.toggleAllSelection(true)
-            //   })
-            // }
+            if (this.checkedTableRow.length !== 0) {
+              this.$nextTick(() => {
+                const checkedRow = this.checkedTableRow.filter((item) => {
+                  return item.page === this.pagination.currentPage
+                })
+                if (this.isSelectAll) {
+                  this.customerList.forEach((item) => {
+                    this.$refs.table.toggleRowSelection(item)
+                  })
+                }
+                checkedRow.forEach((item) => {
+                  this.$refs.table.toggleRowSelection(
+                    this.customerList[item.index]
+                  )
+                })
+              })
+            } else if (this.isSelectAll) {
+              this.$nextTick(() => {
+                this.$refs.table.toggleAllSelection(true)
+              })
+            }
           }
         })
         .finally(() => {
           this.isLoading = false
         })
     },
-    exportList() {}
+    async exportList() {
+      const url = '/sdmulti/qbzz/manage/api/customer/batch/export'
+      const params = {
+        userId: this.$store.state.userInfo.id,
+        batch: this.search.batch || null,
+        startTime: this.search.startTime
+          ? this.search.startTime + ' 00:00:00'
+          : null,
+        endTime: this.search.endTime ? this.search.endTime + ' 23:59:59' : null,
+        type: this.search.customerType,
+        ids: this.isSelectAll
+          ? []
+          : this.checkedTableRow.map((item) => item.row.id)
+      }
+      const res = await this.$request.xml(url, params)
+      const a = document.createElement('a')
+      a.download = '名单批次查询结果导出报表.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    }
   }
 }
 </script>
@@ -698,7 +771,7 @@ export default {
   }
   .pagination {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     flex-direction: row;
     align-items: center;
   }

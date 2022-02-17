@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-02-14 17:20:48
+ * @LastEditTime: 2022-02-17 16:54:16
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -20,7 +20,7 @@
     <div class="toolbar">
       <div class="tool-search">
         <el-input
-          placeholder="客户批次"
+          placeholder="名单批次"
           class="search-component search-input"
           v-model.trim="search.batch"
           clearable
@@ -413,7 +413,7 @@
         </el-table-column>
         <el-table-column
           :resizable="false"
-          prop="reuseTime"
+          prop="repeatCt"
           label="复用次数"
           width="120"
           align="center"
@@ -427,7 +427,7 @@
         >
           <template slot-scope="scope">
             <span>{{
-              scope.row.lastReuseTime | formatDate('yyyy-MM-dd hh:mm:ss')
+              scope.row.repeatTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
@@ -449,7 +449,7 @@
         ></el-table-column>
         <el-table-column
           :resizable="false"
-          prop="onCt"
+          prop="connectCt"
           label="已接通的客户数量"
           width="190"
           align="center"
@@ -470,7 +470,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.passPercent + '%' }}
+              {{ scope.row.connectPercent }}
             </div>
           </template>
         </el-table-column>
@@ -482,7 +482,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.successPercent + '%' }}
+              {{ scope.row.successPercent }}
             </div>
           </template>
         </el-table-column>
@@ -500,9 +500,9 @@
       </el-table>
     </div>
     <div class="pagination">
-      <!-- <el-checkbox v-model="isSelectAll" @change="toggleSelectAll"
+      <el-checkbox v-model="isSelectAll" @change="toggleSelectAll"
         >结果页全选</el-checkbox
-      > -->
+      >
       <el-pagination
         background
         @current-change="queryList"
@@ -515,46 +515,28 @@
       ></el-pagination>
     </div>
     <el-dialog
-      title="名单拉取设置"
+      title="上传成功单"
       :visible.sync="listPullDialogVisible"
       v-if="listPullDialogVisible"
     >
-      <el-form
-        :model="pullForm"
-        label-width="190px"
-        label-position="right"
-        :rules="rules"
-        ref="pullForm"
+      <el-upload
+        class="upload-demo"
+        drag
+        action="/sdmulti/api/insurance/upload"
+        multiple
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       >
-        <el-form-item label="名单拉取方式：" prop="type">
-          <el-radio-group v-model="pullForm.type">
-            <el-radio :label="1">自动拉取</el-radio>
-            <el-radio :label="2">手动拉取</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="最大拉取名单数目/条：" prop="number">
-          <el-input type="number" v-model="pullForm.number"></el-input>
-        </el-form-item>
-        <el-form-item
-          label="每天自动拉取名单时间："
-          v-if="pullForm.type == 1"
-          prop="autoPullTime"
-        >
-          <el-time-select
-            v-model="pullForm.autoPullTime"
-            :picker-options="{
-              start: '00:00',
-              step: '00:30',
-              end: '23:30'
-            }"
-            placeholder="选择时间"
-          >
-          </el-time-select>
-        </el-form-item>
-      </el-form>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">
+          将xls/xlsx文件拖到此处，或<em>点击上传</em>
+        </div>
+      </el-upload>
+      <div style="text-align:center;margin-top:10px;">
+        <a href="/xls/成功单.xlsx">下载成功单模板</a>
+      </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="closePullDialog">取 消</el-button>
-        <el-button type="primary" @click="handleDialogConfirm">确 定</el-button>
+        <el-button @click="closePullDialog">返回</el-button>
+        <!-- <el-button type="primary" @click="handleDialogConfirm">确 定</el-button> -->
       </div>
     </el-dialog>
   </div>
@@ -693,8 +675,65 @@ export default {
     this.queryList()
   },
   methods: {
-    lookTask() {},
-    dowmloadList() {},
+    lookTask(row) {
+      this.$router.push({
+        path: '/main/callManage/callTask',
+        query: {
+          projectName: row.projectName,
+          batch: row.batch
+        }
+      })
+    },
+    async dowmloadList() {
+      ///project/info/project/batch/export
+      const url = '/sdmulti/project/info/project/batch/export'
+      let sex = null
+      if (this.search.sex && this.search.sex.length) {
+        sex = this.search.sex.map(Number)
+        if (sex.includes(0)) {
+          sex.push(2)
+        }
+      }
+      let aiCategory = this.selectIntentTags.join(',')
+      const params = {
+        userId: this.$store.state.userInfo.id,
+        batch: this.search.batch || null,
+        repeatTimeStart: this.search.repeatTimeStart
+          ? this.search.repeatTimeStart + ' 00:00:00'
+          : null,
+        repeatTimeEnd: this.search.repeatTimeEnd
+          ? this.search.repeatTimeEnd + ' 23:59:59'
+          : null,
+        type: this.search.type,
+        projectName: this.search.projectName,
+        product: this.search.product,
+        sex: sex,
+        minAge: this.search.minAge,
+        maxAge: this.search.maxAge,
+        repeatCtMin: this.search.repeatCtMin,
+        repeatCtMax: this.search.repeatCtMax,
+        isCall: this.search.isCall,
+        nameSpecial: this.search.nameSpecial,
+        isSuccess: this.search.isSuccess,
+        isName: this.search.isName,
+        tag: this.search.tag,
+        aiCategory,
+        startMaxTalkTime: this.search.startMaxTalkTime,
+        endMaxTalkTime: this.search.endMaxTalkTime,
+        startTalkTime: this.search.startTalkTime,
+        endTalkTime: this.search.endTalkTime,
+        createTimeMin: this.search.createTimeMin,
+        createTimeMax: this.search.createTimeMax,
+        ids: this.isSelectAll
+          ? []
+          : this.checkedTableRow.map((item) => item.row.id)
+      }
+      const res = await this.$request.xml(url, params)
+      const a = document.createElement('a')
+      a.download = '项目批次查询结果导出报表.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    },
     toManage() {
       this.$router.push('/main/customerManage/programManageList')
     },
@@ -703,53 +742,6 @@ export default {
         this.pullForm[key] = ''
       }
       this.listPullDialogVisible = false
-    },
-    handleDialogConfirm() {
-      this.$refs.pullForm.validate(async (valid) => {
-        if (!valid) return
-        if (this.pullForm.type == 1) {
-          let url = '/sdmulti/fetch/setCron'
-          this.$request
-            .formPost(url, {
-              timeStr: this.pullForm.autoPullTime + ':00',
-              batchSize: this.pullForm.number
-            })
-            .then((res) => {
-              if (res.code == '0') {
-                this.$message.success('名单自动拉取设置成功')
-                this.queryList()
-              } else {
-                this.$message.error(res.message)
-              }
-            })
-        } else {
-          let url = '/sdmulti/fetch/pullNow'
-          this.$request
-            .formPost(url, {
-              batchSize: this.pullForm.number
-            })
-            .then((res) => {
-              if (res.code == '0') {
-                // this.$message.success('自动拉取')
-                if (res.data == 0) {
-                  this.$message.error('名单拉取数量为0，请确认是否已下发名单')
-                } else {
-                  this.$message.success(
-                    '名单拉取成功，拉取数目为' + res.data + '条'
-                  )
-                  this.queryList()
-                }
-              } else {
-                this.$message.error(res.message)
-              }
-            })
-        }
-
-        for (const key in this.pullForm) {
-          this.pullForm[key] = ''
-        }
-        this.listPullDialogVisible = false
-      })
     },
     toListPullSet() {
       this.listPullDialogVisible = true
@@ -825,7 +817,7 @@ export default {
     toCreateTask() {
       if (!this.isSelectAll) {
         if (!this.isSelectAll && this.checkedTableRow.length === 0) {
-          this.$message.warning('请选择客户批次')
+          this.$message.warning('请选择项目批次')
           return
         }
       }
@@ -834,7 +826,7 @@ export default {
         (el) => el.row.type === this.checkedTableRow[0].row.type
       )
       if (!result) {
-        this.$message.warning('只可针对同一客户种类新建外呼任务，请重新选择！')
+        this.$message.warning('只可针对同一名单来源新建外呼任务，请重新选择！')
         return
       }
       const pagination = this.pagination
@@ -843,7 +835,7 @@ export default {
         search.sex = null
       }
       this.$router.push({
-        path: 'createTask',
+        path: '/main/callManage/createTask',
         query: {
           name: JSON.stringify(this.checkedTableRow),
           search: JSON.stringify(search),
@@ -930,27 +922,27 @@ export default {
           if (res.code == 0) {
             this.customerList = res.data ? res.data.list : []
             this.pagination.total = res.data ? res.data.total : 0
-            // if (this.checkedTableRow.length !== 0) {
-            //   this.$nextTick(() => {
-            //     const checkedRow = this.checkedTableRow.filter((item) => {
-            //       return item.page === this.pagination.currentPage
-            //     })
-            //     if (this.isSelectAll) {
-            //       this.customerList.forEach((item) => {
-            //         this.$refs.table.toggleRowSelection(item)
-            //       })
-            //     }
-            //     checkedRow.forEach((item) => {
-            //       this.$refs.table.toggleRowSelection(
-            //         this.customerList[item.index]
-            //       )
-            //     })
-            //   })
-            // if (this.isSelectAll) {
-            //   this.$nextTick(() => {
-            //     this.$refs.table.toggleAllSelection(true)
-            //   })
-            // }
+            if (this.checkedTableRow.length !== 0) {
+              this.$nextTick(() => {
+                const checkedRow = this.checkedTableRow.filter((item) => {
+                  return item.page === this.pagination.currentPage
+                })
+                if (this.isSelectAll) {
+                  this.customerList.forEach((item) => {
+                    this.$refs.table.toggleRowSelection(item)
+                  })
+                }
+                checkedRow.forEach((item) => {
+                  this.$refs.table.toggleRowSelection(
+                    this.customerList[item.index]
+                  )
+                })
+              })
+            } else if (this.isSelectAll) {
+              this.$nextTick(() => {
+                this.$refs.table.toggleAllSelection(true)
+              })
+            }
           }
         })
         .finally(() => {
@@ -968,7 +960,7 @@ export default {
   }
   .pagination {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     flex-direction: row;
     align-items: center;
   }

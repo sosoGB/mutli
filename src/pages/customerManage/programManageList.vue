@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 15:43:03
- * @LastEditTime: 2022-02-14 18:04:49
+ * @LastEditTime: 2022-02-17 13:49:51
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\customerManage\programManageList.vue
@@ -170,7 +170,7 @@
     </div>
 
     <el-dialog
-      :title="'编辑任务'"
+      :title="editDiaTitle"
       :visible.sync="dialogEditVisible"
       @close="$refs.editForm.resetFields()"
       class="ddd"
@@ -328,6 +328,14 @@ export default {
   },
   async created() {
     this.fetchProgramList()
+  },
+  computed: {
+    editDiaTitle() {
+      if (this.editFormData.id) {
+        return '编辑项目'
+      }
+      return '新增项目'
+    }
   },
   methods: {
     beforeSelectBus() {
