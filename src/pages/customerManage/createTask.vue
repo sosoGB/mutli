@@ -16,7 +16,7 @@
       :model="createFormData"
       ref="createForm"
       :rules="createFormRule"
-      label-width="150px"
+      label-width="180px"
     >
       <el-form-item prop="name" label="任务名称：">
         <el-input
@@ -25,6 +25,29 @@
           clearable
           class="input-name"
         ></el-input>
+      </el-form-item>
+      <el-form-item prop="projectId" label="项目名称：">
+        <el-select placeholder="请选择项目" v-model="createFormData.projectId">
+          <el-option
+            v-for="item in projectList"
+            :key="item.id"
+            :label="item.projectName"
+            :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="销售产品：">
+        <el-input
+          :value="programProduct"
+          disabled
+          class="input-name"
+        ></el-input>
+      </el-form-item>
+      <el-form-item prop="repeatCount" label="是否增加名单复用次数：">
+        <el-radio-group v-model="createFormData.repeatCount">
+          <el-radio :label="1">是</el-radio>
+          <el-radio :label="0">否</el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item label="外呼客户数量：" prop="customerNum">
         <span>共{{ selectCtNum }},从第</span>
@@ -449,6 +472,9 @@ export default {
   },
   data() {
     return {
+      type: this.$route.query.type, //名单来源
+      batchList: this.$route.query.batchList, // 批次ID列表
+      projectList: [],
       selectCtNum: 0, //已选客户数量
       selectRobotName: null, //已选机器人名称
       ulCom: null,
@@ -515,6 +541,8 @@ export default {
         customerNum: 1,
         customerNum2: '',
         name: null, // 任务名称
+        projectId: null,
+        repeatCount: 1,
         robotName: null, // 机器人名称
         outCallPlatformId: [], // 外呼平台名称
         concurrentNum: null, //并发数量
@@ -540,6 +568,9 @@ export default {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
           { max: 40, message: '不得超过40个字符', trigger: 'blur' }
+        ],
+        projectId: [
+          { required: true, message: '请选择项目', trigger: 'change' }
         ],
         customerNum: [
           {
@@ -747,6 +778,17 @@ export default {
       this.ulRel = files[0]
     }
   },
+  computed: {
+    programProduct() {
+      if (this.createFormData.projectId && this.projectList.length) {
+        const item = this.projectList.find(
+          (e) => e.id === this.createFormData.projectId
+        )
+        return item.product
+      }
+      return ''
+    }
+  },
   created() {
     const query = this.$route.query
     //把数组由字符串转化成数字
@@ -758,16 +800,27 @@ export default {
     param.forEach((item) => {
       distList.push(item.row.distCt)
       var obj = {}
-      obj.uuid = item.row.uuid
       obj.type = item.row.type
       obj.userId = search.userId
       obj.batch = search.batch
-      obj.startTime = search.startTime
-      obj.endTime = search.endTime
+      obj.repeatTimeStart = search.repeatTimeStart
+      obj.repeatTimeEnd = search.repeatTimeEnd
+      obj.projectName = search.projectName
+      obj.product = search.product
+      obj.repeatCtMin = search.repeatCtMin
+      obj.repeatCtMax = search.repeatCtMax
       obj.isCall = search.isCall
-      obj.isNewCus = search.isNewCus
+      obj.tag = search.tag
+      obj.aiCategory = this.$route.query.aiCategory
+      obj.nameSpecial = search.nameSpecial
       obj.isSuccess = search.isSuccess
       obj.isName = search.isName
+      obj.startMaxTalkTime = search.startMaxTalkTime
+      obj.endMaxTalkTime = search.endMaxTalkTime
+      obj.startTalkTime = search.startTalkTime
+      obj.endTalkTime = search.endTalkTime
+      obj.createTimeMin = search.createTimeMin
+      obj.createTimeMax = search.createTimeMax
       if (
         search.sex &&
         search.sex.length &&
@@ -786,7 +839,7 @@ export default {
     })
     let vo = {}
     this.customerInfoVOs = customerInfos
-    vo.customerInfos = customerInfos
+    vo.projectInfoParams = customerInfos
     this.unionVO = vo
     const numList = distList.map(Number)
     //计算客户总数量
@@ -797,8 +850,21 @@ export default {
     // this.fetchRobotList()
     this.fetchPlatFormList()
     this.getRecallResultList()
+    this.getProjectList()
   },
   methods: {
+    getProjectList() {
+      const url = '/sdmulti/manage/project/list/type'
+      const params = {
+        status: 1, // 只有启动的项目才查出来
+        type: this.type
+      }
+      this.$request.formGet(url, params).then((res) => {
+        if (res.code == 0) {
+          this.projectList = res.data
+        }
+      })
+    },
     getRecallResultList() {
       // /api/1.0/call/phone/records/call/result/dictionary
       this.$request
@@ -1070,6 +1136,9 @@ export default {
         const param = {
           userId: this.$store.state.userInfo.userId,
           name: this.createFormData.name,
+          projectId: this.createFormData.projectId,
+          batchList: this.batchList,
+          repeatCount: this.createFormData.repeatCount,
           phoneCt: this.selectCtNum,
           robotName: this.createFormData.robotName,
           calls: this.createFormData.outCallPlatformId,
@@ -1080,7 +1149,7 @@ export default {
           callSingle: this.createFormData.callSingle == 1 ? true : false, //呼叫去重
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
-          customerInfoVOs: this.customerInfoVOs,
+          projectInfoParams: this.customerInfoVOs,
           weeks: this.createFormData.weeks.join(','),
           times
         }

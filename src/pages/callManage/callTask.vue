@@ -16,6 +16,24 @@
           @keyup.enter.native="fetchTaskList(1)"
           clearable
         ></el-input>
+        <el-input
+          placeholder="名单批次"
+          class="search-component search-input"
+          v-model.trim="search.batch"
+          clearable
+        ></el-input>
+        <el-input
+          v-model="search.projectId"
+          placeholder="请输入项目名称"
+          class="search-component search-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
         <el-select
           v-model="search.taskStatus"
           placeholder="请选择任务状态"
@@ -69,9 +87,11 @@
         >
       </div>
       <div class="tool-button">
-        <el-button @click="$router.push('createTask')" icon="el-icon-plus"
+        <!-- <el-button @click="$router.push('createTask')" icon="el-icon-plus"
           >新建任务</el-button
-        >
+        > -->
+        <el-button @click="dowmloadList" plain>列表导出</el-button>
+        <el-button @click="delOne" plain>删除</el-button>
       </div>
     </div>
 
@@ -83,7 +103,9 @@
         stripe
         tooltip-effect="dark"
         v-loading="isLoadingPlanList"
-        @selection-change="(val) => (checkedTableRow = val)"
+        @select="handleSingleSelect"
+        @select-all="handleAllSelect"
+        ref="table"
       >
         <el-table-column
           type="selection"
@@ -98,6 +120,20 @@
           prop="name"
           label="任务名称"
           width="160"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="projectName"
+          label="项目名称"
+          width="120"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          :resizable="false"
+          prop="batch"
+          label="客户批次"
+          width="120"
           align="center"
         ></el-table-column>
         <el-table-column
@@ -145,11 +181,11 @@
         <el-table-column
           show-overflow-tooltip
           prop="successNum"
-          label="接通数量"
+          label="首呼接通数量"
           width="160"
           align="center"
         ></el-table-column>
-        <el-table-column label="接通率" width="100" align="center">
+        <el-table-column label="首呼接通率" width="100" align="center">
           <template slot-scope="scope">
             <span>{{
               scope.row.finishNum
@@ -205,6 +241,9 @@
     </div>
 
     <div class="pagination">
+      <el-checkbox v-model="isSelectAll" @change="toggleSelectAll"
+        >结果页全选</el-checkbox
+      >
       <el-pagination
         background
         @current-change="fetchTaskList"
@@ -301,17 +340,16 @@ export default {
       jsons: [], //文件导入之后的数据
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
+      isSelectAll: false, //是否全选列表结果
       search: {
         planName: null,
         taskStatus: null,
+        batch: '',
+        projectId: '',
         beginDate: null,
         endDate: null,
-        robotName: null,
-        suserId: '',
-        tuserId: ''
+        robotName: null
       }, // 搜索条件
-      suserIdList: [],
-      tuserIdList: [],
       taskStatusList: {
         '0': {
           statusName: '待启动',
@@ -487,11 +525,110 @@ export default {
     }
   },
   async created() {
+    const { projectId, batch } = this.$route.query
+    if (projectId) {
+      this.search.projectId = projectId
+    }
+    if (batch) {
+      this.search.batch = batch
+    }
     this.fetchTaskList()
     this.fetchRobotList()
     this.getRecallResultList()
   },
   methods: {
+    async dowmloadList() {
+      ///project/info/project/batch/export///task/exportTaskInfoList
+      const url = '/sdmulti/task/exportTaskInfoList'
+      const params = {
+        userId: this.$store.state.userInfo.id,
+        startTime: this.search.beginDate
+          ? this.search.beginDate + ' 00:00:00'
+          : null,
+        endTime: this.search.endDate ? this.search.endDate + ' 23:59:59' : null,
+        name: this.search.planName,
+        projectId: this.search.projectId,
+        batch: this.search.batch,
+        robotName: this.search.robotName ? this.search.robotName : null,
+        status: this.search.taskStatus === '' ? null : this.search.taskStatus,
+        taskId: this.search.taskId,
+        ids: this.isSelectAll
+          ? []
+          : this.checkedTableRow.map((item) => item.row.id)
+      }
+      const res = await this.$request.xml(url, params)
+      const a = document.createElement('a')
+      a.download = '呼叫任务查询结果导出报表.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    },
+    // 表格单个行状态切换
+    handleSingleSelect(selection, row) {
+      const repeatIndex = this.checkedTableRow.findIndex((item) => {
+        return item.row.id === row.id
+      })
+      if (repeatIndex !== -1) {
+        this.checkedTableRow.splice(repeatIndex, 1)
+        return
+      }
+      const index = this.planList.findIndex((item) => {
+        return item.id === row.id
+      })
+      this.checkedTableRow.push({
+        page: this.pagination.currentPage,
+        index,
+        row
+      })
+    },
+    // 手动勾选全选
+    handleAllSelect(selection) {
+      if (this.isSelectAll && selection.length !== 0) {
+        selection.forEach((item) => {
+          const repeatIndex = this.checkedTableRow.findIndex((repeatItem) => {
+            return item.id === repeatItem.row.id
+          })
+          repeatIndex !== -1 && this.checkedTableRow.splice(repeatIndex, 1)
+        })
+      }
+      if (this.isSelectAll && selection.length === 0) {
+        this.checkedTableRow = this.planList
+          .map((item, index) => {
+            return {
+              page: this.pagination.currentPage,
+              index,
+              row: item
+            }
+          })
+          .concat(this.checkedTableRow)
+      }
+      if (!this.isSelectAll && selection.length !== 0) {
+        this.checkedTableRow = selection
+          .map((item, index) => {
+            return {
+              page: this.pagination.currentPage,
+              index,
+              row: item
+            }
+          })
+          .concat(this.checkedTableRow)
+      }
+      if (!this.isSelectAll && selection.length === 0) {
+        this.planList.forEach((item) => {
+          const repeatIndex = this.checkedTableRow.findIndex((repeatItem) => {
+            return item.id === repeatItem.row.id
+          })
+          repeatIndex !== -1 && this.checkedTableRow.splice(repeatIndex, 1)
+        })
+      }
+    },
+    // 结果页全选事件
+    toggleSelectAll(val) {
+      this.checkedTableRow = []
+      this.$refs.table.clearSelection()
+      if (val) {
+        this.$refs.table.toggleAllSelection()
+      }
+    },
     getRecallResultList() {
       // /api/1.0/call/phone/records/call/result/dictionary
       this.$request
@@ -505,12 +642,6 @@ export default {
           })
           this.recallResultList = list
         })
-    },
-    beforeSelectBus() {
-      if (this.userInfo.rankCode == 10 && !this.search.suserId) {
-        this.$message.error('请先选择所属二级账号')
-        this.$refs.busRef.blur()
-      }
     },
 
     selectToggleDown(isShow) {
@@ -577,7 +708,7 @@ export default {
       this.isLoadingPlanList = true
       this.$request
         .jsonPost('/sdmulti/task/getTaskInfoList', {
-          userId: this.$store.state.userInfo.userId,
+          userId: this.$store.state.userInfo.id,
           startTime: this.search.beginDate
             ? this.search.beginDate + ' 00:00:00'
             : null,
@@ -585,6 +716,8 @@ export default {
             ? this.search.endDate + ' 23:59:59'
             : null,
           name: this.search.planName,
+          projectId: this.search.projectId,
+          batch: this.search.batch,
           robotName: this.search.robotName ? this.search.robotName : null,
           status: this.search.taskStatus === '' ? null : this.search.taskStatus,
           page: this.pagination.currentPage,
@@ -610,6 +743,25 @@ export default {
                 : false
           })
           this.pagination.total = res.data.total
+          if (this.checkedTableRow.length !== 0) {
+            this.$nextTick(() => {
+              const checkedRow = this.checkedTableRow.filter((item) => {
+                return item.page === this.pagination.currentPage
+              })
+              if (this.isSelectAll) {
+                this.planList.forEach((item) => {
+                  this.$refs.table.toggleRowSelection(item)
+                })
+              }
+              checkedRow.forEach((item) => {
+                this.$refs.table.toggleRowSelection(this.planList[item.index])
+              })
+            })
+          } else if (this.isSelectAll) {
+            this.$nextTick(() => {
+              this.$refs.table.toggleAllSelection(true)
+            })
+          }
         })
         .finally(() => {
           this.isLoadingPlanList = false
@@ -683,6 +835,32 @@ export default {
       }
       this.dialogEditVisible = true
     },
+    delOne() {
+      if (this.isSelectAll) {
+        this.checkedTableRow = []
+        this.isSelectAll = false
+        this.$message.error('请选择需要删除的任务')
+        return
+      }
+      if (!this.checkedTableRow.length) {
+        this.$message.error('请至少选择一条数据')
+        return
+      }
+      // /task/deleteTask
+      let someOn = this.checkedTableRow.find((e) => e.row.status != 0)
+      if (someOn) {
+        this.$message.error('删除项中包含启动中的任务，请取消该勾选')
+        return
+      }
+      let ids = this.checkedTableRow.map((e) => e.row.id)
+      this.$request.post('/sdmulti/task/deleteTask', ids).then((res) => {
+        if (res.code == 0) {
+          this.$message.success('删除成功')
+          this.checkedTableRow = []
+          this.fetchTaskList()
+        }
+      })
+    },
     // 提交编辑任务表单
     submitEditForm() {
       this.$refs.editForm.validate((isValid) => {
@@ -693,7 +871,7 @@ export default {
 
         const param = {
           id: this.editFormData.id,
-          userId: this.$store.state.userInfo.userId,
+          userId: this.$store.state.userInfo.id,
           robotId: this.editFormData.robotId,
           activeNums: this.editFormData.activeNumber.join(',')
         }
@@ -776,6 +954,11 @@ export default {
 </style>
 <style lang="scss" scoped>
 @import '@/assets/css/common.scss';
+.pagination {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between !important;
+}
 .ddd {
   /deep/ .el-dialog__body {
     overflow: hidden;

@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-02-17 16:54:16
+ * @LastEditTime: 2022-02-18 17:42:55
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -391,7 +391,7 @@
         <el-table-column
           :resizable="false"
           prop="batch"
-          label="客户批次"
+          label="名单批次"
           width="120"
           align="center"
         ></el-table-column>
@@ -556,7 +556,6 @@ export default {
       tableShow: [], //控制表格列显示
       searchShow: [], //控制筛选显示
       isSelectAll: false, //是否全选列表结果
-      ifCheckAll: false, //是否选中所有
       showMoreSearch: false, //是否显示高级搜索
       intentTags: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
       selectIntentTags: [],
@@ -679,7 +678,7 @@ export default {
       this.$router.push({
         path: '/main/callManage/callTask',
         query: {
-          projectName: row.projectName,
+          projectId: row.id,
           batch: row.batch
         }
       })
@@ -815,8 +814,11 @@ export default {
     },
     //跳转新建任务
     toCreateTask() {
-      if (!this.isSelectAll) {
-        if (!this.isSelectAll && this.checkedTableRow.length === 0) {
+      if (this.isSelectAll) {
+        this.isSelectAll = false
+        this.checkedTableRow = []
+      } else {
+        if (this.checkedTableRow.length === 0) {
           this.$message.warning('请选择项目批次')
           return
         }
@@ -829,17 +831,36 @@ export default {
         this.$message.warning('只可针对同一名单来源新建外呼任务，请重新选择！')
         return
       }
+      function isRepeat(arr) {
+        var hash = {}
+        for (var i in arr) {
+          if (hash[arr[i]]) {
+            return true
+          }
+          // 不存在该元素，则赋值为true，可以赋任意值，相应的修改if判断条件即可
+          hash[arr[i]] = true
+        }
+        return false
+      }
+      const batchList = this.checkedTableRow.map((e) => e.row.batch)
+      if (isRepeat(batchList)) {
+        this.$message.error('选择数据中包含重复的名单批次')
+        return
+      }
       const pagination = this.pagination
       const search = { ...this.oldSearch }
       if (!search.sex || !search.sex.length) {
         search.sex = null
       }
       this.$router.push({
-        path: '/main/callManage/createTask',
+        path: '/main/customerManage/createTask',
         query: {
           name: JSON.stringify(this.checkedTableRow),
           search: JSON.stringify(search),
-          pagination: JSON.stringify(pagination)
+          pagination: JSON.stringify(pagination),
+          type: this.checkedTableRow[0].row.type,
+          batchList,
+          aiCategory: this.selectIntentTags.join(',')
         }
       })
     },

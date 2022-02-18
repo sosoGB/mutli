@@ -175,7 +175,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.successPercent + '%' }}
+              {{ scope.row.connectPercent }}
             </div>
           </template>
         </el-table-column>
@@ -187,7 +187,7 @@
         >
           <template slot-scope="scope">
             <div>
-              {{ scope.row.successPercent + '%' }}
+              {{ scope.row.successPercent }}
             </div>
           </template>
         </el-table-column>
