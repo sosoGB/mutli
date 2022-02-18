@@ -1203,7 +1203,7 @@ export default {
     },
     // 返回任务列表页
     backtrack() {
-      this.$router.replace('customerList')
+      this.$router.replace('programRosterList')
     },
     // 任务启动时间focus事件
     handleStartTimeFocus() {
