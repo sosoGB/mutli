@@ -7,7 +7,7 @@
           >首页</el-breadcrumb-item
         >
         <el-breadcrumb-item :to="{ path: '/main/customerManage/customerList' }"
-          >客户批次管理</el-breadcrumb-item
+          >名单批次管理</el-breadcrumb-item
         >
         <el-breadcrumb-item>新建任务</el-breadcrumb-item>
       </el-breadcrumb>

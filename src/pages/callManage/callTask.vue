@@ -131,8 +131,8 @@
         ></el-table-column>
         <el-table-column
           :resizable="false"
-          prop="batch"
-          label="客户批次"
+          prop="batchList"
+          label="名单批次"
           width="120"
           align="center"
         ></el-table-column>

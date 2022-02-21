@@ -46,7 +46,7 @@
       </el-form-item>
       <el-form-item
         prop="customerId"
-        label="客户批次："
+        label="名单批次："
         v-show="createFormData.customerType"
       >
         <div class="input-large form-item_upload">
@@ -570,7 +570,7 @@ export default {
           { required: true, message: '请选择客户种类', trigger: 'blur' }
         ],
         customerId: [
-          { required: true, message: '请选择客户批次', trigger: 'blur' }
+          { required: true, message: '请选择名单批次', trigger: 'blur' }
         ],
         robotId: [
           { required: true, message: '请选择机器人名称', trigger: 'blur' }

@@ -12,7 +12,8 @@
     <div class="toolbar">
       <div class="tool-search">
         <el-input
-          placeholder="客户批次"
+          placeholder="请输入名单批次"
+          style="width:260px;"
           class="search-component search-input"
           v-model.trim="search.batch"
           clearable
@@ -21,7 +22,7 @@
           v-model="search.customerType"
           placeholder="请选择名单来源"
           clearable
-          class="advanced-input"
+          class="search-component search-input"
         >
           <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
           <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
@@ -105,7 +106,7 @@
         <el-table-column
           :resizable="false"
           prop="batch"
-          label="客户批次"
+          label="名单批次"
           width="120"
           align="center"
         ></el-table-column>
@@ -659,7 +660,7 @@ export default {
     toCreateTask() {
       if (!this.isSelectAll) {
         if (!this.isSelectAll && this.checkedTableRow.length === 0) {
-          this.$message.warning('请选择客户批次')
+          this.$message.warning('请选择名单批次')
           return
         }
       }
