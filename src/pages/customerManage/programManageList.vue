@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 15:43:03
- * @LastEditTime: 2022-02-18 10:21:38
+ * @LastEditTime: 2022-02-23 18:13:07
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\customerManage\programManageList.vue
@@ -420,13 +420,15 @@ export default {
           this.$message.error('请填写必填字段')
           return
         }
-        const urlcHECK =
-          '/sdmulti/manage/project/name/check?projectName=' +
-          this.editFormData.projectName
-        const resJu = await this.$request.jsonGet(urlcHECK)
-        if (resJu.code != 0) {
-          this.$message.error(resJu.message)
-          return
+        if (!this.editFormData.id) {
+          const urlcHECK =
+            '/sdmulti/manage/project/name/check?projectName=' +
+            this.editFormData.projectName
+          const resJu = await this.$request.jsonGet(urlcHECK)
+          if (resJu.code != 0) {
+            this.$message.error(resJu.message)
+            return
+          }
         }
         const params = {
           id: this.editFormData.id,
