@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-02-21 13:46:31
+ * @LastEditTime: 2022-02-23 17:49:10
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -79,7 +79,7 @@
     <div v-show="showMoreSearch" class="toolbar-advanced">
       <div class="advanced-item">
         <span class="advanced-label">项目名称：</span>
-        <el-input
+        <!-- <el-input
           v-model="search.projectName"
           placeholder="请输入项目名称"
           class="advanced-input"
@@ -90,7 +90,20 @@
             }
           "
           clearable
-        ></el-input>
+        ></el-input> -->
+        <el-select
+          v-model="search.projectName"
+          placeholder="请选择项目名称"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            v-for="item in projectList"
+            :label="item.projectName"
+            :value="item.projectName"
+            :key="item.id"
+          ></el-option>
+        </el-select>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">名单来源：</span>
@@ -100,11 +113,12 @@
           clearable
           class="advanced-input"
         >
-          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
-          <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
-          <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
-          <el-option label="凯森" value="凯森"></el-option>
-          <el-option label="元保" value="元保"></el-option>
+          <el-option
+            v-for="item in sourceTypeList"
+            :label="item"
+            :value="item"
+            :key="item"
+          ></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -312,7 +326,7 @@
           type="date"
           placeholder="开始时间"
           value-format="yyyy-MM-dd"
-          :picker-options="beginUpdateValidator"
+          :picker-options="createTimeMinValidator"
           clearable
         ></el-date-picker>
         <span class="search-delimiter">-</span>
@@ -322,7 +336,7 @@
           type="date"
           placeholder="结束时间"
           value-format="yyyy-MM-dd"
-          :picker-options="endUpdateValidator"
+          :picker-options="createTimeMaxValidator"
           clearable
         ></el-date-picker>
       </div>
@@ -367,6 +381,7 @@
         v-loading="isLoading"
         @select="handleSingleSelect"
         @select-all="handleAllSelect"
+        @sort-change="sortChange"
       >
         <el-table-column
           type="selection"
@@ -425,10 +440,26 @@
           label="最近一次复用时间"
           width="110"
           align="center"
+          sortable="custom"
+          prop="repeatTime"
         >
           <template slot-scope="scope">
             <span>{{
               scope.row.repeatTime | formatDate('yyyy-MM-dd hh:mm:ss')
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :resizable="false"
+          label="项目批次创建时间"
+          width="110"
+          align="center"
+          sortable="custom"
+          prop="createTime"
+        >
+          <template slot-scope="scope">
+            <span>{{
+              scope.row.createTime | formatDate('yyyy-MM-dd hh:mm:ss')
             }}</span>
           </template>
         </el-table-column>
@@ -558,8 +589,10 @@ export default {
       searchShow: [], //控制筛选显示
       isSelectAll: false, //是否全选列表结果
       showMoreSearch: false, //是否显示高级搜索
+      sourceTypeList: [],
       intentTags: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
       selectIntentTags: [],
+      projectList: [],
       pullForm: {
         type: '',
         number: '',
@@ -632,6 +665,8 @@ export default {
         createTimeMin: null,
         createTimeMax: null
       },
+      repeatTimeOrder: null,
+      createTimeOrder: null,
       listPullDialogVisible: false,
       pagination: {
         pageSize: 10,
@@ -669,12 +704,46 @@ export default {
   },
   created() {
     this.queryList()
+    this.getSourceTypeList()
+    this.getProjectsAll()
   },
   activated() {
     //重新进入缓存页面的钩子
     this.queryList()
+    this.getSourceTypeList()
+    this.getProjectsAll()
   },
   methods: {
+    getProjectsAll() {
+      const url = '/sdmulti/manage/project/list/type'
+      this.$request.formGet(url).then((res) => {
+        if (res.code == 0) {
+          this.projectList = res.data
+        }
+      })
+    },
+    sortChange({ prop, order }) {
+      // console.log(column)
+      // console.log(prop)
+      // console.log(order)
+      if (prop == 'repeatTime') {
+        this.repeatTimeOrder = order === 'descending' ? 1 : 0
+        this.createTimeOrder = null
+      } else {
+        this.createTimeOrder = order === 'descending' ? 1 : 0
+        this.repeatTimeOrder = null
+      }
+      this.pagination.currentPage = 1
+      this.queryList()
+    },
+    getSourceTypeList() {
+      const url = '/sdmulti/qbzz/manage/api/customer/type/list'
+      this.$request.jsonGet(url).then((res) => {
+        if (res.code == '0') {
+          this.sourceTypeList = res.data
+        }
+      })
+    },
     lookTask(row) {
       this.$router.push({
         path: '/main/callManage/callTask',
@@ -686,6 +755,10 @@ export default {
     },
     async dowmloadList() {
       ///project/info/project/batch/export
+      if (!this.isSelectAll && !this.checkedTableRow.length) {
+        this.$message.error('请选择数据后再导出')
+        return
+      }
       const url = '/sdmulti/project/info/project/batch/export'
       let sex = null
       if (this.search.sex && this.search.sex.length) {
@@ -726,7 +799,9 @@ export default {
         createTimeMax: this.search.createTimeMax,
         ids: this.isSelectAll
           ? []
-          : this.checkedTableRow.map((item) => item.row.id)
+          : this.checkedTableRow.map((item) => item.row.id),
+        createTimeOrder: this.createTimeOrder,
+        repeatTimeOrder: this.repeatTimeOrder
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -916,7 +991,9 @@ export default {
         startTalkTime: this.search.startTalkTime,
         endTalkTime: this.search.endTalkTime,
         createTimeMin: this.search.createTimeMin,
-        createTimeMax: this.search.createTimeMax
+        createTimeMax: this.search.createTimeMax,
+        createTimeOrder: this.createTimeOrder,
+        repeatTimeOrder: this.repeatTimeOrder
       }
       let url = '/sdmulti/project/info/list'
       //判断是否是简单字段查询

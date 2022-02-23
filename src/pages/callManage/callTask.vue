@@ -22,18 +22,19 @@
           v-model.trim="search.batch"
           clearable
         ></el-input>
-        <el-input
+        <el-select
           v-model="search.projectId"
-          placeholder="请输入项目名称"
+          placeholder="请选择项目名称"
           class="search-component search-input"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
           clearable
-        ></el-input>
+        >
+          <el-option
+            v-for="item in projectList"
+            :label="item.projectName"
+            :value="item.id"
+            :key="item.id"
+          ></el-option>
+        </el-select>
         <el-select
           v-model="search.taskStatus"
           placeholder="请选择任务状态"
@@ -338,6 +339,7 @@ export default {
       ifCheckAllRes: false, // 是否选择所有失败结果
       errorNum: 0, //错误号码数量
       jsons: [], //文件导入之后的数据
+      projectList: [],
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
       isSelectAll: false, //是否全选列表结果
@@ -535,9 +537,22 @@ export default {
     this.fetchTaskList()
     this.fetchRobotList()
     this.getRecallResultList()
+    this.getProjectsAll()
   },
   methods: {
+    getProjectsAll() {
+      const url = '/sdmulti/manage/project/list/type'
+      this.$request.formGet(url).then((res) => {
+        if (res.code == 0) {
+          this.projectList = res.data
+        }
+      })
+    },
     async dowmloadList() {
+      if (!this.isSelectAll && !this.checkedTableRow.length) {
+        this.$message.error('请选择数据后再导出')
+        return
+      }
       ///project/info/project/batch/export///task/exportTaskInfoList
       const url = '/sdmulti/task/exportTaskInfoList'
       const params = {
@@ -852,13 +867,15 @@ export default {
         this.$message.error('删除项中包含启动中的任务，请取消该勾选')
         return
       }
-      let ids = this.checkedTableRow.map((e) => e.row.id)
-      this.$request.post('/sdmulti/task/deleteTask', ids).then((res) => {
-        if (res.code == 0) {
-          this.$message.success('删除成功')
-          this.checkedTableRow = []
-          this.fetchTaskList()
-        }
+      this.$confirm('是否确认删除该任务').then(() => {
+        let ids = this.checkedTableRow.map((e) => e.row.id)
+        this.$request.post('/sdmulti/task/deleteTask', ids).then((res) => {
+          if (res.code == 0) {
+            this.$message.success('删除成功')
+            this.checkedTableRow = []
+            this.fetchTaskList()
+          }
+        })
       })
     },
     // 提交编辑任务表单

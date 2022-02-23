@@ -24,11 +24,12 @@
           clearable
           class="search-component search-input"
         >
-          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
-          <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
-          <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
-          <el-option label="凯森" value="凯森"></el-option>
-          <el-option label="元保" value="元保"></el-option>
+          <el-option
+            v-for="item in sourceTypeList"
+            :label="item"
+            :value="item"
+            :key="item"
+          ></el-option>
         </el-select>
         <el-date-picker
           v-model="search.startTime"
@@ -313,6 +314,11 @@ import keepAlive from '@/utils/mixins/keepAlive.js' //用于从详情页返回�
 export default {
   mixins: [keepAlive],
   data() {
+    const now = filter.formatDate(Date.now(), 'yyyy-MM-dd')
+    const oneMonthAgo = filter.formatDate(
+      Date.now() - 31 * 24 * 3600 * 1000,
+      'yyyy-MM-dd'
+    )
     return {
       clickedSle: false,
       isDownLoad: false, //是否在下载
@@ -323,6 +329,7 @@ export default {
       searchShow: [], //控制筛选显示
       isSelectAll: false, //是否全选列表结果
       ifCheckAll: false, //是否选中所有
+      sourceTypeList: [],
       pullForm: {
         type: '',
         number: '',
@@ -354,16 +361,16 @@ export default {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
         batch: null, //客户批次
-        endTime: '', //开始时间
-        startTime: '', //结束时间
+        endTime: oneMonthAgo, //开始时间
+        startTime: now, //结束时间
         customerType: null //客户种类
       },
       search: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
         batch: null, //客户批次
-        endTime: '', //开始时间
-        startTime: '', //结束时间
+        endTime: now, //开始时间
+        startTime: oneMonthAgo, //结束时间
         customerType: null //客户种类
       },
       listPullDialogVisible: false,
@@ -425,12 +432,22 @@ export default {
   },
   created() {
     this.queryList()
+    this.getSourceTypeList()
   },
   activated() {
     //重新进入缓存页面的钩子
     this.queryList()
+    this.getSourceTypeList()
   },
   methods: {
+    getSourceTypeList() {
+      const url = '/sdmulti/qbzz/manage/api/customer/type/list'
+      this.$request.jsonGet(url).then((res) => {
+        if (res.code == '0') {
+          this.sourceTypeList = res.data
+        }
+      })
+    },
     viewProgram(row) {
       this.$router.push({
         path: '/main/customerManage/programRosterList',
@@ -501,8 +518,6 @@ export default {
           this.$message.success('名单下发项目成功')
           this.listDispatchDialogVisible = false
           this.queryList()
-        } else {
-          this.$message.error(res.message)
         }
       })
       this.closeDispatchDialog()
@@ -742,6 +757,10 @@ export default {
         })
     },
     async exportList() {
+      if (!this.isSelectAll && !this.checkedTableRow.length) {
+        this.$message.error('请选择数据后再导出')
+        return
+      }
       const url = '/sdmulti/qbzz/manage/api/customer/batch/export'
       const params = {
         userId: this.$store.state.userInfo.id,
