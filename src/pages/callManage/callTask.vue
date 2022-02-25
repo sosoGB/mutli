@@ -862,11 +862,11 @@ export default {
         return
       }
       // /task/deleteTask
-      let someOn = this.checkedTableRow.find((e) => e.row.status != 0)
-      if (someOn) {
-        this.$message.error('删除项中包含启动中的任务，请取消该勾选')
-        return
-      }
+      // let someOn = this.checkedTableRow.find((e) => e.row.status != 0)
+      // if (someOn) {
+      //   this.$message.error('删除项中包含启动中的任务，请取消该勾选')
+      //   return
+      // }
       this.$confirm('是否确认删除该任务').then(() => {
         let ids = this.checkedTableRow.map((e) => e.row.id)
         this.$request.post('/sdmulti/task/deleteTask', ids).then((res) => {
