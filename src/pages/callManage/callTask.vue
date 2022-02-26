@@ -527,26 +527,28 @@ export default {
     }
   },
   async created() {
-    const { projectId, batch } = this.$route.query
-    if (projectId) {
-      this.search.projectId = Number(projectId)
-    }
+    const { batch } = this.$route.query
     if (batch) {
       this.search.batch = batch
     }
+    await this.getProjectsAll()
     this.fetchTaskList()
     this.fetchRobotList()
     this.getRecallResultList()
-    this.getProjectsAll()
   },
   methods: {
-    getProjectsAll() {
+    async getProjectsAll() {
       const url = '/sdmulti/manage/project/list/type'
-      this.$request.formGet(url).then((res) => {
-        if (res.code == 0) {
-          this.projectList = res.data
+      const res = await this.$request.formGet(url)
+      if (res.code == 0) {
+        this.projectList = res.data
+        const item = this.projectList.find(
+          (e) => e.projectName == this.$route.query.projectName
+        )
+        if (item) {
+          this.search.projectId = item.id
         }
-      })
+      }
     },
     async dowmloadList() {
       if (!this.isSelectAll && !this.checkedTableRow.length) {
