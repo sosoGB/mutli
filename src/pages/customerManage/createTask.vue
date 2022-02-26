@@ -802,7 +802,7 @@ export default {
       var obj = {}
       obj.type = item.row.type
       obj.userId = search.userId
-      obj.batch = search.batch
+      obj.batch = item.row.batch
       obj.repeatTimeStart = search.repeatTimeStart
       obj.repeatTimeEnd = search.repeatTimeEnd
       obj.projectName = search.projectName
