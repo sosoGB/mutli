@@ -529,7 +529,7 @@ export default {
   async created() {
     const { projectId, batch } = this.$route.query
     if (projectId) {
-      this.search.projectId = projectId
+      this.search.projectId = Number(projectId)
     }
     if (batch) {
       this.search.batch = batch
