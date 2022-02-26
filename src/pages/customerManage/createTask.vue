@@ -801,6 +801,7 @@ export default {
       distList.push(item.row.distCt)
       var obj = {}
       obj.type = item.row.type
+      obj.projectInfoId = item.row.id
       obj.userId = search.userId
       obj.batch = item.row.batch
       obj.repeatTimeStart = search.repeatTimeStart
