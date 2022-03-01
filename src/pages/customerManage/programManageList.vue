@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 15:43:03
- * @LastEditTime: 2022-03-01 10:35:11
+ * @LastEditTime: 2022-03-01 20:21:32
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\customerManage\programManageList.vue
@@ -47,11 +47,17 @@
           clearable
           class="advanced-input"
         >
-          <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
+          <!-- <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
           <el-option label="水滴公众号吸粉" value="水滴公众号吸粉"></el-option>
           <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
           <el-option label="凯森" value="凯森"></el-option>
-          <el-option label="元保" value="元保"></el-option>
+          <el-option label="元保" value="元保"></el-option> -->
+          <el-option
+            v-for="item in sourceTypeList"
+            :label="item"
+            :value="item"
+            :key="item"
+          ></el-option>
         </el-select>
         <el-date-picker
           v-model="search.startTime"
@@ -196,14 +202,20 @@
             class="advanced-input"
             :disabled="!!editFormData.id"
           >
-            <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
+            <!-- <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
             <el-option
               label="水滴公众号吸粉"
               value="水滴公众号吸粉"
             ></el-option>
             <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
             <el-option label="凯森" value="凯森"></el-option>
-            <el-option label="元保" value="元保"></el-option>
+            <el-option label="元保" value="元保"></el-option> -->
+            <el-option
+              v-for="item in sourceTypeList"
+              :label="item"
+              :value="item"
+              :key="item"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item prop="product" label="销售产品：">
@@ -252,6 +264,7 @@ export default {
         robotName: null,
         type: null
       }, // 搜索条件
+      sourceTypeList: [],
       taskStatusList: [
         {
           name: '启动',
@@ -328,6 +341,7 @@ export default {
   },
   async created() {
     this.fetchProgramList()
+    this.getSourceTypeList()
   },
   computed: {
     editDiaTitle() {
@@ -338,6 +352,14 @@ export default {
     }
   },
   methods: {
+    getSourceTypeList() {
+      const url = '/sdmulti/qbzz/manage/api/customer/type/list'
+      this.$request.jsonGet(url).then((res) => {
+        if (res.code == '0') {
+          this.sourceTypeList = res.data
+        }
+      })
+    },
     beforeSelectBus() {
       if (this.userInfo.rankCode == 10 && !this.search.suserId) {
         this.$message.error('请先选择所属二级账号')

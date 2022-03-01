@@ -29,18 +29,24 @@
           <el-select
             v-model="createFormData.customerType"
             @change="handleChangeCustomerType"
-            placeholder="请选择客户种类"
+            placeholder="请选择名单来源"
             filterable
             clearable
           >
-            <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
+            <!-- <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
             <el-option
               label="水滴公众号吸粉"
               value="水滴公众号吸粉"
             ></el-option>
             <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
             <el-option label="凯森" value="凯森"></el-option>
-            <el-option label="元保" value="元保"></el-option>
+            <el-option label="元保" value="元保"></el-option> -->
+            <el-option
+              v-for="item in sourceTypeList"
+              :label="item"
+              :value="item"
+              :key="item"
+            ></el-option>
           </el-select>
         </div>
       </el-form-item>
@@ -53,7 +59,7 @@
           <el-select
             v-model="createFormData.customerId"
             @change="handleChangeCustomer"
-            placeholder="请选择客户批次"
+            placeholder="请选择名单批次"
             filterable
             multiple
             collapse-tags
@@ -487,6 +493,7 @@ export default {
       activeNumberList: [], // 可选线路
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
+      sourceTypeList: [],
       recallResultList: [
         // { label: '正在通话中', key: '1' },
         // { label: '用户忙', key: '2' },
@@ -786,11 +793,20 @@ export default {
   },
   created() {
     // this.fetchRobotList()
+    this.getSourceTypeList()
     this.fetchCusList()
     this.fetchPlatFormList()
     this.getRecallResultList()
   },
   methods: {
+    getSourceTypeList() {
+      const url = '/sdmulti/qbzz/manage/api/customer/type/list'
+      this.$request.jsonGet(url).then((res) => {
+        if (res.code == '0') {
+          this.sourceTypeList = res.data
+        }
+      })
+    },
     getRecallResultList() {
       // /api/1.0/call/phone/records/call/result/dictionary
       this.$request

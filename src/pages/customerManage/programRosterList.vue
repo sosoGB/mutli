@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-03-01 14:50:40
+ * @LastEditTime: 2022-03-01 20:25:23
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -1013,26 +1013,26 @@ export default {
       }
       let url = '/sdmulti/project/info/list'
       //判断是否是简单字段查询
-      if (
-        (!this.search.sex || !this.search.sex.length) &&
-        (this.search.minAge === '' || this.search.minAge === null) &&
-        (this.search.maxAge === '' || this.search.maxAge === null) &&
-        (this.search.isCall === '' || this.search.isCall === null) &&
-        (this.search.nameSpecial === '' || this.search.nameSpecial === null) &&
-        (this.search.isSuccess === '' || this.search.isSuccess === null) &&
-        (this.search.isName === '' || this.search.isName === null) &&
-        (this.search.tag === '' || this.search.tag === null) &&
-        (this.search.startMaxTalkTime === '' ||
-          this.search.startMaxTalkTime === null) &&
-        (this.search.endMaxTalkTime === '' ||
-          this.search.endMaxTalkTime === null) &&
-        (this.search.startTalkTime === '' ||
-          this.search.startTalkTime === null) &&
-        (this.search.endTalkTime === '' || this.search.endTalkTime === null) &&
-        !aiCategory
-      ) {
-        url = '/sdmulti/project/info/list/init'
-      }
+      // if (
+      //   (!this.search.sex || !this.search.sex.length) &&
+      //   (this.search.minAge === '' || this.search.minAge === null) &&
+      //   (this.search.maxAge === '' || this.search.maxAge === null) &&
+      //   (this.search.isCall === '' || this.search.isCall === null) &&
+      //   (this.search.nameSpecial === '' || this.search.nameSpecial === null) &&
+      //   (this.search.isSuccess === '' || this.search.isSuccess === null) &&
+      //   (this.search.isName === '' || this.search.isName === null) &&
+      //   (this.search.tag === '' || this.search.tag === null) &&
+      //   (this.search.startMaxTalkTime === '' ||
+      //     this.search.startMaxTalkTime === null) &&
+      //   (this.search.endMaxTalkTime === '' ||
+      //     this.search.endMaxTalkTime === null) &&
+      //   (this.search.startTalkTime === '' ||
+      //     this.search.startTalkTime === null) &&
+      //   (this.search.endTalkTime === '' || this.search.endTalkTime === null) &&
+      //   !aiCategory
+      // ) {
+      //   url = '/sdmulti/project/info/list/init'
+      // }
       this.$request
         .jsonPost(url, params)
         .then((res) => {
