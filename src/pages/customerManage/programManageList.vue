@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 15:43:03
- * @LastEditTime: 2022-02-23 18:13:07
+ * @LastEditTime: 2022-03-01 10:35:11
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\customerManage\programManageList.vue
@@ -450,7 +450,7 @@ export default {
             this.$message.error(res.message)
           }
         } else {
-          res = await this.$request.post(url, params)
+          res = await this.$request.jsonPost(url, params)
           if (res.code === '0') {
             this.$message.success('新增项目成功')
             this.fetchProgramList()
