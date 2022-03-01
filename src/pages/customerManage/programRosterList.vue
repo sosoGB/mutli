@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-02-28 13:47:04
+ * @LastEditTime: 2022-03-01 13:49:55
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -795,8 +795,12 @@ export default {
         endMaxTalkTime: this.search.endMaxTalkTime,
         startTalkTime: this.search.startTalkTime,
         endTalkTime: this.search.endTalkTime,
-        createTimeMin: this.search.createTimeMin,
-        createTimeMax: this.search.createTimeMax,
+        createTimeMin: this.search.createTimeMin
+          ? this.search.createTimeMin + ' 00:00:00'
+          : null,
+        createTimeMax: this.search.createTimeMax
+          ? this.search.createTimeMax + ' 23:59:59'
+          : null,
         ids: this.isSelectAll
           ? []
           : this.checkedTableRow.map((item) => item.row.id),
