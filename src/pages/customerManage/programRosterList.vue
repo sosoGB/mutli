@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-03-01 14:47:31
+ * @LastEditTime: 2022-03-01 14:50:40
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -755,7 +755,6 @@ export default {
       })
     },
     uploadSuccess(response) {
-      console.log(response)
       if (response.code == '0') {
         this.$message.success('上传成功')
         this.$refs.upload.clearFiles()
