@@ -79,7 +79,6 @@
             @change="handleChangePlat"
             placeholder="请选择外呼平台"
             filterable
-            multiple
           >
             <el-option
               v-for="item in OutCallPlatformList"
@@ -93,7 +92,7 @@
       <el-form-item
         prop="robotName"
         label="机器人名称："
-        v-if="createFormData.outCallPlatformId.length"
+        v-if="createFormData.outCallPlatformId"
       >
         <div class="input-large form-item_upload">
           <el-select
@@ -158,12 +157,28 @@
           >
         </div>
       </el-form-item>
+      <el-form-item prop="routeId" label="路由选择：">
+        <el-select
+          v-model="createFormData.routeId"
+          @change="handleChangeRouteId"
+          placeholder="请选择路由名称"
+          filterable
+        >
+          <el-option
+            v-for="item in routeList"
+            :key="item.id"
+            :label="item.routeName"
+            :value="item.id"
+          ></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item prop="concurrentNum" label="总并发数量：">
         <el-input
           v-model.trim="createFormData.concurrentNum"
-          placeholder=""
           clearable
           class="input-name"
+          @change="whenInputCon"
+          :placeholder="getCpl"
         ></el-input>
       </el-form-item>
       <el-form-item prop="weeks" label="外呼周期：">
@@ -537,6 +552,8 @@ export default {
         { name: '星期六', value: 6 },
         { name: '星期日', value: 0 }
       ],
+      maxConcurrentCount: '',
+      routeList: [],
       createFormData: {
         customerNum: 1,
         customerNum2: '',
@@ -546,6 +563,7 @@ export default {
         robotName: null, // 机器人名称
         outCallPlatformId: [], // 外呼平台名称
         concurrentNum: null, //并发数量
+        routeId: null,
         activeNumber: null, // 线路
         importMethod: 'file', // 导入方式
         importComVar: [], //共用型变量导入
@@ -618,27 +636,9 @@ export default {
         robotName: [
           { required: true, message: '请选择机器人名称', trigger: 'blur' }
         ],
+        routeId: [{ required: true, message: '请选择路由', trigger: 'change' }],
         concurrentNum: [
-          {
-            validator: (rule, value, callback) => {
-              if (!value) {
-                callback(new Error('请输入总并发数量'))
-              } else {
-                this.$request
-                  .jsonPost('/sdmulti/task/checkConcurrentNum', {
-                    concurrentNum: this.createFormData.concurrentNum,
-                    serviceIds: this.createFormData.outCallPlatformId
-                  })
-                  .then((res) => {
-                    if (res.code === '0' && res.data === false) {
-                      callback(new Error(res.message))
-                    } else {
-                      callback()
-                    }
-                  })
-              }
-            }
-          }
+          { required: true, message: '请输入并发数量', trigger: 'blur' }
         ],
         recallInterval: [
           {
@@ -779,6 +779,9 @@ export default {
     }
   },
   computed: {
+    getCpl() {
+      return `当前路由最大并发量：${this.maxConcurrentCount}`
+    },
     programProduct() {
       if (this.createFormData.projectId && this.projectList.length) {
         const item = this.projectList.find(
@@ -854,6 +857,24 @@ export default {
     this.getProjectList()
   },
   methods: {
+    whenInputCon(val) {
+      if (val > this.maxConcurrentCount) {
+        this.createFormData.concurrentNum = this.maxConcurrentCount
+      } else if (val < 1) {
+        this.createFormData.concurrentNum = 1
+      } else {
+        this.createFormData.concurrentNum = parseInt(val)
+      }
+    },
+    // 切换路由名称
+    handleChangeRouteId(id) {
+      this.maxConcurrentCount = this.routeList.find(
+        (e) => e.id == id
+      ).concurrentCount
+      if (this.createFormData.concurrentNum > this.maxConcurrentCount) {
+        this.createFormData.concurrentNum = this.maxConcurrentCount
+      }
+    },
     getProjectList() {
       const url = '/sdmulti/manage/project/list/type'
       const params = {
@@ -944,20 +965,29 @@ export default {
     handleChangePlat(select) {
       if (select) {
         let platforms = []
-        select.forEach((item) => {
-          let plat = this.OutCallPlatformList.find((list) => {
-            return list.id === item
-          })
-          let obj = {}
-          obj.platformId = plat.id
-          obj.userId = plat.serviceUserId
-          obj.robotId = plat.robotId
-          platforms.push(obj)
+        // select.forEach((item) => {})
+        let plat = this.OutCallPlatformList.find((list) => {
+          return list.id === select
         })
+        let obj = {}
+        obj.platformId = plat.id
+        obj.userId = plat.serviceUserId
+        obj.robotId = plat.robotId
+        platforms.push(obj)
         this.unionVO.platforms = platforms
         this.createFormData.robotName = ''
+
         this.fetchRobotList()
+        this.getRouteList()
       }
+    },
+    getRouteList() {
+      let serviceInfo = this.OutCallPlatformList.find((e) => {
+        return this.createFormData.outCallPlatformId == e.id
+      })
+      this.$request.post('/sdmulti/task/getRoute', serviceInfo).then((res) => {
+        this.routeList = res.data
+      })
     },
     selectRobot(val) {
       if (val) {
@@ -977,7 +1007,7 @@ export default {
         this.$message.warning('请先选择机器人名称')
         return
       }
-      if (this.createFormData.outCallPlatformId.length === 0) {
+      if (!this.createFormData.outCallPlatformId) {
         this.$message.warning('请先选择外呼平台')
         return
       }
@@ -1030,7 +1060,7 @@ export default {
     // 查询机器人列表
     fetchRobotList() {
       let serviceInfos = this.OutCallPlatformList.filter((e) => {
-        return this.createFormData.outCallPlatformId.includes(e.id)
+        return this.createFormData.outCallPlatformId == e.id
       }).map((e) => {
         let a = { ...e }
         delete a.status
@@ -1142,7 +1172,7 @@ export default {
           repeatCount: this.createFormData.repeatCount,
           phoneCt: this.selectCtNum,
           robotName: this.createFormData.robotName,
-          calls: this.createFormData.outCallPlatformId,
+          calls: [this.createFormData.outCallPlatformId],
           concurrentNum: this.createFormData.concurrentNum,
           type: this.createFormData.type,
           taskTime: this.createFormData.type === 0 ? taskTime : null,
@@ -1151,6 +1181,7 @@ export default {
           connectCall: this.createFormData.recallFlag,
           platforms: this.varResult, //校验结果
           projectInfoParams: this.customerInfoVOs,
+          routeId: this.createFormData.routeId,
           weeks: this.createFormData.weeks.join(','),
           times
         }
