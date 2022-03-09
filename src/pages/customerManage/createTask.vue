@@ -837,6 +837,9 @@ export default {
       }
       obj.minAge = search.minAge
       obj.maxAge = search.maxAge
+      obj.freeInsuranceCompany = search.freeInsuranceCompany
+      obj.freeInsurance = search.freeInsurance
+      obj.freeInsuranceMonth = search.freeInsuranceMonth
       obj.page = pagination.currentPage
       obj.pageSize = pagination.pageSize
       customerInfos.push(obj)

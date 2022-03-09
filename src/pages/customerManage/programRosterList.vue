@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-03-01 20:25:23
+ * @LastEditTime: 2022-03-08 16:31:37
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -317,6 +317,46 @@
           "
           clearable
         ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">赠险名称：</span>
+        <el-input
+          v-model="search.freeInsurance"
+          placeholder="请输入赠险名称"
+          class="advanced-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">赠险所属公司：</span>
+        <el-input
+          v-model="search.freeInsuranceCompany"
+          placeholder="请输入赠险所属公司"
+          class="advanced-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">赠险领取月份：</span>
+        <el-date-picker
+          v-model="search.freeInsuranceMonth"
+          type="month"
+          placeholder="选择月"
+          value-format="yyyy-MM"
+        >
+        </el-date-picker>
       </div>
       <div class="advanced-item">
         <span class="advanced-label">项目批次创建时间：</span>
@@ -638,7 +678,10 @@ export default {
         startTalkTime: null,
         endTalkTime: null,
         createTimeMin: null,
-        createTimeMax: null
+        createTimeMax: null,
+        freeInsuranceCompany: null,
+        freeInsurance: null,
+        freeInsuranceMonth: null
       },
       search: {
         //查询筛选字段
@@ -664,7 +707,10 @@ export default {
         startTalkTime: null,
         endTalkTime: null,
         createTimeMin: null,
-        createTimeMax: null
+        createTimeMax: null,
+        freeInsuranceCompany: null,
+        freeInsurance: null,
+        freeInsuranceMonth: null
       },
       repeatTimeOrder: null,
       createTimeOrder: null,
@@ -813,7 +859,10 @@ export default {
           ? []
           : this.checkedTableRow.map((item) => item.row.id),
         createTimeOrder: this.createTimeOrder,
-        repeatTimeOrder: this.repeatTimeOrder
+        repeatTimeOrder: this.repeatTimeOrder,
+        freeInsuranceCompany: this.search.freeInsuranceCompany || null,
+        freeInsurance: this.search.freeInsurance || null,
+        freeInsuranceMonth: this.search.freeInsuranceMonth || null
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -1009,7 +1058,10 @@ export default {
           ? this.search.createTimeMax + ' 23:59:59'
           : null,
         createTimeOrder: this.createTimeOrder,
-        repeatTimeOrder: this.repeatTimeOrder
+        repeatTimeOrder: this.repeatTimeOrder,
+        freeInsuranceCompany: this.search.freeInsuranceCompany || null,
+        freeInsurance: this.search.freeInsurance || null,
+        freeInsuranceMonth: this.search.freeInsuranceMonth || null
       }
       let url = '/sdmulti/project/info/list'
       //判断是否是简单字段查询
