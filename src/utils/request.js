@@ -2,7 +2,7 @@ import axios from 'axios';
 import qs from 'qs'
 import { Message } from 'element-ui'
 import store from '@/utils/store'
-const userInfo = store.state.userInfo
+// const userInfo = store.state.userInfo
 const instance = axios.create({
   // timeout: 20000,
   baseURL: process.env.VUE_APP_BASE_API
@@ -51,6 +51,7 @@ instance.interceptors.response.use(
 
 export default {
   post (url, data) {
+    const userInfo = store.state.userInfo
     return axios({
       method: 'post',
       url,

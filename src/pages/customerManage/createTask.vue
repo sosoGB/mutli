@@ -988,9 +988,11 @@ export default {
       let serviceInfo = this.OutCallPlatformList.find((e) => {
         return this.createFormData.outCallPlatformId == e.id
       })
-      this.$request.post('/sdmulti/task/getRoute', serviceInfo).then((res) => {
-        this.routeList = res.data
-      })
+      this.$request
+        .jsonPost('/sdmulti/task/getRoute', serviceInfo)
+        .then((res) => {
+          this.routeList = res.data
+        })
     },
     selectRobot(val) {
       if (val) {
