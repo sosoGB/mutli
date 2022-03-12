@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-03-12 15:58:34
+ * @LastEditTime: 2022-03-12 16:16:59
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -364,6 +364,7 @@
           range-separator="至"
           start-placeholder="开始月份"
           end-placeholder="结束月份"
+          :picker-options="monthPickOp"
           value-format="yyyy-MM"
         >
         </el-date-picker>
@@ -729,6 +730,9 @@ export default {
         pageSize: 10,
         currentPage: 1,
         total: 0
+      },
+      monthPickOp: {
+        disabledDate: (val) => Date.now() < val
       },
       robotList: [], // 可选机器人列表
       customerList: [], //表格填充数据
