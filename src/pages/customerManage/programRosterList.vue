@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-03-12 15:22:05
+ * @LastEditTime: 2022-03-12 15:58:34
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -873,12 +873,16 @@ export default {
         freeInsuranceCompany: this.search.freeInsuranceCompany || null,
         freeInsurance: this.search.freeInsurance || null,
         // freeInsuranceMonth: this.search.freeInsuranceMonth || null,
-        freeInsuranceMonthMin: this.search.freeInsuranceMonth.length
-          ? this.search.freeInsuranceMonth[0]
-          : null,
-        freeInsuranceMonthMax: this.search.freeInsuranceMonth.length
-          ? this.search.freeInsuranceMonth[1]
-          : null
+        freeInsuranceMonthMin:
+          this.search.freeInsuranceMonth &&
+          this.search.freeInsuranceMonth.length
+            ? this.search.freeInsuranceMonth[0]
+            : null,
+        freeInsuranceMonthMax:
+          this.search.freeInsuranceMonth &&
+          this.search.freeInsuranceMonth.length
+            ? this.search.freeInsuranceMonth[1]
+            : null
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -1078,12 +1082,16 @@ export default {
         freeInsuranceCompany: this.search.freeInsuranceCompany || null,
         freeInsurance: this.search.freeInsurance || null,
         // freeInsuranceMonth: this.search.freeInsuranceMonth || null
-        freeInsuranceMonthMin: this.search.freeInsuranceMonth.length
-          ? this.search.freeInsuranceMonth[0]
-          : null,
-        freeInsuranceMonthMax: this.search.freeInsuranceMonth.length
-          ? this.search.freeInsuranceMonth[1]
-          : null
+        freeInsuranceMonthMin:
+          this.search.freeInsuranceMonth &&
+          this.search.freeInsuranceMonth.length
+            ? this.search.freeInsuranceMonth[0]
+            : null,
+        freeInsuranceMonthMax:
+          this.search.freeInsuranceMonth &&
+          this.search.freeInsuranceMonth.length
+            ? this.search.freeInsuranceMonth[1]
+            : null
       }
       let url = '/sdmulti/project/info/list'
       //判断是否是简单字段查询
