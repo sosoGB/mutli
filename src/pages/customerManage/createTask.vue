@@ -839,7 +839,13 @@ export default {
       obj.maxAge = search.maxAge
       obj.freeInsuranceCompany = search.freeInsuranceCompany
       obj.freeInsurance = search.freeInsurance
-      obj.freeInsuranceMonth = search.freeInsuranceMonth
+      // obj.freeInsuranceMonth = search.freeInsuranceMonth
+      obj.freeInsuranceMonthMin = search.freeInsuranceMonth.length
+        ? search.freeInsuranceMonth[0]
+        : null
+      obj.freeInsuranceMonthMax = search.freeInsuranceMonth.length
+        ? search.freeInsuranceMonth[1]
+        : null
       obj.page = pagination.currentPage
       obj.pageSize = pagination.pageSize
       customerInfos.push(obj)
@@ -985,14 +991,14 @@ export default {
       }
     },
     getRouteList() {
-      let serviceInfo = this.OutCallPlatformList.find((e) => {
+      let serviceInfos = this.OutCallPlatformList.find((e) => {
         return this.createFormData.outCallPlatformId == e.id
       })
-      this.$request
-        .jsonPost('/sdmulti/task/getRoute', serviceInfo)
-        .then((res) => {
-          this.routeList = res.data
-        })
+      let fd = new FormData()
+      fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
+      this.$request.uploadPost('/sdmulti/task/getRoute', fd).then((res) => {
+        this.routeList = res.data
+      })
     },
     selectRobot(val) {
       if (val) {

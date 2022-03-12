@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-03-08 16:31:37
+ * @LastEditTime: 2022-03-12 15:22:05
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -350,10 +350,20 @@
       </div>
       <div class="advanced-item">
         <span class="advanced-label">赠险领取月份：</span>
-        <el-date-picker
+        <!-- <el-date-picker
           v-model="search.freeInsuranceMonth"
           type="month"
           placeholder="选择月"
+          value-format="yyyy-MM"
+        >
+        </el-date-picker> -->
+        <el-date-picker
+          v-model="search.freeInsuranceMonth"
+          type="monthrange"
+          class="free-month"
+          range-separator="至"
+          start-placeholder="开始月份"
+          end-placeholder="结束月份"
           value-format="yyyy-MM"
         >
         </el-date-picker>
@@ -681,7 +691,7 @@ export default {
         createTimeMax: null,
         freeInsuranceCompany: null,
         freeInsurance: null,
-        freeInsuranceMonth: null
+        freeInsuranceMonth: []
       },
       search: {
         //查询筛选字段
@@ -710,7 +720,7 @@ export default {
         createTimeMax: null,
         freeInsuranceCompany: null,
         freeInsurance: null,
-        freeInsuranceMonth: null
+        freeInsuranceMonth: []
       },
       repeatTimeOrder: null,
       createTimeOrder: null,
@@ -862,7 +872,13 @@ export default {
         repeatTimeOrder: this.repeatTimeOrder,
         freeInsuranceCompany: this.search.freeInsuranceCompany || null,
         freeInsurance: this.search.freeInsurance || null,
-        freeInsuranceMonth: this.search.freeInsuranceMonth || null
+        // freeInsuranceMonth: this.search.freeInsuranceMonth || null,
+        freeInsuranceMonthMin: this.search.freeInsuranceMonth.length
+          ? this.search.freeInsuranceMonth[0]
+          : null,
+        freeInsuranceMonthMax: this.search.freeInsuranceMonth.length
+          ? this.search.freeInsuranceMonth[1]
+          : null
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -1061,7 +1077,13 @@ export default {
         repeatTimeOrder: this.repeatTimeOrder,
         freeInsuranceCompany: this.search.freeInsuranceCompany || null,
         freeInsurance: this.search.freeInsurance || null,
-        freeInsuranceMonth: this.search.freeInsuranceMonth || null
+        // freeInsuranceMonth: this.search.freeInsuranceMonth || null
+        freeInsuranceMonthMin: this.search.freeInsuranceMonth.length
+          ? this.search.freeInsuranceMonth[0]
+          : null,
+        freeInsuranceMonthMax: this.search.freeInsuranceMonth.length
+          ? this.search.freeInsuranceMonth[1]
+          : null
       }
       let url = '/sdmulti/project/info/list'
       //判断是否是简单字段查询
@@ -1128,6 +1150,12 @@ export default {
 .customerList {
   .tool-search {
     flex: 1;
+  }
+  .free-month {
+    width: 320px;
+    /deep/ .el-range-separator {
+      padding: 0;
+    }
   }
   .pagination {
     display: flex;
