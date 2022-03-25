@@ -991,14 +991,22 @@ export default {
       }
     },
     getRouteList() {
-      let serviceInfos = this.OutCallPlatformList.find((e) => {
+      // let serviceInfos = this.OutCallPlatformList.find((e) => {
+      //   return this.createFormData.outCallPlatformId == e.id
+      // })
+      // let fd = new FormData()
+      // fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
+      // this.$request.uploadPost('/sdmulti/task/getRoute', fd).then((res) => {
+      //   this.routeList = res.data
+      // })
+      let serviceInfo = this.OutCallPlatformList.find((e) => {
         return this.createFormData.outCallPlatformId == e.id
       })
-      let fd = new FormData()
-      fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
-      this.$request.uploadPost('/sdmulti/task/getRoute', fd).then((res) => {
-        this.routeList = res.data
-      })
+      this.$request
+        .jsonPost('/sdmulti/task/getRoute', serviceInfo)
+        .then((res) => {
+          this.routeList = res.data
+        })
     },
     selectRobot(val) {
       if (val) {
