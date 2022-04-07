@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-02-08 15:43:03
- * @LastEditTime: 2022-03-01 20:21:32
+ * @LastEditTime: 2022-04-07 09:26:39
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\customerManage\programManageList.vue
@@ -275,7 +275,18 @@ export default {
           value: 0
         }
       ],
-      categoryList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'], // 可选意向分类
+      categoryList: [
+        'A++类',
+        'A+类',
+        'A类',
+        'A-类',
+        'B类',
+        'C类',
+        'D类',
+        'E类',
+        'F类',
+        '未分类'
+      ], // 可选意向分类
       activeNumberList: [], // 可选线路
       availableCallTaskTemplate: [238, 253, 283, 310], // 可选任务模板id
       planList: [], // 任务列表数据

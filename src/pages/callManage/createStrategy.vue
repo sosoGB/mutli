@@ -860,7 +860,18 @@ export default {
         disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
       },
       dialogOpportunityVisible: false, // 导入商机名单弹窗可见性
-      opportunityTagList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'],
+      opportunityTagList: [
+        'A++类',
+        'A+类',
+        'A类',
+        'A-类',
+        'B类',
+        'C类',
+        'D类',
+        'E类',
+        'F类',
+        '未分类'
+      ],
       opportunityStatusList: [
         {
           label: '未呼叫',

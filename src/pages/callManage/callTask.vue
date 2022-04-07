@@ -383,7 +383,18 @@ export default {
         // }
       },
       robotList: [], // 可选机器人列表
-      categoryList: ['A类', 'B类', 'C类', 'D类', 'E类', 'F类', '未分类'], // 可选意向分类
+      categoryList: [
+        'A++类',
+        'A+类',
+        'A类',
+        'A-类',
+        'B类',
+        'C类',
+        'D类',
+        'E类',
+        'F类',
+        '未分类'
+      ], // 可选意向分类
       activeNumberList: [], // 可选线路
       availableCallTaskTemplate: [238, 253, 283, 310], // 可选任务模板id
       planList: [], // 任务列表数据
