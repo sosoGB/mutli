@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2022-01-21 15:30:34
- * @LastEditTime: 2022-04-07 09:26:48
+ * @LastEditTime: 2022-04-14 11:02:37
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \mutli\src\pages\programRosterManage\list.vue
@@ -349,6 +349,18 @@
         ></el-input>
       </div>
       <div class="advanced-item">
+        <span class="advanced-label">当批是否为新客户：</span>
+        <el-select
+          placeholder="请选择"
+          clearable
+          v-model="search.isNewCus"
+          class="advanced-input"
+        >
+          <el-option label="是" :value="0"></el-option>
+          <el-option label="否" :value="1"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
         <span class="advanced-label">赠险领取月份：</span>
         <!-- <el-date-picker
           v-model="search.freeInsuranceMonth"
@@ -694,6 +706,7 @@ export default {
         nameSpecial: null, //是否为新客户
         isSuccess: null, //是否已成功转化
         isName: null, //名字是否为空
+        isNewCus: null,
         tag: '', //
         startMaxTalkTime: null,
         endMaxTalkTime: null,
@@ -723,6 +736,7 @@ export default {
         nameSpecial: null, //是否为新客户
         isSuccess: null, //是否已成功转化
         isName: null, //名字是否为空
+        isNewCus: null,
         tag: '', //
         startMaxTalkTime: null,
         endMaxTalkTime: null,
@@ -866,6 +880,7 @@ export default {
         repeatCtMax: this.search.repeatCtMax,
         isCall: this.search.isCall,
         nameSpecial: this.search.nameSpecial,
+        isNewCus: this.search.isNewCus,
         isSuccess: this.search.isSuccess,
         isName: this.search.isName,
         tag: this.search.tag,
@@ -1077,6 +1092,7 @@ export default {
         isCall: this.search.isCall,
         nameSpecial: this.search.nameSpecial,
         isSuccess: this.search.isSuccess,
+        isNewCus: this.search.isNewCus,
         isName: this.search.isName,
         page: this.pagination.currentPage,
         pageSize: this.pagination.pageSize,
