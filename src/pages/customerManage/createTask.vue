@@ -800,7 +800,6 @@ export default {
     const pagination = query.pagination ? JSON.parse(query.pagination) : {}
     let distList = []
     let customerInfos = []
-    debugger
     param.forEach((item) => {
       distList.push(item.row.distCt)
       var obj = {}
