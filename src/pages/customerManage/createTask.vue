@@ -58,7 +58,7 @@
           :max="selectCtNum"
           @change="checkLastNum"
           v-model="createFormData.customerNum"
-          style="width:80px;"
+          style="width: 80px"
         ></el-input>
         <span>-第</span>
         <el-input
@@ -68,7 +68,7 @@
           :max="selectCtNum"
           @change="lastNumOnInput"
           v-model="createFormData.customerNum2"
-          style="width:80px;"
+          style="width: 80px"
         ></el-input>
         <span>个进行选取</span>
       </el-form-item>
@@ -184,25 +184,25 @@
       <el-form-item prop="weeks" label="外呼周期：">
         <el-checkbox-group
           v-model="createFormData.weeks"
-          style="display:inline-block;"
+          style="display: inline-block"
         >
           <el-checkbox
             v-for="item in dateList"
             :label="item.value"
             :key="item.value"
-            style="width:80px;"
+            style="width: 80px"
             >{{ item.name }}</el-checkbox
           >
         </el-checkbox-group>
       </el-form-item>
       <el-form-item prop="times" label="外呼时间段：">
-        <div style="font-size:12px;color:#999;">
+        <div style="font-size: 12px; color: #999">
           请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
         </div>
         <div
           v-for="(item, index) in createFormData.times"
           :key="index"
-          style="margin-bottom:10px;"
+          style="margin-bottom: 10px"
         >
           <el-time-select
             placeholder="起始时间"
@@ -211,7 +211,7 @@
             :picker-options="{
               start: '00:00',
               step: '00:10',
-              end: '23:50'
+              end: '23:50',
             }"
           >
           </el-time-select>
@@ -224,7 +224,7 @@
               start: '00:10',
               step: '00:10',
               end: '24:00',
-              minTime: item.startTime
+              minTime: item.startTime,
             }"
           >
           </el-time-select>
@@ -234,14 +234,14 @@
             type="primary"
             @click="addTimeRange"
             size="mini"
-            style="margin-left:20px;"
+            style="margin-left: 20px"
           ></el-button>
           <el-button
             v-else
             icon="el-icon-minus"
             type="danger"
             @click="deleteTimeRange(index)"
-            style="margin-left:20px;"
+            style="margin-left: 20px"
             size="mini"
           ></el-button>
         </div>
@@ -271,7 +271,7 @@
                 :picker-options="{
                   start: '08:00',
                   step: '00:10',
-                  end: '22:00'
+                  end: '22:00',
                 }"
                 placeholder="选择时间"
               >
@@ -285,7 +285,7 @@
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '22:00'
+                end: '22:00',
               }"
               placeholder="选择时间"
             >
@@ -296,7 +296,7 @@
               :picker-options="{
                 start: '07:55',
                 step: '00:10',
-                end: '22:05'
+                end: '22:05',
               }"
               placeholder="选择时间"
             >
@@ -391,7 +391,7 @@
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '22:00'
+                end: '22:00',
               }"
               placeholder="选择时间"
             >
@@ -483,7 +483,7 @@ import util from '@/service/filter'
 export default {
   components: {
     FileUploader,
-    ProgressPop
+    ProgressPop,
   },
   data() {
     return {
@@ -550,7 +550,7 @@ export default {
         { name: '星期四', value: 4 },
         { name: '星期五', value: 5 },
         { name: '星期六', value: 6 },
-        { name: '星期日', value: 0 }
+        { name: '星期日', value: 0 },
       ],
       maxConcurrentCount: '',
       routeList: [],
@@ -580,15 +580,15 @@ export default {
         conversionFlag: 0, // 转化失败重呼
         jietongFlag: 0, // 接通失败重呼
         weeks: [0, 1, 2, 3, 4, 5, 6],
-        times: [{ startTime: '08:00', endTime: '22:00' }]
+        times: [{ startTime: '08:00', endTime: '22:00' }],
       }, // 新建任务表单项
       createFormRule: {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
-          { max: 40, message: '不得超过40个字符', trigger: 'blur' }
+          { max: 40, message: '不得超过40个字符', trigger: 'blur' },
         ],
         projectId: [
-          { required: true, message: '请选择项目', trigger: 'change' }
+          { required: true, message: '请选择项目', trigger: 'change' },
         ],
         customerNum: [
           {
@@ -601,8 +601,8 @@ export default {
               } else {
                 callback()
               }
-            }
-          }
+            },
+          },
         ],
         times: [
           {
@@ -627,18 +627,18 @@ export default {
                 }
               })
               callback()
-            }
-          }
+            },
+          },
         ],
         // weeks: [
         //   { required: true, message: '请选择允许的外呼周期', trigger: 'change' }
         // ],
         robotName: [
-          { required: true, message: '请选择机器人名称', trigger: 'blur' }
+          { required: true, message: '请选择机器人名称', trigger: 'blur' },
         ],
         routeId: [{ required: true, message: '请选择路由', trigger: 'change' }],
         concurrentNum: [
-          { required: true, message: '请输入并发数量', trigger: 'blur' }
+          { required: true, message: '请输入并发数量', trigger: 'blur' },
         ],
         recallInterval: [
           {
@@ -649,8 +649,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         recallMaxNum: [
           {
@@ -661,8 +661,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         conversionInterval: [
           {
@@ -673,8 +673,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         conversionMaxNum: [
           {
@@ -685,8 +685,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         importComVar: [
           {
@@ -700,8 +700,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         importRelVar: [
           {
@@ -715,36 +715,36 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
-        ]
+            trigger: 'blur',
+          },
+        ],
       }, // 新增任务表单项校验规则
       beginDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field],
         }
       },
       endDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field],
         }
       },
       datePicker: {
-        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
+        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7,
       },
       allowTime: [],
       allowTimes: [],
       dynamicValidateForm: {
         domains: [
           {
-            value: ''
-          }
-        ]
-      }
+            value: '',
+          },
+        ],
+      },
     }
   },
   watch: {
@@ -776,7 +776,7 @@ export default {
         return
       }
       this.ulRel = files[0]
-    }
+    },
   },
   computed: {
     getCpl() {
@@ -790,7 +790,7 @@ export default {
         return item.product
       }
       return ''
-    }
+    },
   },
   created() {
     const query = this.$route.query
@@ -800,6 +800,7 @@ export default {
     const pagination = query.pagination ? JSON.parse(query.pagination) : {}
     let distList = []
     let customerInfos = []
+    debugger
     param.forEach((item) => {
       distList.push(item.row.distCt)
       var obj = {}
@@ -817,6 +818,7 @@ export default {
       obj.tag = search.tag
       obj.aiCategory = this.$route.query.aiCategory
       obj.nameSpecial = search.nameSpecial
+      obj.isNewCus = search.isNewCus
       obj.isSuccess = search.isSuccess
       obj.isName = search.isName
       obj.startMaxTalkTime = search.startMaxTalkTime
@@ -856,7 +858,7 @@ export default {
     this.unionVO = vo
     const numList = distList.map(Number)
     //计算客户总数量
-    this.selectCtNum = numList.reduce(function(prev, cur) {
+    this.selectCtNum = numList.reduce(function (prev, cur) {
       return prev + cur
     })
     this.createFormData.customerNum2 = this.selectCtNum
@@ -888,7 +890,7 @@ export default {
       const url = '/sdmulti/manage/project/list/type'
       const params = {
         status: 1, // 只有启动的项目才查出来
-        type: this.type
+        type: this.type,
       }
       this.$request.formGet(url, params).then((res) => {
         if (res.code == 0) {
@@ -904,7 +906,7 @@ export default {
           let list = Object.keys(res.data).map((label) => {
             return {
               label,
-              key: res.data[label]
+              key: res.data[label],
             }
           })
           this.recallResultList = list
@@ -944,7 +946,7 @@ export default {
       if (this.createFormData.times.length > 3) return
       this.createFormData.times.push({
         startTime: '',
-        endTime: ''
+        endTime: '',
       })
     },
     deleteTimeRange(index) {
@@ -965,7 +967,7 @@ export default {
       )
       this.allowTime.push({
         allowstartTime: this.allowstartTime,
-        allowendTime: this.allowendTime
+        allowendTime: this.allowendTime,
       })
       this.allowstartTime = ''
       this.allowendTime = ''
@@ -1036,8 +1038,8 @@ export default {
         let param = new FormData()
         const config = {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         }
         param.append('pFile', this.ulCom)
         param.append('rFile', this.ulRel)
@@ -1068,7 +1070,7 @@ export default {
       this.$request
         .jsonPost('/sdmulti/task/checkConcurrentNum', {
           concurrentNum: this.createFormData.concurrentNum,
-          serviceIds: this.createFormData.outCallPlatformId
+          serviceIds: this.createFormData.outCallPlatformId,
         })
         .then((res) => {
           if (res.code === '0' && res.data === false) {
@@ -1202,7 +1204,7 @@ export default {
           projectInfoParams: this.customerInfoVOs,
           routeId: this.createFormData.routeId,
           weeks: this.createFormData.weeks.join(','),
-          times
+          times,
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {
@@ -1224,7 +1226,7 @@ export default {
           lock: true,
           text: ltext,
           spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.5)'
+          background: 'rgba(0, 0, 0, 0.5)',
         })
         const url = '/sdmulti/task/save'
         return this.$request
@@ -1244,7 +1246,7 @@ export default {
                 if (err.response.data.code == '300') {
                   this.$router.replace('/main/callManage/callTask')
                 }
-              }
+              },
             })
           })
           .finally(() => {
@@ -1268,8 +1270,8 @@ export default {
           }
         })
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
