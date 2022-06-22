@@ -23,7 +23,7 @@
           placeholder="名单批次"
           class="search-component search-input"
           v-model.trim="search.batch"
-          style="width:260px;"
+          style="width: 260px"
           clearable
         ></el-input>
         <el-date-picker
@@ -43,6 +43,27 @@
           placeholder="复用结束时间"
           value-format="yyyy-MM-dd"
           :picker-options="endUpdateValidator"
+          clearable
+        ></el-date-picker>
+        <el-date-picker
+          v-model="search.createTimeMin"
+          class="search-component search-input"
+          type="date"
+          placeholder="创建时间最小值"
+          value-format="yyyy-MM-dd"
+          :picker-options="createTimeMinValidator"
+          @change="whenCreateTimeMinChange"
+          clearable
+        ></el-date-picker>
+        <span class="search-delimiter">-</span>
+        <el-date-picker
+          v-model="search.createTimeMax"
+          class="search-component search-input"
+          type="date"
+          placeholder="创建时间最大值"
+          value-format="yyyy-MM-dd"
+          :picker-options="createTimeMaxValidator"
+          @change="whenCreateTimeMaxChange"
           clearable
         ></el-date-picker>
         <el-button
@@ -223,15 +244,27 @@
         </el-select>
       </div>
       <div class="advanced-item">
-        <span class="advanced-label">是否已成功转化：</span>
+        <span class="advanced-label">是否已成功转化（最近一次外呼）：</span>
         <el-select
-          v-model="search.isSuccess"
+          v-model="search.callIsSuccess"
           placeholder="请选择"
           clearable
           class="advanced-input"
         >
-          <el-option label="是" :value="2"></el-option>
-          <el-option label="否" :value="1"></el-option>
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">是否已成功转化（最近一次接通）：</span>
+        <el-select
+          v-model="search.talkIsSuccess"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+        >
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -362,13 +395,6 @@
       </div>
       <div class="advanced-item">
         <span class="advanced-label">赠险领取月份：</span>
-        <!-- <el-date-picker
-          v-model="search.freeInsuranceMonth"
-          type="month"
-          placeholder="选择月"
-          value-format="yyyy-MM"
-        >
-        </el-date-picker> -->
         <el-date-picker
           v-model="search.freeInsuranceMonth"
           type="monthrange"
@@ -382,55 +408,26 @@
         </el-date-picker>
       </div>
       <div class="advanced-item">
-        <span class="advanced-label">项目批次创建时间：</span>
+        <span class="advanced-label">成单日期：</span>
         <el-date-picker
-          v-model="search.createTimeMin"
+          v-model="search.successStartDate"
           class="search-component search-input"
           type="date"
-          placeholder="开始时间"
+          placeholder="创建时间最小值"
           value-format="yyyy-MM-dd"
-          :picker-options="createTimeMinValidator"
+          :picker-options="successStartDateValidator"
           clearable
         ></el-date-picker>
         <span class="search-delimiter">-</span>
         <el-date-picker
-          v-model="search.createTimeMax"
+          v-model="search.successEndDate"
           class="search-component search-input"
           type="date"
-          placeholder="结束时间"
+          placeholder="创建时间最大值"
           value-format="yyyy-MM-dd"
-          :picker-options="createTimeMaxValidator"
+          :picker-options="successEndDateValidator"
           clearable
         ></el-date-picker>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label">意向分级标签：</span>
-        <el-input
-          placeholder="请输入意向分级标签，用逗号隔开"
-          v-model="search.tag"
-          class="advanced-input large-input"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label">意向分级等级：</span>
-        <el-checkbox-group
-          v-model="selectIntentTags"
-          style="display:inline-block;"
-        >
-          <el-checkbox
-            v-for="range in intentTags"
-            :label="range"
-            :key="range"
-            style="width:80px;"
-          ></el-checkbox>
-        </el-checkbox-group>
       </div>
     </div>
     <div class="table">
@@ -627,7 +624,7 @@
           将xls/xlsx文件拖到此处，或<em>点击上传</em>
         </div>
       </el-upload>
-      <div style="text-align:center;margin-top:10px;">
+      <div style="text-align: center; margin-top: 10px">
         <a href="/xls/成功单.xlsx">下载成功单模板</a>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -644,6 +641,11 @@ import keepAlive from '@/utils/mixins/keepAlive.js' //用于从详情页返回�
 export default {
   mixins: [keepAlive],
   data() {
+    const now = filter.formatDate(Date.now(), 'yyyy-MM-dd')
+    const oneWeekAgo = filter.formatDate(
+      Date.now() - 6 * 24 * 3600 * 1000,
+      'yyyy-MM-dd'
+    )
     return {
       clickedSle: false,
       authExport: false,
@@ -654,39 +656,26 @@ export default {
       isSelectAll: false, //是否全选列表结果
       showMoreSearch: false, //是否显示高级搜索
       sourceTypeList: [],
-      intentTags: [
-        'A++类',
-        'A+类',
-        'A类',
-        'A-类',
-        'B类',
-        'C类',
-        'D类',
-        'E类',
-        'F类',
-        '未分类'
-      ],
-      selectIntentTags: [],
       projectList: [],
       pullForm: {
         type: '',
         number: '',
-        autoPullTime: ''
+        autoPullTime: '',
       },
       rules: {
         type: [
-          { required: true, message: '请选择名单拉取方式', trigger: 'change' }
+          { required: true, message: '请选择名单拉取方式', trigger: 'change' },
         ],
         number: [
-          { required: true, message: '请输入最大拉取条数', trigger: 'blur' }
+          { required: true, message: '请输入最大拉取条数', trigger: 'blur' },
         ],
         autoPullTime: [
           {
             required: true,
             message: '请选择自动拉取名单时间',
-            trigger: 'change'
-          }
-        ]
+            trigger: 'change',
+          },
+        ],
       },
       oldSearch: {
         //查询筛选字段
@@ -705,9 +694,10 @@ export default {
         isCall: null, //是否已创建外呼任务
         nameSpecial: null, //是否为新客户
         isSuccess: null, //是否已成功转化
+        talkIsSuccess: null, //是否已成功转化
+        callIsSuccess: null,
         isName: null, //名字是否为空
         isNewCus: null,
-        tag: '', //
         startMaxTalkTime: null,
         endMaxTalkTime: null,
         startTalkTime: null,
@@ -716,7 +706,9 @@ export default {
         createTimeMax: null,
         freeInsuranceCompany: null,
         freeInsurance: null,
-        freeInsuranceMonth: []
+        freeInsuranceMonth: [],
+        successStartDate: null,
+        successEndDate: null,
       },
       search: {
         //查询筛选字段
@@ -735,18 +727,21 @@ export default {
         isCall: null, //是否已创建外呼任务
         nameSpecial: null, //是否为新客户
         isSuccess: null, //是否已成功转化
+        talkIsSuccess: null,
+        callIsSuccess: null,
         isName: null, //名字是否为空
         isNewCus: null,
-        tag: '', //
         startMaxTalkTime: null,
         endMaxTalkTime: null,
         startTalkTime: null,
         endTalkTime: null,
-        createTimeMin: null,
-        createTimeMax: null,
+        createTimeMin: oneWeekAgo,
+        createTimeMax: now,
         freeInsuranceCompany: null,
         freeInsurance: null,
-        freeInsuranceMonth: []
+        freeInsuranceMonth: [],
+        successStartDate: null,
+        successEndDate: null,
       },
       repeatTimeOrder: null,
       createTimeOrder: null,
@@ -754,17 +749,17 @@ export default {
       pagination: {
         pageSize: 10,
         currentPage: 1,
-        total: 0
+        total: 0,
       },
       monthPickOp: {
-        disabledDate: (val) => Date.now() < val
+        disabledDate: (val) => Date.now() < val,
       },
       robotList: [], // 可选机器人列表
       customerList: [], //表格填充数据
       isLoading: false,
       checkedTableRow: [], //表格已选中或取消行
       beginUpdateValidator: {
-        disabledDate: (current) => Date.now() < current
+        disabledDate: (current) => Date.now() < current,
       },
       endUpdateValidator: {
         disabledDate: (current) => {
@@ -773,10 +768,10 @@ export default {
             filter.formatDate(current, 'yyyy-MM-dd') <
               this.search.repeatTimeStart
           )
-        }
+        },
       },
       createTimeMinValidator: {
-        disabledDate: (current) => Date.now() < current
+        disabledDate: (current) => Date.now() < current,
       },
       createTimeMaxValidator: {
         disabledDate: (current) => {
@@ -784,8 +779,20 @@ export default {
             this.search.createTimeMin &&
             filter.formatDate(current, 'yyyy-MM-dd') < this.search.createTimeMin
           )
-        }
-      }
+        },
+      },
+      successStartDateValidator: {
+        disabledDate: (current) => Date.now() < current,
+      },
+      successEndDateValidator: {
+        disabledDate: (current) => {
+          return (
+            this.search.successStartDate &&
+            filter.formatDate(current, 'yyyy-MM-dd') <
+              this.search.successStartDate
+          )
+        },
+      },
     }
   },
   created() {
@@ -800,6 +807,36 @@ export default {
     this.getProjectsAll()
   },
   methods: {
+    whenCreateTimeMinChange(val) {
+      if (
+        new Date(this.search.createTimeMax).getTime() -
+          new Date(val).getTime() >
+          1000 * 60 * 60 * 24 * 6 ||
+        new Date(this.search.createTimeMax).getTime() -
+          new Date(val).getTime() <
+          0
+      ) {
+        this.search.createTimeMax = filter.formatDate(
+          new Date(val).getTime() + 1000 * 60 * 60 * 24 * 6,
+          'yyyy-MM-dd'
+        )
+      }
+    },
+    whenCreateTimeMaxChange(val) {
+      if (
+        new Date(val).getTime() -
+          new Date(this.search.createTimeMin).getTime() >
+          1000 * 60 * 60 * 24 * 6 ||
+        new Date(val).getTime() -
+          new Date(this.search.createTimeMin).getTime() <
+          0
+      ) {
+        this.search.createTimeMin = filter.formatDate(
+          new Date(val).getTime() - 1000 * 60 * 60 * 24 * 6,
+          'yyyy-MM-dd'
+        )
+      }
+    },
     getProjectsAll() {
       const url = '/sdmulti/manage/project/list/type'
       this.$request.formGet(url).then((res) => {
@@ -835,8 +872,8 @@ export default {
         path: '/main/callManage/callTask',
         query: {
           projectName: row.projectName,
-          batch: row.batch
-        }
+          batch: row.batch,
+        },
       })
     },
     uploadSuccess(response) {
@@ -860,7 +897,6 @@ export default {
           sex.push(2)
         }
       }
-      let aiCategory = this.selectIntentTags.join(',')
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
@@ -882,9 +918,9 @@ export default {
         nameSpecial: this.search.nameSpecial,
         isNewCus: this.search.isNewCus,
         isSuccess: this.search.isSuccess,
+        talkIsSuccess: this.search.talkIsSuccess,
+        callIsSuccess: this.search.callIsSuccess,
         isName: this.search.isName,
-        tag: this.search.tag,
-        aiCategory,
         startMaxTalkTime: this.search.startMaxTalkTime,
         endMaxTalkTime: this.search.endMaxTalkTime,
         startTalkTime: this.search.startTalkTime,
@@ -912,7 +948,13 @@ export default {
           this.search.freeInsuranceMonth &&
           this.search.freeInsuranceMonth.length
             ? this.search.freeInsuranceMonth[1]
-            : null
+            : null,
+        successStartDate: this.search.successStartDate
+          ? this.search.successStartDate + ' 00:00:00'
+          : null,
+        successEndDate: this.search.successEndDate
+          ? this.search.successEndDate + ' 00:00:00'
+          : null,
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -947,7 +989,7 @@ export default {
       this.checkedTableRow.push({
         page: this.pagination.currentPage,
         index,
-        row
+        row,
       })
     },
     // 手动勾选全选
@@ -966,7 +1008,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .concat(this.checkedTableRow)
@@ -977,7 +1019,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .concat(this.checkedTableRow)
@@ -1047,8 +1089,7 @@ export default {
           pagination: JSON.stringify(pagination),
           type: this.checkedTableRow[0].row.type,
           batchList,
-          aiCategory: this.selectIntentTags.join(',')
-        }
+        },
       })
     },
     // 查询列表
@@ -1071,7 +1112,6 @@ export default {
           sex.push(2)
         }
       }
-      let aiCategory = this.selectIntentTags.join(',')
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
@@ -1092,12 +1132,12 @@ export default {
         isCall: this.search.isCall,
         nameSpecial: this.search.nameSpecial,
         isSuccess: this.search.isSuccess,
+        talkIsSuccess: this.search.talkIsSuccess,
+        callIsSuccess: this.search.callIsSuccess,
         isNewCus: this.search.isNewCus,
         isName: this.search.isName,
         page: this.pagination.currentPage,
         pageSize: this.pagination.pageSize,
-        tag: this.search.tag,
-        aiCategory,
         startMaxTalkTime: this.search.startMaxTalkTime,
         endMaxTalkTime: this.search.endMaxTalkTime,
         startTalkTime: this.search.startTalkTime,
@@ -1122,30 +1162,15 @@ export default {
           this.search.freeInsuranceMonth &&
           this.search.freeInsuranceMonth.length
             ? this.search.freeInsuranceMonth[1]
-            : null
+            : null,
+        successStartDate: this.search.successStartDate
+          ? this.search.successStartDate + ' 00:00:00'
+          : null,
+        successEndDate: this.search.successEndDate
+          ? this.search.successEndDate + ' 00:00:00'
+          : null,
       }
       let url = '/sdmulti/project/info/list'
-      //判断是否是简单字段查询
-      // if (
-      //   (!this.search.sex || !this.search.sex.length) &&
-      //   (this.search.minAge === '' || this.search.minAge === null) &&
-      //   (this.search.maxAge === '' || this.search.maxAge === null) &&
-      //   (this.search.isCall === '' || this.search.isCall === null) &&
-      //   (this.search.nameSpecial === '' || this.search.nameSpecial === null) &&
-      //   (this.search.isSuccess === '' || this.search.isSuccess === null) &&
-      //   (this.search.isName === '' || this.search.isName === null) &&
-      //   (this.search.tag === '' || this.search.tag === null) &&
-      //   (this.search.startMaxTalkTime === '' ||
-      //     this.search.startMaxTalkTime === null) &&
-      //   (this.search.endMaxTalkTime === '' ||
-      //     this.search.endMaxTalkTime === null) &&
-      //   (this.search.startTalkTime === '' ||
-      //     this.search.startTalkTime === null) &&
-      //   (this.search.endTalkTime === '' || this.search.endTalkTime === null) &&
-      //   !aiCategory
-      // ) {
-      //   url = '/sdmulti/project/info/list/init'
-      // }
       this.$request
         .jsonPost(url, params)
         .then((res) => {
@@ -1180,8 +1205,8 @@ export default {
         .finally(() => {
           this.isLoading = false
         })
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss" scoped>

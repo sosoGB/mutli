@@ -27,11 +27,7 @@
         ></el-input>
       </el-form-item>
       <el-form-item prop="projectId" label="项目名称：">
-        <el-select
-          placeholder="请选择项目"
-          v-model="createFormData.projectId"
-          @change="changeProject"
-        >
+        <el-select placeholder="请选择项目" v-model="createFormData.projectId">
           <el-option
             v-for="item in projectList"
             :key="item.id"
@@ -46,9 +42,6 @@
           disabled
           class="input-name"
         ></el-input>
-      </el-form-item>
-      <el-form-item label="所属业务账号：">
-        <el-input :value="userMobile" disabled class="input-name"></el-input>
       </el-form-item>
       <el-form-item prop="repeatCount" label="是否增加名单复用次数：">
         <el-radio-group v-model="createFormData.repeatCount">
@@ -65,7 +58,7 @@
           :max="selectCtNum"
           @change="checkLastNum"
           v-model="createFormData.customerNum"
-          style="width: 80px"
+          style="width:80px;"
         ></el-input>
         <span>-第</span>
         <el-input
@@ -75,7 +68,7 @@
           :max="selectCtNum"
           @change="lastNumOnInput"
           v-model="createFormData.customerNum2"
-          style="width: 80px"
+          style="width:80px;"
         ></el-input>
         <span>个进行选取</span>
       </el-form-item>
@@ -191,25 +184,25 @@
       <el-form-item prop="weeks" label="外呼周期：">
         <el-checkbox-group
           v-model="createFormData.weeks"
-          style="display: inline-block"
+          style="display:inline-block;"
         >
           <el-checkbox
             v-for="item in dateList"
             :label="item.value"
             :key="item.value"
-            style="width: 80px"
+            style="width:80px;"
             >{{ item.name }}</el-checkbox
           >
         </el-checkbox-group>
       </el-form-item>
       <el-form-item prop="times" label="外呼时间段：">
-        <div style="font-size: 12px; color: #999">
+        <div style="font-size:12px;color:#999;">
           请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
         </div>
         <div
           v-for="(item, index) in createFormData.times"
           :key="index"
-          style="margin-bottom: 10px"
+          style="margin-bottom:10px;"
         >
           <el-time-select
             placeholder="起始时间"
@@ -218,7 +211,7 @@
             :picker-options="{
               start: '00:00',
               step: '00:10',
-              end: '23:50',
+              end: '23:50'
             }"
           >
           </el-time-select>
@@ -231,7 +224,7 @@
               start: '00:10',
               step: '00:10',
               end: '24:00',
-              minTime: item.startTime,
+              minTime: item.startTime
             }"
           >
           </el-time-select>
@@ -241,14 +234,14 @@
             type="primary"
             @click="addTimeRange"
             size="mini"
-            style="margin-left: 20px"
+            style="margin-left:20px;"
           ></el-button>
           <el-button
             v-else
             icon="el-icon-minus"
             type="danger"
             @click="deleteTimeRange(index)"
-            style="margin-left: 20px"
+            style="margin-left:20px;"
             size="mini"
           ></el-button>
         </div>
@@ -278,7 +271,7 @@
                 :picker-options="{
                   start: '08:00',
                   step: '00:10',
-                  end: '22:00',
+                  end: '22:00'
                 }"
                 placeholder="选择时间"
               >
@@ -292,7 +285,7 @@
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '22:00',
+                end: '22:00'
               }"
               placeholder="选择时间"
             >
@@ -303,7 +296,7 @@
               :picker-options="{
                 start: '07:55',
                 step: '00:10',
-                end: '22:05',
+                end: '22:05'
               }"
               placeholder="选择时间"
             >
@@ -323,20 +316,13 @@
           <el-radio :label="0">否</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item prop="recallFlag" label="自动重呼：">
+      <el-form-item prop="recallFlag" label="自动失败重呼：">
         <el-radio-group v-model="createFormData.recallFlag">
           <el-radio :label="1">是</el-radio>
           <el-radio :label="0">否</el-radio>
         </el-radio-group>
         <div v-show="createFormData.recallFlag">
           <p>
-            <el-tooltip
-              effect="dark"
-              content="呼叫失败结果和呼叫成功结果为‘或’的关系"
-              placement="top"
-            >
-              <i class="el-icon-question" style="font-size: 20px"></i>
-            </el-tooltip>
             <span class="form-prefix">选择通话结果</span>
             <span
               class="clickable"
@@ -357,152 +343,30 @@
               >{{ item.label }}</el-checkbox
             >
           </el-checkbox-group>
-          <div>
-            <el-tooltip
-              effect="dark"
-              content="呼叫失败结果和呼叫成功结果为‘或’的关系"
-              placement="top"
-            >
-              <i class="el-icon-question" style="font-size: 20px"></i>
-            </el-tooltip>
-            <span class="form-prefix"
-              >呼叫成功结果（以下四个条件同时满足）</span
-            >
-            <div class="classify" style="padding-left: 40px">
-              <div>
-                <span>意向分类：</span>
-                <span
-                  class="clickable"
-                  @click="handleCheckAllClassify(createFormData)"
-                >
-                  {{
-                    createFormData.recallResult.length ===
-                    recallResultList.length
-                      ? '全部取消'
-                      : '全选'
-                  }}
-                </span>
-              </div>
-              <div>
-                <span
-                  v-for="item in opportunityTagList"
-                  :key="item"
-                  class="advanced-category"
-                  :class="{
-                    selected: createFormData.categories.includes(item),
-                  }"
-                  @click="toggleSelectedCat(item)"
-                  >{{ item }}</span
-                >
-              </div>
-            </div>
-            <div class="classDesc" style="padding-left: 40px; margin-top: 10px">
-              <span>意向分类描述：</span>
-              <el-input
-                v-model="createFormData.groupInfos"
-                placeholder="未打标签的用null表示，多标签用英文逗号隔开"
-                style="display: inline-block; width: 500px"
-              ></el-input>
-            </div>
-            <div class="timelen" style="padding-left: 40px; margin-top: 10px">
-              <span>通话时长：</span>
-              <el-input
-                type="number"
-                placeholder="最小值"
-                v-model="createFormData.minCallTime"
-                style="display: inline-block; width: 200px"
-                clearable
-              ></el-input>
-              <span style="padding: 0 10px">-</span>
-              <el-input
-                type="number"
-                placeholder="最大值"
-                v-model="createFormData.maxCallTime"
-                style="display: inline-block; width: 200px"
-                clearable
-              ></el-input>
-            </div>
-            <div class="timenum" style="padding-left: 40px; margin-top: 10px">
-              <span>呼叫次数：</span>
-              <el-input
-                type="number"
-                placeholder="最小值"
-                v-model="createFormData.minAllCallNum"
-                style="display: inline-block; width: 200px"
-                clearable
-              ></el-input>
-              <span style="padding: 0 10px">-</span>
-              <el-input
-                type="number"
-                placeholder="最大值"
-                v-model="createFormData.maxAllCallNum"
-                style="display: inline-block; width: 200px"
-                clearable
-              ></el-input>
-            </div>
-          </div>
-          <div>
-            <div>
-              <span class="form-prefix">重呼时间选择：</span>
-              <el-radio v-model="createFormData.reCallStartWay" label="定时启动"
-                >自定义定时启动</el-radio
-              >
-              <el-radio v-model="createFormData.reCallStartWay" label="间隔启动"
-                >首呼完成后间隔启动</el-radio
-              >
-            </div>
-            <div
-              v-if="createFormData.reCallStartWay === '定时启动'"
-              style="padding-left: 20px"
-            >
-              <el-date-picker
-                v-model="createFormData.reCallStartTime"
-                type="datetime"
-                placeholder="选择日期时间"
-                value-format="yyyy-MM-dd HH:mm:ss"
-              >
-              </el-date-picker>
-            </div>
-            <div v-else style="padding-left: 20px; margin-top: 10px">
-              <el-form-item
-                label-width="70px"
-                prop="recallSpace"
-                label="重呼间隔"
-              >
-                <el-input-number
-                  v-model="createFormData.recallSpace"
-                  :min="1"
-                  :precision="0"
-                  size="small"
-                  placeholder="请输入重呼间隔"
-                ></el-input-number>
-                <el-select
-                  v-model="createFormData.spaceUnit"
-                  placeholder="请选择单位"
-                  size="small"
-                  style="width: 120px"
-                >
-                  <el-option label="分钟" value="m"> </el-option>
-                  <el-option label="小时" value="h"> </el-option>
-                  <el-option label="天" value="d"> </el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item
-                label-width="70px"
-                prop="recallMaxNum"
-                label="重呼次数"
-              >
-                <el-input-number
-                  v-model="createFormData.recallMaxNum"
-                  :min="1"
-                  :precision="0"
-                  size="small"
-                  placeholder="请输入重呼次数"
-                ></el-input-number>
-                <span class="form-suffix">次</span>
-              </el-form-item>
-            </div>
-          </div>
+          <el-form-item
+            label-width="70px"
+            prop="recallInterval"
+            label="重呼间隔"
+          >
+            <el-input-number
+              v-model="createFormData.recallInterval"
+              :min="1"
+              :precision="0"
+              size="small"
+              placeholder="请输入重呼间隔"
+            ></el-input-number>
+            <span class="form-suffix">分钟</span>
+          </el-form-item>
+          <el-form-item label-width="70px" prop="recallMaxNum" label="重呼次数">
+            <el-input-number
+              v-model="createFormData.recallMaxNum"
+              :min="1"
+              :precision="0"
+              size="small"
+              placeholder="请输入重呼次数"
+            ></el-input-number>
+            <span class="form-suffix">次</span>
+          </el-form-item>
         </div>
       </el-form-item>
       <el-form-item prop="conversionFlag" label="转化失败重呼：">
@@ -527,7 +391,7 @@
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '22:00',
+                end: '22:00'
               }"
               placeholder="选择时间"
             >
@@ -599,31 +463,6 @@
           </div>
         </div>
       </el-form-item>
-      <el-form-item prop="reCallRouteId" label="重呼路由选择：">
-        <el-select
-          v-model="createFormData.reCallRouteId"
-          @change="handleChangeRecallRouteId"
-          placeholder="请选择路由名称"
-          filterable
-        >
-          <el-option
-            v-for="item in routeList"
-            :key="item.id"
-            :label="item.routeName"
-            :value="item.id"
-          ></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item prop="reCallConcurrentCount" label="重呼并发数量：">
-        <el-input
-          type="number"
-          v-model="createFormData.reCallConcurrentCount"
-          :max="maxRecallConcurrentCount"
-          :min="1"
-          class="input-name"
-          @change="whenInputRecallCon"
-        ></el-input>
-      </el-form-item>
     </el-form>
     <el-row class="bottom">
       <el-button type="primary" @click="submitCreateForm">确定</el-button>
@@ -644,7 +483,7 @@ import util from '@/service/filter'
 export default {
   components: {
     FileUploader,
-    ProgressPop,
+    ProgressPop
   },
   data() {
     return {
@@ -711,24 +550,10 @@ export default {
         { name: '星期四', value: 4 },
         { name: '星期五', value: 5 },
         { name: '星期六', value: 6 },
-        { name: '星期日', value: 0 },
-      ],
-      opportunityTagList: [
-        'A++类',
-        'A+类',
-        'A类',
-        'A-类',
-        'B类',
-        'C类',
-        'D类',
-        'E类',
-        'F类',
-        '未分类',
+        { name: '星期日', value: 0 }
       ],
       maxConcurrentCount: '',
       routeList: [],
-      maxRecallConcurrentCount: null,
-      ifCheckAllCat: false,
       createFormData: {
         customerNum: 1,
         customerNum2: '',
@@ -755,26 +580,15 @@ export default {
         conversionFlag: 0, // 转化失败重呼
         jietongFlag: 0, // 接通失败重呼
         weeks: [0, 1, 2, 3, 4, 5, 6],
-        times: [{ startTime: '08:00', endTime: '22:00' }],
-        reCallRouteId: '', // 重呼路由选择
-        reCallConcurrentCount: null,
-        categories: [], // 重呼意向分类列表
-        groupInfos: '', // 重呼的意向分类描述
-        maxCallTime: '', //重呼最大通话时长
-        minCallTime: '', //重呼最小通话时长
-        maxAllCallNum: '', //重呼最多次数
-        minAllCallNum: '', //重呼最少次数
-        reCallStartWay: '定时启动', // 重呼时间选择
-        reCallStartTime: '',
-        spaceUnit: 'm',
+        times: [{ startTime: '08:00', endTime: '22:00' }]
       }, // 新建任务表单项
       createFormRule: {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
-          { max: 40, message: '不得超过40个字符', trigger: 'blur' },
+          { max: 40, message: '不得超过40个字符', trigger: 'blur' }
         ],
         projectId: [
-          { required: true, message: '请选择项目', trigger: 'change' },
+          { required: true, message: '请选择项目', trigger: 'change' }
         ],
         customerNum: [
           {
@@ -787,8 +601,8 @@ export default {
               } else {
                 callback()
               }
-            },
-          },
+            }
+          }
         ],
         times: [
           {
@@ -813,18 +627,18 @@ export default {
                 }
               })
               callback()
-            },
-          },
+            }
+          }
         ],
         // weeks: [
         //   { required: true, message: '请选择允许的外呼周期', trigger: 'change' }
         // ],
         robotName: [
-          { required: true, message: '请选择机器人名称', trigger: 'blur' },
+          { required: true, message: '请选择机器人名称', trigger: 'blur' }
         ],
         routeId: [{ required: true, message: '请选择路由', trigger: 'change' }],
         concurrentNum: [
-          { required: true, message: '请输入并发数量', trigger: 'blur' },
+          { required: true, message: '请输入并发数量', trigger: 'blur' }
         ],
         recallInterval: [
           {
@@ -835,8 +649,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur',
-          },
+            trigger: 'blur'
+          }
         ],
         recallMaxNum: [
           {
@@ -847,8 +661,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur',
-          },
+            trigger: 'blur'
+          }
         ],
         conversionInterval: [
           {
@@ -859,8 +673,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur',
-          },
+            trigger: 'blur'
+          }
         ],
         conversionMaxNum: [
           {
@@ -871,8 +685,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur',
-          },
+            trigger: 'blur'
+          }
         ],
         importComVar: [
           {
@@ -886,8 +700,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur',
-          },
+            trigger: 'blur'
+          }
         ],
         importRelVar: [
           {
@@ -901,42 +715,36 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur',
-          },
-        ],
-        reCallRouteId: [
-          { required: true, message: '请选择重呼路由', trigger: 'change' },
-        ],
-        reCallConcurrentCount: [
-          { required: true, message: '请输入重呼并发数量', trigger: 'blur' },
-        ],
+            trigger: 'blur'
+          }
+        ]
       }, // 新增任务表单项校验规则
       beginDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') > this[search][field],
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
         }
       },
       endDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') < this[search][field],
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
         }
       },
       datePicker: {
-        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7,
+        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
       },
       allowTime: [],
       allowTimes: [],
       dynamicValidateForm: {
         domains: [
           {
-            value: '',
-          },
-        ],
-      },
+            value: ''
+          }
+        ]
+      }
     }
   },
   watch: {
@@ -968,7 +776,7 @@ export default {
         return
       }
       this.ulRel = files[0]
-    },
+    }
   },
   computed: {
     getCpl() {
@@ -982,16 +790,7 @@ export default {
         return item.product
       }
       return ''
-    },
-    userMobile() {
-      if (this.createFormData.projectId && this.projectList.length) {
-        const item = this.projectList.find(
-          (e) => e.id === this.createFormData.projectId
-        )
-        return item.userMobile
-      }
-      return ''
-    },
+    }
   },
   created() {
     const query = this.$route.query
@@ -1015,13 +814,10 @@ export default {
       obj.repeatCtMin = search.repeatCtMin
       obj.repeatCtMax = search.repeatCtMax
       obj.isCall = search.isCall
-      // obj.tag = search.tag
-      // obj.aiCategory = this.$route.query.aiCategory
+      obj.tag = search.tag
+      obj.aiCategory = this.$route.query.aiCategory
       obj.nameSpecial = search.nameSpecial
-      obj.isNewCus = search.isNewCus
       obj.isSuccess = search.isSuccess
-      obj.talkIsSuccess = search.talkIsSuccess
-      obj.callIsSuccess = search.callIsSuccess
       obj.isName = search.isName
       obj.startMaxTalkTime = search.startMaxTalkTime
       obj.endMaxTalkTime = search.endMaxTalkTime
@@ -1050,8 +846,6 @@ export default {
       obj.freeInsuranceMonthMax = search.freeInsuranceMonth.length
         ? search.freeInsuranceMonth[1]
         : null
-      obj.successStartDate = search.successStartDate
-      obj.successEndDate = search.successEndDate
       obj.page = pagination.currentPage
       obj.pageSize = pagination.pageSize
       customerInfos.push(obj)
@@ -1062,7 +856,7 @@ export default {
     this.unionVO = vo
     const numList = distList.map(Number)
     //计算客户总数量
-    this.selectCtNum = numList.reduce(function (prev, cur) {
+    this.selectCtNum = numList.reduce(function(prev, cur) {
       return prev + cur
     })
     this.createFormData.customerNum2 = this.selectCtNum
@@ -1072,33 +866,6 @@ export default {
     this.getProjectList()
   },
   methods: {
-    changeProject(id) {
-      const url = '/sdmulti/manage/project/service?projectId=' + id
-      this.$request.jsonGet(url).then((res) => {
-        if (res.code == 0) {
-          //           calls: 1457
-          // name: "测试平台-2"
-          // times: "08:00:00-12:00:00"
-          // weeks: "0,1,2,3,4,5,6"
-          if (res.data.weeks) {
-            let arr = res.data.weeks.split(',')
-            this.createFormData.weeks = arr.map(Number)
-          }
-          if (res.data.times) {
-            let arr = res.data.times.split(',')
-            this.createFormData.times = arr.map((e) => {
-              let ar = e.split('-')
-              let startTime = ar[0].substring(0, ar[0].length - 3)
-              let endTime = ar[1].substring(0, ar[1].length - 3)
-              return {
-                startTime,
-                endTime,
-              }
-            })
-          }
-        }
-      })
-    },
     whenInputCon(val) {
       if (val > this.maxConcurrentCount) {
         this.createFormData.concurrentNum = this.maxConcurrentCount
@@ -1108,36 +875,6 @@ export default {
         this.createFormData.concurrentNum = parseInt(val)
       }
     },
-    whenInputRecallCon(val) {
-      if (val > this.maxRecallConcurrentCount) {
-        this.createFormData.reCallConcurrentCount =
-          this.maxRecallConcurrentCount
-      }
-      if (val < 1) {
-        this.createFormData.reCallConcurrentCount = 1
-      }
-    },
-    handleCheckAllClassify(formData) {
-      if (formData.categories.length === this.opportunityTagList.length) {
-        formData.categories = []
-      } else {
-        formData.categories = this.opportunityTagList.slice()
-      }
-    },
-    // 切换重呼选择的意向分类
-    toggleSelectedCat(val) {
-      const flag = this.createFormData.categories.includes(val)
-      if (flag) {
-        const index = this.createFormData.categories.indexOf(val)
-        this.createFormData.categories.splice(index, 1)
-      } else {
-        this.createFormData.categories.push(val)
-      }
-      this.ifCheckAllCat =
-        this.createFormData.categories.length === this.opportunityTagList.length
-          ? true
-          : false
-    },
     // 切换路由名称
     handleChangeRouteId(id) {
       this.maxConcurrentCount = this.routeList.find(
@@ -1146,23 +883,12 @@ export default {
       if (this.createFormData.concurrentNum > this.maxConcurrentCount) {
         this.createFormData.concurrentNum = this.maxConcurrentCount
       }
-      if (!this.createFormData.reCallConcurrentCount) {
-        this.createFormData.reCallConcurrentCount = this.maxConcurrentCount
-        this.createFormData.reCallRouteId = id
-      }
-    },
-    // 切换路由名称
-    handleChangeRecallRouteId(id) {
-      this.maxRecallConcurrentCount = this.routeList.find(
-        (e) => e.id == id
-      ).concurrentCount
-      this.createFormData.reCallConcurrentCount = this.maxRecallConcurrentCount
     },
     getProjectList() {
       const url = '/sdmulti/manage/project/list/type'
       const params = {
         status: 1, // 只有启动的项目才查出来
-        type: this.type,
+        type: this.type
       }
       this.$request.formGet(url, params).then((res) => {
         if (res.code == 0) {
@@ -1178,7 +904,7 @@ export default {
           let list = Object.keys(res.data).map((label) => {
             return {
               label,
-              key: res.data[label],
+              key: res.data[label]
             }
           })
           this.recallResultList = list
@@ -1218,7 +944,7 @@ export default {
       if (this.createFormData.times.length > 3) return
       this.createFormData.times.push({
         startTime: '',
-        endTime: '',
+        endTime: ''
       })
     },
     deleteTimeRange(index) {
@@ -1239,7 +965,7 @@ export default {
       )
       this.allowTime.push({
         allowstartTime: this.allowstartTime,
-        allowendTime: this.allowendTime,
+        allowendTime: this.allowendTime
       })
       this.allowstartTime = ''
       this.allowendTime = ''
@@ -1265,22 +991,14 @@ export default {
       }
     },
     getRouteList() {
-      // let serviceInfos = this.OutCallPlatformList.find((e) => {
-      //   return this.createFormData.outCallPlatformId == e.id
-      // })
-      // let fd = new FormData()
-      // fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
-      // this.$request.uploadPost('/sdmulti/task/getRoute', fd).then((res) => {
-      //   this.routeList = res.data
-      // })
-      let serviceInfo = this.OutCallPlatformList.find((e) => {
+      let serviceInfos = this.OutCallPlatformList.find((e) => {
         return this.createFormData.outCallPlatformId == e.id
       })
-      this.$request
-        .jsonPost('/sdmulti/task/getRoute', serviceInfo)
-        .then((res) => {
-          this.routeList = res.data
-        })
+      let fd = new FormData()
+      fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
+      this.$request.uploadPost('/sdmulti/task/getRoute', fd).then((res) => {
+        this.routeList = res.data
+      })
     },
     selectRobot(val) {
       if (val) {
@@ -1310,8 +1028,8 @@ export default {
         let param = new FormData()
         const config = {
           headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            'Content-Type': 'multipart/form-data'
+          }
         }
         param.append('pFile', this.ulCom)
         param.append('rFile', this.ulRel)
@@ -1342,7 +1060,7 @@ export default {
       this.$request
         .jsonPost('/sdmulti/task/checkConcurrentNum', {
           concurrentNum: this.createFormData.concurrentNum,
-          serviceIds: this.createFormData.outCallPlatformId,
+          serviceIds: this.createFormData.outCallPlatformId
         })
         .then((res) => {
           if (res.code === '0' && res.data === false) {
@@ -1476,7 +1194,7 @@ export default {
           projectInfoParams: this.customerInfoVOs,
           routeId: this.createFormData.routeId,
           weeks: this.createFormData.weeks.join(','),
-          times,
+          times
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {
@@ -1486,19 +1204,6 @@ export default {
             .map(Number)
           param.timeInterval = this.createFormData.recallInterval
           param.callNum = this.createFormData.recallMaxNum
-          param.categories = this.createFormData.categories
-          param.reCallRouteId = this.createFormData.reCallRouteId
-          param.reCallConcurrentCount =
-            this.createFormData.reCallConcurrentCount
-          param.recallSpace = this.createFormData.recallSpace
-          param.groupInfos = this.createFormData.groupInfos
-          param.maxCallTime = this.createFormData.maxCallTime
-          param.minCallTime = this.createFormData.minCallTime
-          param.maxAllCallNum = this.createFormData.maxCallTime
-          param.minAllCallNum = this.createFormData.minAllCallNum
-          param.reCallStartWay = this.createFormData.reCallStartWay
-          param.reCallStartTime = this.createFormData.reCallStartTime
-          param.spaceUnit = this.createFormData.spaceUnit
         }
         // if (param.conversionFlag) {
         //   param.connectCallResult = this.createFormData.conversionrecallResult.join(',')
@@ -1511,7 +1216,7 @@ export default {
           lock: true,
           text: ltext,
           spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.5)',
+          background: 'rgba(0, 0, 0, 0.5)'
         })
         const url = '/sdmulti/task/save'
         return this.$request
@@ -1531,7 +1236,7 @@ export default {
                 if (err.response.data.code == '300') {
                   this.$router.replace('/main/callManage/callTask')
                 }
-              },
+              }
             })
           })
           .finally(() => {
@@ -1555,8 +1260,8 @@ export default {
           }
         })
       })
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -1567,23 +1272,6 @@ export default {
   padding: 15px 0;
   display: flex;
   flex-direction: column;
-  .advanced-category {
-    display: inline-block;
-    width: 60px;
-    line-height: 27px;
-    text-align: center;
-    border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    margin: 0 15px 10px 0;
-    color: rgba(0, 0, 0, 0.65);
-    transition: all 0.3s;
-    &.selected {
-      color: #fff;
-      border-color: $themeColor;
-      background: $themeColor;
-    }
-  }
   .el-form {
     flex: 1;
     overflow: auto;

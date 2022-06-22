@@ -131,6 +131,60 @@
           min-width="200"
           align="center"
         ></el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          prop="userMobile"
+          label="所属业务账号"
+          min-width="200"
+          align="center"
+        ></el-table-column>
+        <el-table-column
+          prop="weeks"
+          label="外呼周期"
+          width="200"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-tooltip
+              :content="'星期' + getShowWeeksInTable(scope.row.weeks)"
+              placement="top"
+            >
+              <div v-show="scope.row.weeks">
+                <span>星期</span>
+                <span>{{
+                  getShowWeeksInTable(
+                    scope.row.weeks.split(',').slice(0, 2).join(',')
+                  )
+                }}</span>
+                <span v-if="scope.row.weeks.split(',').length > 2">...</span>
+              </div>
+            </el-tooltip>
+            <!-- <div>
+              <span>星期{{ getShowWeeksInTable(scope.row.weeks) }}</span>
+            </div> -->
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="times"
+          label="外呼时段"
+          width="200"
+          align="center"
+        >
+          <template slot-scope="scope">
+            <el-tooltip :content="scope.row.times" placement="top">
+              <div>
+                <div
+                  v-for="(item, index) in scope.row.times.split(',')"
+                  :key="scope.row.id + index"
+                  v-show="index < 3"
+                >
+                  <div v-show="index < 2">{{ item }}</div>
+                  <span v-show="index == 2">...</span>
+                </div>
+              </div>
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column label="最近一次修改时间" width="180" align="center">
           <template slot-scope="scope">
             <span>{{
@@ -202,14 +256,6 @@
             class="advanced-input"
             :disabled="!!editFormData.id"
           >
-            <!-- <el-option label="水滴医疗险" value="水滴医疗险"></el-option>
-            <el-option
-              label="水滴公众号吸粉"
-              value="水滴公众号吸粉"
-            ></el-option>
-            <el-option label="水滴长险意向" value="水滴长险意向"></el-option>
-            <el-option label="凯森" value="凯森"></el-option>
-            <el-option label="元保" value="元保"></el-option> -->
             <el-option
               v-for="item in sourceTypeList"
               :label="item"
@@ -224,6 +270,78 @@
             placeholder="请输入销售产品"
             class="input-large"
           ></el-input>
+        </el-form-item>
+        <el-form-item prop="userMobile" label="所属业务账号：">
+          <el-input
+            v-model.trim="editFormData.userMobile"
+            placeholder="请输入所属业务账号"
+            class="input-large"
+          ></el-input>
+        </el-form-item>
+        <el-form-item prop="weeks" label="外呼周期：">
+          <el-checkbox-group
+            v-model="editFormData.weeks"
+            style="display: inline-block"
+          >
+            <el-checkbox
+              v-for="item in dateList"
+              :label="item.value"
+              :key="item.value"
+              style="width: 80px"
+              >{{ item.name }}</el-checkbox
+            >
+          </el-checkbox-group>
+        </el-form-item>
+        <el-form-item prop="times" label="外呼时间段：">
+          <div style="font-size: 12px; color: #999">
+            请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
+          </div>
+          <div
+            v-for="(item, index) in editFormData.times"
+            :key="index"
+            style="margin-bottom: 10px"
+          >
+            <el-time-select
+              placeholder="起始时间"
+              v-model="item.startTime"
+              :clearable="false"
+              :picker-options="{
+                start: '00:00',
+                step: '00:10',
+                end: '23:50',
+              }"
+            >
+            </el-time-select>
+            <span>-</span>
+            <el-time-select
+              placeholder="结束时间"
+              v-model="item.endTime"
+              :clearable="false"
+              :picker-options="{
+                start: '00:10',
+                step: '00:10',
+                end: '24:00',
+                minTime: item.startTime,
+              }"
+            >
+            </el-time-select>
+            <el-button
+              v-if="index == 0"
+              icon="el-icon-plus"
+              type="primary"
+              @click="addTimeRange"
+              size="mini"
+              style="margin-left: 20px"
+            ></el-button>
+            <el-button
+              v-else
+              icon="el-icon-minus"
+              type="danger"
+              @click="deleteTimeRange(index)"
+              style="margin-left: 20px"
+              size="mini"
+            ></el-button>
+          </div>
         </el-form-item>
         <el-form-item prop="status" label="项目状态：">
           <el-radio-group v-model="editFormData.status">
@@ -262,18 +380,18 @@ export default {
         startTime: null,
         endTime: null,
         robotName: null,
-        type: null
+        type: null,
       }, // 搜索条件
       sourceTypeList: [],
       taskStatusList: [
         {
           name: '启动',
-          value: 1
+          value: 1,
         },
         {
           name: '暂停',
-          value: 0
-        }
+          value: 0,
+        },
       ],
       categoryList: [
         'A++类',
@@ -285,8 +403,17 @@ export default {
         'D类',
         'E类',
         'F类',
-        '未分类'
+        '未分类',
       ], // 可选意向分类
+      dateList: [
+        { name: '星期一', value: 1 },
+        { name: '星期二', value: 2 },
+        { name: '星期三', value: 3 },
+        { name: '星期四', value: 4 },
+        { name: '星期五', value: 5 },
+        { name: '星期六', value: 6 },
+        { name: '星期日', value: 0 },
+      ],
       activeNumberList: [], // 可选线路
       availableCallTaskTemplate: [238, 253, 283, 310], // 可选任务模板id
       planList: [], // 任务列表数据
@@ -295,7 +422,7 @@ export default {
       pagination: {
         currentPage: 1,
         total: 50,
-        pageSize: 10
+        pageSize: 10,
       }, // 分页数据
       dialogEditVisible: false, // 编辑任务弹框是否可见
       editFormData: {
@@ -304,36 +431,68 @@ export default {
         type: null,
         product: null,
         status: 1,
-        remark: null
+        remark: null,
+        userMobile: null,
+        weeks: [0, 1, 2, 3, 4, 5, 6],
+        times: [{ startTime: '08:00', endTime: '22:00' }],
       }, // 编辑任务表单项
       editFormRule: {
         projectName: [
-          { required: true, message: '请输入项目名称', trigger: 'blur' }
+          { required: true, message: '请输入项目名称', trigger: 'blur' },
         ],
         type: [
-          { required: true, message: '请选择名单来源', trigger: 'change' }
+          { required: true, message: '请选择名单来源', trigger: 'change' },
         ],
         product: [
-          { required: true, message: '请输入销售产品', trigger: 'blur' }
+          { required: true, message: '请输入销售产品', trigger: 'blur' },
+        ],
+        userMobile: [
+          { required: true, message: '请输入所属业务账号', trigger: 'blur' },
+        ],
+        times: [
+          {
+            validator: (rule, value, callback) => {
+              value.forEach((e, index) => {
+                if (!e.startTime || !e.endTime) {
+                  callback(new Error('请输入完整的外呼时段'))
+                }
+                if (e.startTime > e.endTime) {
+                  callback(new Error('同组外呼时段结束时间不能早于开始时间'))
+                }
+                for (let i = index + 1; i < value.length; i++) {
+                  const element = value[i]
+                  let flag =
+                    (element.startTime >= e.startTime &&
+                      element.startTime <= e.endTime) ||
+                    (element.endTime >= e.startTime &&
+                      element.endTime <= e.endTime)
+                  if (flag) {
+                    callback(new Error('外呼时段存在重复区间，请修改'))
+                  }
+                }
+              })
+              callback()
+            },
+          },
         ],
         status: [
-          { required: true, message: '请选择项目状态', trigger: 'change' }
-        ]
+          { required: true, message: '请选择项目状态', trigger: 'change' },
+        ],
       },
       startTimeValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field],
         }
       },
       endTimeValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field],
         }
-      }
+      },
     }
   },
   watch: {
@@ -345,10 +504,13 @@ export default {
           type: null,
           product: null,
           status: 1,
-          remark: null
+          remark: null,
+          userMobile: null,
+          weeks: [0, 1, 2, 3, 4, 5, 6],
+          times: [{ startTime: '08:00', endTime: '22:00' }],
         }
       }
-    }
+    },
   },
   async created() {
     this.fetchProgramList()
@@ -360,9 +522,30 @@ export default {
         return '编辑项目'
       }
       return '新增项目'
-    }
+    },
   },
   methods: {
+    addTimeRange() {
+      if (this.editFormData.times.length > 3) return
+      this.editFormData.times.push({
+        startTime: '',
+        endTime: '',
+      })
+    },
+    deleteTimeRange(index) {
+      this.editFormData.times.splice(index, 1)
+    },
+    getShowWeeksInTable(weeks) {
+      return weeks
+        .replaceAll('1', '一')
+        .replaceAll('2', '二')
+        .replaceAll('3', '三')
+        .replaceAll('4', '四')
+        .replaceAll('5', '五')
+        .replaceAll('6', '六')
+        .replaceAll('0', '日')
+        .replaceAll(',', '，')
+    },
     getSourceTypeList() {
       const url = '/sdmulti/qbzz/manage/api/customer/type/list'
       this.$request.jsonGet(url).then((res) => {
@@ -409,7 +592,7 @@ export default {
           type: this.search.type,
           status: this.search.taskStatus === '' ? null : this.search.taskStatus,
           page: this.pagination.currentPage,
-          pageSize: this.pagination.pageSize
+          pageSize: this.pagination.pageSize,
         })
         .then((res) => {
           if (!res.data) {
@@ -463,13 +646,19 @@ export default {
             return
           }
         }
+        let times = this.editFormData.times
+          .map((e) => e.startTime + ':00-' + e.endTime + ':00')
+          .join(',')
         const params = {
           id: this.editFormData.id,
           projectName: this.editFormData.projectName, // 项目名称
           type: this.editFormData.type,
           product: this.editFormData.product,
           status: this.editFormData.status,
-          remark: this.editFormData.remark
+          remark: this.editFormData.remark,
+          userMobile: this.editFormData.userMobile,
+          weeks: this.editFormData.weeks.join(','),
+          times,
         }
         let url = '/sdmulti/manage/project'
         let res = null
@@ -507,14 +696,14 @@ export default {
       let param = new FormData()
       const config = {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       }
       const loading = this.$loading({
         lock: true,
         text: '正在解析，请稍候',
         spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
+        background: 'rgba(255, 255, 255, 0.3)',
       })
       param.append('file', file)
       param.append('code', robotId)
@@ -532,8 +721,8 @@ export default {
         .finally(() => {
           loading.close()
         })
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss">
