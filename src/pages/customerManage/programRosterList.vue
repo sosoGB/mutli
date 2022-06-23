@@ -244,7 +244,9 @@
         </el-select>
       </div>
       <div class="advanced-item">
-        <span class="advanced-label">是否已成功转化（最近一次外呼）：</span>
+        <span class="advanced-label" style="width: 220px"
+          >是否已成功转化（最近一次外呼）：</span
+        >
         <el-select
           v-model="search.callIsSuccess"
           placeholder="请选择"
@@ -256,7 +258,9 @@
         </el-select>
       </div>
       <div class="advanced-item">
-        <span class="advanced-label">是否已成功转化（最近一次接通）：</span>
+        <span class="advanced-label" style="width: 220px"
+          >是否已成功转化（最近一次接通）：</span
+        >
         <el-select
           v-model="search.talkIsSuccess"
           placeholder="请选择"
@@ -1231,7 +1235,8 @@ export default {
     margin-top: -10px;
     padding-bottom: 10px;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto;
+    height: 240px;
     $labelWidth: 100px;
     .advanced-item {
       display: inline-block;

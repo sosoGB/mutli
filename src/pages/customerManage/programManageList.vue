@@ -234,133 +234,136 @@
       :visible.sync="dialogEditVisible"
       @close="$refs.editForm.resetFields()"
       class="ddd"
+      v-if="dialogEditVisible"
     >
-      <el-form
-        :model="editFormData"
-        ref="editForm"
-        :rules="editFormRule"
-        label-width="150px"
-      >
-        <el-form-item prop="projectName" label="项目名称：">
-          <el-input
-            v-model.trim="editFormData.projectName"
-            placeholder="请输入项目名称"
-            class="input-large"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="type" label="名单来源：">
-          <el-select
-            v-model="editFormData.type"
-            placeholder="请选择名单来源"
-            clearable
-            class="advanced-input"
-            :disabled="!!editFormData.id"
-          >
-            <el-option
-              v-for="item in sourceTypeList"
-              :label="item"
-              :value="item"
-              :key="item"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item prop="product" label="销售产品：">
-          <el-input
-            v-model.trim="editFormData.product"
-            placeholder="请输入销售产品"
-            class="input-large"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="userMobile" label="所属业务账号：">
-          <el-input
-            v-model.trim="editFormData.userMobile"
-            placeholder="请输入所属业务账号"
-            class="input-large"
-          ></el-input>
-        </el-form-item>
-        <el-form-item prop="weeks" label="外呼周期：">
-          <el-checkbox-group
-            v-model="editFormData.weeks"
-            style="display: inline-block"
-          >
-            <el-checkbox
-              v-for="item in dateList"
-              :label="item.value"
-              :key="item.value"
-              style="width: 80px"
-              >{{ item.name }}</el-checkbox
+      <div style="overflow: auto; height: 666px">
+        <el-form
+          :model="editFormData"
+          ref="editForm"
+          :rules="editFormRule"
+          label-width="150px"
+        >
+          <el-form-item prop="projectName" label="项目名称：">
+            <el-input
+              v-model.trim="editFormData.projectName"
+              placeholder="请输入项目名称"
+              class="input-large"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="type" label="名单来源：">
+            <el-select
+              v-model="editFormData.type"
+              placeholder="请选择名单来源"
+              clearable
+              class="advanced-input"
+              :disabled="!!editFormData.id"
             >
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item prop="times" label="外呼时间段：">
-          <div style="font-size: 12px; color: #999">
-            请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
-          </div>
-          <div
-            v-for="(item, index) in editFormData.times"
-            :key="index"
-            style="margin-bottom: 10px"
-          >
-            <el-time-select
-              placeholder="起始时间"
-              v-model="item.startTime"
-              :clearable="false"
-              :picker-options="{
-                start: '00:00',
-                step: '00:10',
-                end: '23:50',
-              }"
+              <el-option
+                v-for="item in sourceTypeList"
+                :label="item"
+                :value="item"
+                :key="item"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="product" label="销售产品：">
+            <el-input
+              v-model.trim="editFormData.product"
+              placeholder="请输入销售产品"
+              class="input-large"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="userMobile" label="所属业务账号：">
+            <el-input
+              v-model.trim="editFormData.userMobile"
+              placeholder="请输入所属业务账号"
+              class="input-large"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="weeks" label="外呼周期：">
+            <el-checkbox-group
+              v-model="editFormData.weeks"
+              style="display: inline-block"
             >
-            </el-time-select>
-            <span>-</span>
-            <el-time-select
-              placeholder="结束时间"
-              v-model="item.endTime"
-              :clearable="false"
-              :picker-options="{
-                start: '00:10',
-                step: '00:10',
-                end: '24:00',
-                minTime: item.startTime,
-              }"
+              <el-checkbox
+                v-for="item in dateList"
+                :label="item.value"
+                :key="item.value"
+                style="width: 80px"
+                >{{ item.name }}</el-checkbox
+              >
+            </el-checkbox-group>
+          </el-form-item>
+          <el-form-item prop="times" label="外呼时间段：">
+            <div style="font-size: 12px; color: #999">
+              请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
+            </div>
+            <div
+              v-for="(item, index) in editFormData.times"
+              :key="index"
+              style="margin-bottom: 10px"
             >
-            </el-time-select>
-            <el-button
-              v-if="index == 0"
-              icon="el-icon-plus"
-              type="primary"
-              @click="addTimeRange"
-              size="mini"
-              style="margin-left: 20px"
-            ></el-button>
-            <el-button
-              v-else
-              icon="el-icon-minus"
-              type="danger"
-              @click="deleteTimeRange(index)"
-              style="margin-left: 20px"
-              size="mini"
-            ></el-button>
-          </div>
-        </el-form-item>
-        <el-form-item prop="status" label="项目状态：">
-          <el-radio-group v-model="editFormData.status">
-            <el-radio :label="1">启动</el-radio>
-            <el-radio :label="0">暂停</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="备注：">
-          <el-input
-            type="textarea"
-            v-model="editFormData.remark"
-            placeholder="请输入备注"
-          ></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer">
-        <el-button @click="dialogEditVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitEditForm">确定</el-button>
-      </span>
+              <el-time-select
+                placeholder="起始时间"
+                v-model="item.startTime"
+                :clearable="false"
+                :picker-options="{
+                  start: '00:00',
+                  step: '00:10',
+                  end: '23:50',
+                }"
+              >
+              </el-time-select>
+              <span>-</span>
+              <el-time-select
+                placeholder="结束时间"
+                v-model="item.endTime"
+                :clearable="false"
+                :picker-options="{
+                  start: '00:10',
+                  step: '00:10',
+                  end: '24:00',
+                  minTime: item.startTime,
+                }"
+              >
+              </el-time-select>
+              <el-button
+                v-if="index == 0"
+                icon="el-icon-plus"
+                type="primary"
+                @click="addTimeRange"
+                size="mini"
+                style="margin-left: 20px"
+              ></el-button>
+              <el-button
+                v-else
+                icon="el-icon-minus"
+                type="danger"
+                @click="deleteTimeRange(index)"
+                style="margin-left: 20px"
+                size="mini"
+              ></el-button>
+            </div>
+          </el-form-item>
+          <el-form-item prop="status" label="项目状态：">
+            <el-radio-group v-model="editFormData.status">
+              <el-radio :label="1">启动</el-radio>
+              <el-radio :label="0">暂停</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="备注：">
+            <el-input
+              type="textarea"
+              v-model="editFormData.remark"
+              placeholder="请输入备注"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" style="text-align: center">
+          <el-button @click="dialogEditVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitEditForm">确定</el-button>
+        </div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -627,6 +630,22 @@ export default {
         data.lineIds = data.lineIds.map((e) => parseInt(e))
       }
       this.editFormData = { ...data }
+      if (data.weeks) {
+        let arr = data.weeks.split(',')
+        this.editFormData.weeks = arr.map(Number)
+      }
+      if (data.times) {
+        let arr = data.times.split(',')
+        this.editFormData.times = arr.map((e) => {
+          let ar = e.split('-')
+          let startTime = ar[0].substring(0, ar[0].length - 3)
+          let endTime = ar[1].substring(0, ar[1].length - 3)
+          return {
+            startTime,
+            endTime,
+          }
+        })
+      }
       this.dialogEditVisible = true
     },
     // 提交编辑项目表单
