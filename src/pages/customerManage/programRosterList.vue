@@ -99,7 +99,9 @@
     </div>
     <div v-show="showMoreSearch" class="toolbar-advanced">
       <div class="advanced-item">
-        <span class="advanced-label">项目名称：</span>
+        <span class="advanced-label" style="width: 220px"
+          >项目名称（最近一次外呼）：</span
+        >
         <!-- <el-input
           v-model="search.projectName"
           placeholder="请输入项目名称"
@@ -113,7 +115,7 @@
           clearable
         ></el-input> -->
         <el-select
-          v-model="search.projectName"
+          v-model="search.callProjectName"
           placeholder="请选择项目名称"
           clearable
           class="advanced-input"
@@ -417,7 +419,7 @@
           v-model="search.successStartDate"
           class="search-component search-input"
           type="date"
-          placeholder="创建时间最小值"
+          placeholder="成单日期最小值"
           value-format="yyyy-MM-dd"
           :picker-options="successStartDateValidator"
           clearable
@@ -427,11 +429,329 @@
           v-model="search.successEndDate"
           class="search-component search-input"
           type="date"
-          placeholder="创建时间最大值"
+          placeholder="成单最大值"
           value-format="yyyy-MM-dd"
           :picker-options="successEndDateValidator"
           clearable
         ></el-date-picker>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >外呼日期（最近一次外呼）：</span
+        >
+        <el-date-picker
+          v-model="search.callStartDate"
+          class="search-component search-input"
+          type="date"
+          placeholder="复用开始时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="callStartDateValidator"
+          clearable
+        ></el-date-picker>
+        <span class="search-delimiter">-</span>
+        <el-date-picker
+          v-model="search.callEndDate"
+          class="search-component search-input"
+          type="date"
+          placeholder="复用结束时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="callEndDateValidator"
+          clearable
+        ></el-date-picker>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >是否接通（最近一次外呼）：</span
+        >
+        <el-select
+          placeholder="请选择"
+          clearable
+          v-model="search.callStatus"
+          class="advanced-input"
+        >
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >通话时长/s（最近一次外呼）：</span
+        >
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.callStartTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.callEndTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >机器人名称（最近一次外呼）：</span
+        >
+        <el-select
+          placeholder="请选择"
+          clearable
+          v-model="search.callRobotName"
+          class="advanced-input"
+        >
+          <el-option
+            v-for="item in robotList"
+            :key="item.id"
+            :label="item.showName"
+            :value="item.showName"
+          ></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >外呼日期（最近一次接通）：</span
+        >
+        <el-date-picker
+          v-model="search.talkStartDate"
+          class="search-component search-input"
+          type="date"
+          placeholder="接通开始时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="talkStartDateValidator"
+          clearable
+        ></el-date-picker>
+        <span class="search-delimiter">-</span>
+        <el-date-picker
+          v-model="search.talkEndDate"
+          class="search-component search-input"
+          type="date"
+          placeholder="接通结束时间"
+          value-format="yyyy-MM-dd"
+          :picker-options="talkEndDateValidator"
+          clearable
+        ></el-date-picker>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >通话时长/s（最近一次接通）：</span
+        >
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.talkStartTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.talkEndTalkTime"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >机器人名称（最近一次接通）：</span
+        >
+        <el-select
+          placeholder="请选择"
+          clearable
+          v-model="search.talkRobotName"
+          class="advanced-input"
+        >
+          <el-option
+            v-for="item in robotList"
+            :key="item.id"
+            :label="item.showName"
+            :value="item.showName"
+          ></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">接通次数：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.minTalkNum"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.maxTalkNum"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label">呼叫次数：</span>
+        <el-input
+          v-number
+          placeholder="最小值(含)"
+          v-model="search.minCallNum"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+        <span class="delimiter">-</span>
+        <el-input
+          v-number
+          placeholder="最大值(含)"
+          v-model="search.maxCallNum"
+          class="advanced-input input_small"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >意向分级标签（最近一次外呼）：</span
+        >
+        <el-input
+          placeholder="请输入意向分级标签，用逗号隔开"
+          v-model="search.callGroupInfo"
+          class="advanced-input large-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >意向分级等级（最近一次外呼）：</span
+        >
+        <el-checkbox-group
+          v-model="callAiCategory"
+          style="display: inline-block"
+        >
+          <el-checkbox
+            v-for="range in intentTags"
+            :label="range"
+            :key="range"
+            style="width: 80px"
+          ></el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >意向分级标签（最近一次外呼）：</span
+        >
+        <el-input
+          placeholder="请输入意向分级标签，用逗号隔开"
+          v-model="search.talkGroupInfo"
+          class="advanced-input large-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >意向分级等级（最近一次接通）：</span
+        >
+        <el-checkbox-group
+          v-model="talkAiCategory"
+          style="display: inline-block"
+        >
+          <el-checkbox
+            v-for="range in intentTags"
+            :label="range"
+            :key="range"
+            style="width: 80px"
+          ></el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >项目名称（最近一次接通）：</span
+        >
+        <!-- <el-input
+          v-model="search.projectName"
+          placeholder="请输入项目名称"
+          class="advanced-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input> -->
+        <el-select
+          v-model="search.talkProjectName"
+          placeholder="请选择项目名称"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            v-for="item in projectList"
+            :label="item.projectName"
+            :value="item.projectName"
+            :key="item.id"
+          ></el-option>
+        </el-select>
       </div>
     </div>
     <div class="table">
@@ -681,13 +1001,27 @@ export default {
           },
         ],
       },
+      intentTags: [
+        'A++类',
+        'A+类',
+        'A类',
+        'A-类',
+        'B类',
+        'C类',
+        'D类',
+        'E类',
+        'F类',
+        '未分类',
+      ],
+      callAiCategory: [],
+      talkAiCategory: [],
       oldSearch: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
         batch: null, //客户批次
         repeatTimeEnd: '', //复用开始时间
         repeatTimeStart: '', //复用结束时间
-        projectName: null, // 项目名称
+        callProjectName: null, // 项目名称
         type: null, //名单来源
         product: null,
         sex: null, //性别
@@ -713,6 +1047,24 @@ export default {
         freeInsuranceMonth: [],
         successStartDate: null,
         successEndDate: null,
+        callStartDate: '',
+        callEndDate: '',
+        callStatus: null,
+        callStartTalkTime: null,
+        callEndTalkTime: null,
+        callRobotName: null,
+        talkStartDate: '',
+        talkEndDate: '',
+        talkStartTalkTime: null,
+        talkEndTalkTime: null,
+        talkRobotName: null,
+        minTalkNum: null,
+        maxTalkNum: null,
+        minCallNum: null,
+        maxCallNum: null,
+        callGroupInfo: '',
+        talkGroupInfo: '',
+        talkProjectName: '',
       },
       search: {
         //查询筛选字段
@@ -720,7 +1072,7 @@ export default {
         batch: this.$route.query.batch, //客户批次
         repeatTimeEnd: '', //开始时间
         repeatTimeStart: '', //结束时间
-        projectName: '', //项目名称
+        callProjectName: '', //项目名称
         type: null, //名单来源
         product: null, //销售产品
         sex: null, //性别
@@ -746,6 +1098,24 @@ export default {
         freeInsuranceMonth: [],
         successStartDate: null,
         successEndDate: null,
+        callStartDate: '',
+        callEndDate: '',
+        callStatus: '',
+        callStartTalkTime: null,
+        callEndTalkTime: null,
+        callRobotName: null,
+        talkStartDate: '',
+        talkEndDate: '',
+        talkStartTalkTime: null,
+        talkEndTalkTime: null,
+        talkRobotName: null,
+        minTalkNum: null,
+        maxTalkNum: null,
+        minCallNum: null,
+        maxCallNum: null,
+        callGroupInfo: '',
+        talkGroupInfo: '',
+        talkProjectName: '',
       },
       repeatTimeOrder: null,
       createTimeOrder: null,
@@ -797,12 +1167,35 @@ export default {
           )
         },
       },
+      callStartDateValidator: {
+        disabledDate: (current) => Date.now() < current,
+      },
+      callEndDateValidator: {
+        disabledDate: (current) => {
+          return (
+            this.search.callStartDate &&
+            filter.formatDate(current, 'yyyy-MM-dd') < this.search.callStartDate
+          )
+        },
+      },
+      talkStartDateValidator: {
+        disabledDate: (current) => Date.now() < current,
+      },
+      talkEndDateValidator: {
+        disabledDate: (current) => {
+          return (
+            this.search.talkStartDate &&
+            filter.formatDate(current, 'yyyy-MM-dd') < this.search.talkStartDate
+          )
+        },
+      },
     }
   },
   created() {
     this.queryList()
     this.getSourceTypeList()
     this.getProjectsAll()
+    this.getRobotList()
   },
   activated() {
     //重新进入缓存页面的钩子
@@ -811,6 +1204,11 @@ export default {
     this.getProjectsAll()
   },
   methods: {
+    getRobotList() {
+      this.$request.jsonGet('/sdmulti/task/getRobots').then((res) => {
+        this.robotList = res.data
+      })
+    },
     whenCreateTimeMinChange(val) {
       if (
         new Date(this.search.createTimeMax).getTime() -
@@ -901,6 +1299,10 @@ export default {
           sex.push(2)
         }
       }
+      // let talkGroupInfo = this.talkGroupInfo.join(',')
+      // let callGroupInfo = this.callGroupInfo.join(',')
+      let callAiCategory = this.callAiCategory.join(',')
+      let talkAiCategory = this.talkAiCategory.join(',')
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
@@ -911,7 +1313,7 @@ export default {
           ? this.search.repeatTimeEnd + ' 23:59:59'
           : null,
         type: this.search.type,
-        projectName: this.search.projectName,
+        callProjectName: this.search.callProjectName,
         product: this.search.product,
         sex: sex,
         minAge: this.search.minAge,
@@ -959,6 +1361,34 @@ export default {
         successEndDate: this.search.successEndDate
           ? this.search.successEndDate + ' 00:00:00'
           : null,
+        callStartDate: this.search.callStartDate
+          ? this.search.callStartDate + ' 00:00:00'
+          : null,
+        callEndDate: this.search.callEndDate
+          ? this.search.callEndDate + ' 00:00:00'
+          : null,
+        callStatus: this.search.callStatus,
+        callStartTalkTime: this.search.callStartTalkTime,
+        callEndTalkTime: this.search.callEndTalkTime,
+        callRobotName: this.search.callRobotName,
+        talkStartDate: this.search.talkStartDate
+          ? this.search.talkStartDate + ' 00:00:00'
+          : null,
+        talkEndDate: this.search.talkEndDate
+          ? this.search.talkEndDate + ' 00:00:00'
+          : null,
+        talkStartTalkTime: this.search.talkStartTalkTime,
+        talkEndTalkTime: this.search.talkEndTalkTime,
+        talkRobotName: this.search.talkRobotName,
+        minTalkNum: this.search.minTalkNum,
+        maxTalkNum: this.search.maxTalkNum,
+        minCallNum: this.search.minCallNum,
+        maxCallNum: this.search.maxCallNum,
+        talkGroupInfo: this.search.talkGroupInfo,
+        callGroupInfo: this.search.callGroupInfo,
+        talkAiCategory,
+        callAiCategory,
+        talkProjectName: this.search.talkProjectName,
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -1089,7 +1519,11 @@ export default {
         path: '/main/customerManage/createTask',
         query: {
           name: JSON.stringify(this.checkedTableRow),
-          search: JSON.stringify(search),
+          search: JSON.stringify({
+            ...search,
+            talkAiCategory: this.talkAiCategory,
+            callAiCategory: this.aiCategory,
+          }),
           pagination: JSON.stringify(pagination),
           type: this.checkedTableRow[0].row.type,
           batchList,
@@ -1116,6 +1550,8 @@ export default {
           sex.push(2)
         }
       }
+      let talkAiCategory = this.talkAiCategory.join(',')
+      let callAiCategory = this.callAiCategory.join(',')
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
@@ -1126,7 +1562,7 @@ export default {
           ? this.search.repeatTimeEnd + ' 23:59:59'
           : null,
         type: this.search.type,
-        projectName: this.search.projectName,
+        callProjectName: this.search.callProjectName,
         product: this.search.product,
         sex: sex,
         minAge: this.search.minAge,
@@ -1173,6 +1609,34 @@ export default {
         successEndDate: this.search.successEndDate
           ? this.search.successEndDate + ' 00:00:00'
           : null,
+        callStartDate: this.search.callStartDate
+          ? this.search.callStartDate + ' 00:00:00'
+          : null,
+        callEndDate: this.search.callEndDate
+          ? this.search.callEndDate + ' 00:00:00'
+          : null,
+        callStatus: this.search.callStatus,
+        callStartTalkTime: this.search.callStartTalkTime,
+        callEndTalkTime: this.search.callEndTalkTime,
+        callRobotName: this.search.callRobotName,
+        talkStartDate: this.search.talkStartDate
+          ? this.search.talkStartDate + ' 00:00:00'
+          : null,
+        talkEndDate: this.search.talkEndDate
+          ? this.search.talkEndDate + ' 00:00:00'
+          : null,
+        talkStartTalkTime: this.search.talkStartTalkTime,
+        talkEndTalkTime: this.search.talkEndTalkTime,
+        talkRobotName: this.search.talkRobotName,
+        minTalkNum: this.search.minTalkNum,
+        maxTalkNum: this.search.maxTalkNum,
+        minCallNum: this.search.minCallNum,
+        maxCallNum: this.search.maxCallNum,
+        talkGroupInfo: this.search.talkGroupInfo,
+        callGroupInfo: this.search.callGroupInfo,
+        talkAiCategory,
+        callAiCategory,
+        talkProjectName: this.search.talkProjectName,
       }
       let url = '/sdmulti/project/info/list'
       this.$request

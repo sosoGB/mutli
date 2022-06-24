@@ -1010,7 +1010,7 @@ export default {
       obj.batch = item.row.batch
       obj.repeatTimeStart = search.repeatTimeStart
       obj.repeatTimeEnd = search.repeatTimeEnd
-      obj.projectName = search.projectName
+      obj.callProjectName = search.callProjectName
       obj.product = search.product
       obj.repeatCtMin = search.repeatCtMin
       obj.repeatCtMax = search.repeatCtMax
@@ -1052,6 +1052,26 @@ export default {
         : null
       obj.successStartDate = search.successStartDate
       obj.successEndDate = search.successEndDate
+      obj.callStartDate = search.callStartDate
+      obj.callEndDate = search.callEndDate
+      obj.callStatus = search.callStatus
+      obj.callStartTalkTime = search.callStartTalkTime
+      obj.callEndTalkTime = search.callEndTalkTime
+      obj.callRobotName = search.callRobotName
+      obj.talkStartDate = search.talkStartDate
+      obj.talkEndDate = search.talkEndDate
+      obj.talkStartTalkTime = search.talkStartTalkTime
+      obj.talkEndTalkTime = search.talkEndTalkTime
+      obj.talkRobotName = search.talkRobotName
+      obj.minTalkNum = search.minTalkNum
+      obj.maxTalkNum = search.maxTalkNum
+      obj.minCallNum = search.minCallNum
+      obj.maxCallNum = search.maxCallNum
+      obj.talkGroupInfo = search.talkGroupInfo
+      obj.callGroupInfo = search.callGroupInfo
+      obj.talkAiCategory = search.talkAiCategory
+      obj.callAiCategory = search.callAiCategory
+      obj.talkProjectName = search.talkProjectName
       obj.page = pagination.currentPage
       obj.pageSize = pagination.pageSize
       customerInfos.push(obj)
