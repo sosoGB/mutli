@@ -659,6 +659,36 @@
       </div>
       <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
+          >项目名称（最近一次接通）：</span
+        >
+        <!-- <el-input
+          v-model="search.projectName"
+          placeholder="请输入项目名称"
+          class="advanced-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input> -->
+        <el-select
+          v-model="search.talkProjectName"
+          placeholder="请选择项目名称"
+          clearable
+          class="advanced-input"
+        >
+          <el-option
+            v-for="item in projectList"
+            :label="item.projectName"
+            :value="item.projectName"
+            :key="item.id"
+          ></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
           >意向分级标签（最近一次外呼）：</span
         >
         <el-input
@@ -722,36 +752,6 @@
             style="width: 80px"
           ></el-checkbox>
         </el-checkbox-group>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >项目名称（最近一次接通）：</span
-        >
-        <!-- <el-input
-          v-model="search.projectName"
-          placeholder="请输入项目名称"
-          class="advanced-input"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input> -->
-        <el-select
-          v-model="search.talkProjectName"
-          placeholder="请选择项目名称"
-          clearable
-          class="advanced-input"
-        >
-          <el-option
-            v-for="item in projectList"
-            :label="item.projectName"
-            :value="item.projectName"
-            :key="item.id"
-          ></el-option>
-        </el-select>
       </div>
     </div>
     <div class="table">
