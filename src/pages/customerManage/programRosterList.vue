@@ -692,7 +692,7 @@
       </div>
       <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
-          >意向分级标签（最近一次外呼）：</span
+          >意向分级标签（最近一次接通）：</span
         >
         <el-input
           placeholder="请输入意向分级标签，用逗号隔开"
