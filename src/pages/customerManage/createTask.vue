@@ -1069,9 +1069,8 @@ export default {
       obj.maxCallNum = search.maxCallNum
       obj.talkGroupInfo = search.talkGroupInfo
       obj.callGroupInfo = search.callGroupInfo
-      obj.talkAiCategory = search.talkAiCategory
-      obj.callAiCategory = search.callAiCategory
-      obj.talkProjectName = search.talkProjectName
+      obj.talkAiCategory = search.talkAiCategory.join(',')
+      obj.callAiCategory = search.callAiCategory.join(',')
       obj.page = pagination.currentPage
       obj.pageSize = pagination.pageSize
       customerInfos.push(obj)

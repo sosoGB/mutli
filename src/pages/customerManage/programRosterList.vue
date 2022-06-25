@@ -99,23 +99,9 @@
     </div>
     <div v-show="showMoreSearch" class="toolbar-advanced">
       <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >项目名称（最近一次外呼）：</span
-        >
-        <!-- <el-input
-          v-model="search.projectName"
-          placeholder="请输入项目名称"
-          class="advanced-input"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input> -->
+        <span class="advanced-label">项目名称：</span>
         <el-select
-          v-model="search.callProjectName"
+          v-model="search.projectName"
           placeholder="请选择项目名称"
           clearable
           class="advanced-input"
@@ -237,34 +223,6 @@
         <span class="advanced-label">姓名是否为空：</span>
         <el-select
           v-model="search.isName"
-          placeholder="请选择"
-          clearable
-          class="advanced-input"
-        >
-          <el-option label="是" :value="1"></el-option>
-          <el-option label="否" :value="0"></el-option>
-        </el-select>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >是否已成功转化（最近一次外呼）：</span
-        >
-        <el-select
-          v-model="search.callIsSuccess"
-          placeholder="请选择"
-          clearable
-          class="advanced-input"
-        >
-          <el-option label="是" :value="1"></el-option>
-          <el-option label="否" :value="0"></el-option>
-        </el-select>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >是否已成功转化（最近一次接通）：</span
-        >
-        <el-select
-          v-model="search.talkIsSuccess"
           placeholder="请选择"
           clearable
           class="advanced-input"
@@ -417,93 +375,97 @@
         <span class="advanced-label">成单日期：</span>
         <el-date-picker
           v-model="search.successStartDate"
-          class="search-component search-input"
+          class="search-input"
           type="date"
           placeholder="成单日期最小值"
           value-format="yyyy-MM-dd"
           :picker-options="successStartDateValidator"
+          @change="checkSuccessDate"
           clearable
         ></el-date-picker>
         <span class="search-delimiter">-</span>
         <el-date-picker
           v-model="search.successEndDate"
-          class="search-component search-input"
+          class="search-input"
           type="date"
           placeholder="成单最大值"
           value-format="yyyy-MM-dd"
           :picker-options="successEndDateValidator"
           clearable
+          @change="checkSuccessDate"
         ></el-date-picker>
       </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >外呼日期（最近一次外呼）：</span
-        >
-        <el-date-picker
-          v-model="search.callStartDate"
-          class="search-component search-input"
-          type="date"
-          placeholder="复用开始时间"
-          value-format="yyyy-MM-dd"
-          :picker-options="callStartDateValidator"
-          clearable
-        ></el-date-picker>
-        <span class="search-delimiter">-</span>
-        <el-date-picker
-          v-model="search.callEndDate"
-          class="search-component search-input"
-          type="date"
-          placeholder="复用结束时间"
-          value-format="yyyy-MM-dd"
-          :picker-options="callEndDateValidator"
-          clearable
-        ></el-date-picker>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >是否接通（最近一次外呼）：</span
-        >
-        <el-select
-          placeholder="请选择"
-          clearable
-          v-model="search.callStatus"
-          class="advanced-input"
-        >
-          <el-option label="是" :value="1"></el-option>
-          <el-option label="否" :value="0"></el-option>
-        </el-select>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >通话时长/s（最近一次外呼）：</span
-        >
-        <el-input
-          v-number
-          placeholder="最小值(含)"
-          v-model="search.callStartTalkTime"
-          class="advanced-input input_small"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-        <span class="delimiter">-</span>
-        <el-input
-          v-number
-          placeholder="最大值(含)"
-          v-model="search.callEndTalkTime"
-          class="advanced-input input_small"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
+      <div>
+        <div class="advanced-item">
+          <span class="advanced-label" style="width: 220px"
+            >外呼日期（最近一次外呼）：</span
+          >
+          <el-date-picker
+            v-model="search.callStartDate"
+            class="search-component search-input"
+            type="date"
+            placeholder="复用开始时间"
+            value-format="yyyy-MM-dd"
+            :picker-options="callStartDateValidator"
+            clearable
+          ></el-date-picker>
+          <span class="search-delimiter">-</span>
+          <el-date-picker
+            v-model="search.callEndDate"
+            class="search-component search-input"
+            type="date"
+            placeholder="复用结束时间"
+            value-format="yyyy-MM-dd"
+            :picker-options="callEndDateValidator"
+            clearable
+          ></el-date-picker>
+        </div>
+        <div class="advanced-item">
+          <span class="advanced-label" style="width: 220px"
+            >是否接通（最近一次外呼）：</span
+          >
+          <el-select
+            placeholder="请选择"
+            clearable
+            v-model="search.callStatus"
+            class="advanced-input"
+          >
+            <el-option label="是" :value="1"></el-option>
+            <el-option label="否" :value="0"></el-option>
+          </el-select>
+        </div>
+        <div class="advanced-item">
+          <span class="advanced-label" style="width: 220px"
+            >通话时长/s（最近一次外呼）：</span
+          >
+          <el-input
+            v-number
+            placeholder="最小值(含)"
+            v-model="search.callStartTalkTime"
+            class="advanced-input input_small"
+            @keyup.enter.native="
+              () => {
+                pagination.currentPage = 1
+                queryList()
+              }
+            "
+            clearable
+          ></el-input>
+          <span class="delimiter">-</span>
+          <el-input
+            v-number
+            placeholder="最大值(含)"
+            v-model="search.callEndTalkTime"
+            class="advanced-input input_small"
+            @keyup.enter.native="
+              () => {
+                pagination.currentPage = 1
+                queryList()
+              }
+            "
+            clearable
+          ></el-input>
+        </div>
       </div>
       <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
@@ -522,6 +484,54 @@
             :value="item.showName"
           ></el-option>
         </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >是否已成功转化（最近一次外呼）：</span
+        >
+        <el-select
+          v-model="search.callIsSuccess"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+          :disabled="successFlag"
+        >
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >意向分级标签（最近一次外呼）：</span
+        >
+        <el-input
+          placeholder="请输入意向分级标签，用逗号隔开"
+          v-model="search.callGroupInfo"
+          class="advanced-input large-input"
+          @keyup.enter.native="
+            () => {
+              pagination.currentPage = 1
+              queryList()
+            }
+          "
+          clearable
+        ></el-input>
+      </div>
+      <div class="advanced-item">
+        <span class="advanced-label" style="width: 220px"
+          >意向分级等级（最近一次外呼）：</span
+        >
+        <el-checkbox-group
+          v-model="callAiCategory"
+          style="display: inline-block"
+        >
+          <el-checkbox
+            v-for="range in intentTags"
+            :label="range"
+            :key="range"
+            style="width: 80px"
+          ></el-checkbox>
+        </el-checkbox-group>
       </div>
       <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
@@ -598,127 +608,19 @@
         </el-select>
       </div>
       <div class="advanced-item">
-        <span class="advanced-label">接通次数：</span>
-        <el-input
-          v-number
-          placeholder="最小值(含)"
-          v-model="search.minTalkNum"
-          class="advanced-input input_small"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-        <span class="delimiter">-</span>
-        <el-input
-          v-number
-          placeholder="最大值(含)"
-          v-model="search.maxTalkNum"
-          class="advanced-input input_small"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label">呼叫次数：</span>
-        <el-input
-          v-number
-          placeholder="最小值(含)"
-          v-model="search.minCallNum"
-          class="advanced-input input_small"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-        <span class="delimiter">-</span>
-        <el-input
-          v-number
-          placeholder="最大值(含)"
-          v-model="search.maxCallNum"
-          class="advanced-input input_small"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-      </div>
-      <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
-          >项目名称（最近一次接通）：</span
+          >是否已成功转化（最近一次接通）：</span
         >
-        <!-- <el-input
-          v-model="search.projectName"
-          placeholder="请输入项目名称"
-          class="advanced-input"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input> -->
         <el-select
-          v-model="search.talkProjectName"
-          placeholder="请选择项目名称"
+          v-model="search.talkIsSuccess"
+          placeholder="请选择"
           clearable
           class="advanced-input"
+          :disabled="successFlag"
         >
-          <el-option
-            v-for="item in projectList"
-            :label="item.projectName"
-            :value="item.projectName"
-            :key="item.id"
-          ></el-option>
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
         </el-select>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >意向分级标签（最近一次外呼）：</span
-        >
-        <el-input
-          placeholder="请输入意向分级标签，用逗号隔开"
-          v-model="search.callGroupInfo"
-          class="advanced-input large-input"
-          @keyup.enter.native="
-            () => {
-              pagination.currentPage = 1
-              queryList()
-            }
-          "
-          clearable
-        ></el-input>
-      </div>
-      <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >意向分级等级（最近一次外呼）：</span
-        >
-        <el-checkbox-group
-          v-model="callAiCategory"
-          style="display: inline-block"
-        >
-          <el-checkbox
-            v-for="range in intentTags"
-            :label="range"
-            :key="range"
-            style="width: 80px"
-          ></el-checkbox>
-        </el-checkbox-group>
       </div>
       <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
@@ -752,6 +654,68 @@
             style="width: 80px"
           ></el-checkbox>
         </el-checkbox-group>
+      </div>
+      <div>
+        <div class="advanced-item">
+          <span class="advanced-label">接通次数：</span>
+          <el-input
+            v-number
+            placeholder="最小值(含)"
+            v-model="search.minTalkNum"
+            class="advanced-input input_small"
+            @keyup.enter.native="
+              () => {
+                pagination.currentPage = 1
+                queryList()
+              }
+            "
+            clearable
+          ></el-input>
+          <span class="delimiter">-</span>
+          <el-input
+            v-number
+            placeholder="最大值(含)"
+            v-model="search.maxTalkNum"
+            class="advanced-input input_small"
+            @keyup.enter.native="
+              () => {
+                pagination.currentPage = 1
+                queryList()
+              }
+            "
+            clearable
+          ></el-input>
+        </div>
+        <div class="advanced-item">
+          <span class="advanced-label">呼叫次数：</span>
+          <el-input
+            v-number
+            placeholder="最小值(含)"
+            v-model="search.minCallNum"
+            class="advanced-input input_small"
+            @keyup.enter.native="
+              () => {
+                pagination.currentPage = 1
+                queryList()
+              }
+            "
+            clearable
+          ></el-input>
+          <span class="delimiter">-</span>
+          <el-input
+            v-number
+            placeholder="最大值(含)"
+            v-model="search.maxCallNum"
+            class="advanced-input input_small"
+            @keyup.enter.native="
+              () => {
+                pagination.currentPage = 1
+                queryList()
+              }
+            "
+            clearable
+          ></el-input>
+        </div>
       </div>
     </div>
     <div class="table">
@@ -1013,6 +977,7 @@ export default {
         'F类',
         '未分类',
       ],
+      successFlag: false,
       callAiCategory: [],
       talkAiCategory: [],
       oldSearch: {
@@ -1021,7 +986,7 @@ export default {
         batch: null, //客户批次
         repeatTimeEnd: '', //复用开始时间
         repeatTimeStart: '', //复用结束时间
-        callProjectName: null, // 项目名称
+        projectName: null, // 项目名称
         type: null, //名单来源
         product: null,
         sex: null, //性别
@@ -1064,7 +1029,6 @@ export default {
         maxCallNum: null,
         callGroupInfo: '',
         talkGroupInfo: '',
-        talkProjectName: '',
       },
       search: {
         //查询筛选字段
@@ -1072,7 +1036,7 @@ export default {
         batch: this.$route.query.batch, //客户批次
         repeatTimeEnd: '', //开始时间
         repeatTimeStart: '', //结束时间
-        callProjectName: '', //项目名称
+        projectName: '', //项目名称
         type: null, //名单来源
         product: null, //销售产品
         sex: null, //性别
@@ -1115,7 +1079,6 @@ export default {
         maxCallNum: null,
         callGroupInfo: '',
         talkGroupInfo: '',
-        talkProjectName: '',
       },
       repeatTimeOrder: null,
       createTimeOrder: null,
@@ -1204,10 +1167,19 @@ export default {
     this.getProjectsAll()
   },
   methods: {
+    checkSuccessDate() {
+      if (this.search.successStartDate && this.search.successEndDate) {
+        this.successFlag = true
+        this.search.callIsSuccess = 1
+        this.search.talkIsSuccess = 1
+      } else {
+        this.successFlag = false
+      }
+    },
     getRobotList() {
-      this.$request.jsonGet('/sdmulti/task/getRobots').then((res) => {
-        this.robotList = res.data
-      })
+      // this.$request.jsonGet('/sdmulti/task/getRobots').then((res) => {
+      //   this.robotList = res.data
+      // })
     },
     whenCreateTimeMinChange(val) {
       if (
@@ -1313,7 +1285,7 @@ export default {
           ? this.search.repeatTimeEnd + ' 23:59:59'
           : null,
         type: this.search.type,
-        callProjectName: this.search.callProjectName,
+        projectName: this.search.projectName,
         product: this.search.product,
         sex: sex,
         minAge: this.search.minAge,
@@ -1388,7 +1360,6 @@ export default {
         callGroupInfo: this.search.callGroupInfo,
         talkAiCategory,
         callAiCategory,
-        talkProjectName: this.search.talkProjectName,
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -1522,7 +1493,7 @@ export default {
           search: JSON.stringify({
             ...search,
             talkAiCategory: this.talkAiCategory,
-            callAiCategory: this.aiCategory,
+            callAiCategory: this.callAiCategory,
           }),
           pagination: JSON.stringify(pagination),
           type: this.checkedTableRow[0].row.type,
@@ -1562,7 +1533,7 @@ export default {
           ? this.search.repeatTimeEnd + ' 23:59:59'
           : null,
         type: this.search.type,
-        callProjectName: this.search.callProjectName,
+        projectName: this.search.projectName,
         product: this.search.product,
         sex: sex,
         minAge: this.search.minAge,
@@ -1636,7 +1607,6 @@ export default {
         callGroupInfo: this.search.callGroupInfo,
         talkAiCategory,
         callAiCategory,
-        talkProjectName: this.search.talkProjectName,
       }
       let url = '/sdmulti/project/info/list'
       this.$request
