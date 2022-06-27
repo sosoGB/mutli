@@ -53,7 +53,6 @@
           value-format="yyyy-MM-dd"
           :picker-options="createTimeMinValidator"
           @change="whenCreateTimeMinChange"
-          clearable
         ></el-date-picker>
         <span class="search-delimiter">-</span>
         <el-date-picker
@@ -64,7 +63,6 @@
           value-format="yyyy-MM-dd"
           :picker-options="createTimeMaxValidator"
           @change="whenCreateTimeMaxChange"
-          clearable
         ></el-date-picker>
         <el-button
           type="primary"

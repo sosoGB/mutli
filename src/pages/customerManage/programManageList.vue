@@ -278,6 +278,7 @@
               v-model.trim="editFormData.userMobile"
               placeholder="请输入所属业务账号"
               class="input-large"
+              :disabled="editForm.id"
             ></el-input>
           </el-form-item>
           <el-form-item prop="weeks" label="外呼周期：">
