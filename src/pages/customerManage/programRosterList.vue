@@ -230,6 +230,19 @@
         </el-select>
       </div>
       <div class="advanced-item">
+        <span class="advanced-label">是否已成功转化：</span>
+        <el-select
+          v-model="search.IsSuccess"
+          placeholder="请选择"
+          clearable
+          class="advanced-input"
+          :disabled="successFlag"
+        >
+          <el-option label="是" :value="1"></el-option>
+          <el-option label="否" :value="0"></el-option>
+        </el-select>
+      </div>
+      <div class="advanced-item">
         <span class="advanced-label">是否已创建外呼任务：</span>
         <el-select
           v-model="search.isCall"
@@ -395,12 +408,10 @@
       </div>
       <div>
         <div class="advanced-item">
-          <span class="advanced-label" style="width: 220px"
-            >外呼日期（最近一次外呼）：</span
-          >
+          <span class="advanced-label">外呼日期：</span>
           <el-date-picker
             v-model="search.callStartDate"
-            class="search-component search-input"
+            class="search-input"
             type="date"
             placeholder="复用开始时间"
             value-format="yyyy-MM-dd"
@@ -410,7 +421,7 @@
           <span class="search-delimiter">-</span>
           <el-date-picker
             v-model="search.callEndDate"
-            class="search-component search-input"
+            class="search-input"
             type="date"
             placeholder="复用结束时间"
             value-format="yyyy-MM-dd"
@@ -419,20 +430,18 @@
           ></el-date-picker>
         </div>
         <div class="advanced-item">
-          <span class="advanced-label" style="width: 220px"
-            >是否接通（最近一次外呼）：</span
-          >
+          <span class="advanced-label">是否接通：</span>
           <el-select
             placeholder="请选择"
             clearable
-            v-model="search.callStatus"
+            v-model="search.talk_time"
             class="advanced-input"
           >
             <el-option label="是" :value="1"></el-option>
             <el-option label="否" :value="0"></el-option>
           </el-select>
         </div>
-        <div class="advanced-item">
+        <!-- <div class="advanced-item">
           <span class="advanced-label" style="width: 220px"
             >通话时长/s（最近一次外呼）：</span
           >
@@ -463,16 +472,14 @@
             "
             clearable
           ></el-input>
-        </div>
+        </div> -->
       </div>
       <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >机器人名称（最近一次外呼）：</span
-        >
+        <span class="advanced-label">机器人名称：</span>
         <el-select
           placeholder="请选择"
           clearable
-          v-model="search.callRobotName"
+          v-model="search.robotName"
           class="advanced-input"
         >
           <el-option
@@ -483,7 +490,7 @@
           ></el-option>
         </el-select>
       </div>
-      <div class="advanced-item">
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >是否已成功转化（最近一次外呼）：</span
         >
@@ -497,14 +504,12 @@
           <el-option label="是" :value="1"></el-option>
           <el-option label="否" :value="0"></el-option>
         </el-select>
-      </div>
+      </div> -->
       <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >意向分级标签（最近一次外呼）：</span
-        >
+        <span class="advanced-label">意向分级标签：</span>
         <el-input
           placeholder="请输入意向分级标签，用逗号隔开"
-          v-model="search.callGroupInfo"
+          v-model="search.tag"
           class="advanced-input large-input"
           @keyup.enter.native="
             () => {
@@ -516,13 +521,8 @@
         ></el-input>
       </div>
       <div class="advanced-item">
-        <span class="advanced-label" style="width: 220px"
-          >意向分级等级（最近一次外呼）：</span
-        >
-        <el-checkbox-group
-          v-model="callAiCategory"
-          style="display: inline-block"
-        >
+        <span class="advanced-label">意向分级等级：</span>
+        <el-checkbox-group v-model="aiCategory" style="display: inline-block">
           <el-checkbox
             v-for="range in intentTags"
             :label="range"
@@ -531,7 +531,7 @@
           ></el-checkbox>
         </el-checkbox-group>
       </div>
-      <div class="advanced-item">
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >外呼日期（最近一次接通）：</span
         >
@@ -554,8 +554,8 @@
           :picker-options="talkEndDateValidator"
           clearable
         ></el-date-picker>
-      </div>
-      <div class="advanced-item">
+      </div> -->
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >通话时长/s（最近一次接通）：</span
         >
@@ -586,8 +586,8 @@
           "
           clearable
         ></el-input>
-      </div>
-      <div class="advanced-item">
+      </div> -->
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >机器人名称（最近一次接通）：</span
         >
@@ -604,8 +604,8 @@
             :value="item.showName"
           ></el-option>
         </el-select>
-      </div>
-      <div class="advanced-item">
+      </div> -->
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >是否已成功转化（最近一次接通）：</span
         >
@@ -619,8 +619,8 @@
           <el-option label="是" :value="1"></el-option>
           <el-option label="否" :value="0"></el-option>
         </el-select>
-      </div>
-      <div class="advanced-item">
+      </div> -->
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >意向分级标签（最近一次接通）：</span
         >
@@ -636,8 +636,8 @@
           "
           clearable
         ></el-input>
-      </div>
-      <div class="advanced-item">
+      </div> -->
+      <!-- <div class="advanced-item">
         <span class="advanced-label" style="width: 220px"
           >意向分级等级（最近一次接通）：</span
         >
@@ -652,7 +652,7 @@
             style="width: 80px"
           ></el-checkbox>
         </el-checkbox-group>
-      </div>
+      </div> -->
       <div>
         <div class="advanced-item">
           <span class="advanced-label">接通次数：</span>
@@ -927,11 +927,11 @@ import keepAlive from '@/utils/mixins/keepAlive.js' //用于从详情页返回�
 export default {
   mixins: [keepAlive],
   data() {
-    const now = filter.formatDate(Date.now(), 'yyyy-MM-dd')
-    const oneWeekAgo = filter.formatDate(
-      Date.now() - 6 * 24 * 3600 * 1000,
-      'yyyy-MM-dd'
-    )
+    // const now = filter.formatDate(Date.now(), 'yyyy-MM-dd')
+    // const oneWeekAgo = filter.formatDate(
+    //   Date.now() - 6 * 24 * 3600 * 1000,
+    //   'yyyy-MM-dd'
+    // )
     return {
       clickedSle: false,
       authExport: false,
@@ -976,8 +976,8 @@ export default {
         '未分类',
       ],
       successFlag: false,
-      callAiCategory: [],
-      talkAiCategory: [],
+      aiCategory: [],
+      // talkAiCategory: [],
       oldSearch: {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
@@ -995,8 +995,8 @@ export default {
         isCall: null, //是否已创建外呼任务
         nameSpecial: null, //是否为新客户
         isSuccess: null, //是否已成功转化
-        talkIsSuccess: null, //是否已成功转化
-        callIsSuccess: null,
+        // talkIsSuccess: null, //是否已成功转化
+        // callIsSuccess: null,
         isName: null, //名字是否为空
         isNewCus: null,
         startMaxTalkTime: null,
@@ -1012,21 +1012,21 @@ export default {
         successEndDate: null,
         callStartDate: '',
         callEndDate: '',
-        callStatus: null,
-        callStartTalkTime: null,
-        callEndTalkTime: null,
-        callRobotName: null,
-        talkStartDate: '',
-        talkEndDate: '',
-        talkStartTalkTime: null,
-        talkEndTalkTime: null,
-        talkRobotName: null,
+        talk_time: null,
+        // callStartTalkTime: null,
+        // callEndTalkTime: null,
+        robotName: null,
+        // talkStartDate: '',
+        // talkEndDate: '',
+        // talkStartTalkTime: null,
+        // talkEndTalkTime: null,
+        // talkRobotName: null,
         minTalkNum: null,
         maxTalkNum: null,
         minCallNum: null,
         maxCallNum: null,
-        callGroupInfo: '',
-        talkGroupInfo: '',
+        tag: '',
+        // talkGroupInfo: '',
       },
       search: {
         //查询筛选字段
@@ -1045,16 +1045,16 @@ export default {
         isCall: null, //是否已创建外呼任务
         nameSpecial: null, //是否为新客户
         isSuccess: null, //是否已成功转化
-        talkIsSuccess: null,
-        callIsSuccess: null,
+        // talkIsSuccess: null,
+        // callIsSuccess: null,
         isName: null, //名字是否为空
         isNewCus: null,
         startMaxTalkTime: null,
         endMaxTalkTime: null,
         startTalkTime: null,
         endTalkTime: null,
-        createTimeMin: oneWeekAgo,
-        createTimeMax: now,
+        createTimeMin: null,
+        createTimeMax: null,
         freeInsuranceCompany: null,
         freeInsurance: null,
         freeInsuranceMonth: [],
@@ -1062,21 +1062,21 @@ export default {
         successEndDate: null,
         callStartDate: '',
         callEndDate: '',
-        callStatus: '',
-        callStartTalkTime: null,
-        callEndTalkTime: null,
-        callRobotName: null,
-        talkStartDate: '',
-        talkEndDate: '',
-        talkStartTalkTime: null,
-        talkEndTalkTime: null,
-        talkRobotName: null,
+        talk_time: '',
+        // callStartTalkTime: null,
+        // callEndTalkTime: null,
+        robotName: null,
+        // talkStartDate: '',
+        // talkEndDate: '',
+        // talkStartTalkTime: null,
+        // talkEndTalkTime: null,
+        // talkRobotName: null,
         minTalkNum: null,
         maxTalkNum: null,
         minCallNum: null,
         maxCallNum: null,
-        callGroupInfo: '',
-        talkGroupInfo: '',
+        tag: '',
+        // talkGroupInfo: '',
       },
       repeatTimeOrder: null,
       createTimeOrder: null,
@@ -1168,8 +1168,9 @@ export default {
     checkSuccessDate() {
       if (this.search.successStartDate && this.search.successEndDate) {
         this.successFlag = true
-        this.search.callIsSuccess = 1
-        this.search.talkIsSuccess = 1
+        // this.search.callIsSuccess = 1
+        // this.search.talkIsSuccess = 1
+        this.search.isSuccess = 1
       } else {
         this.successFlag = false
       }
@@ -1270,9 +1271,9 @@ export default {
         }
       }
       // let talkGroupInfo = this.talkGroupInfo.join(',')
-      // let callGroupInfo = this.callGroupInfo.join(',')
-      let callAiCategory = this.callAiCategory.join(',')
-      let talkAiCategory = this.talkAiCategory.join(',')
+      // let tag = this.tag.join(',')
+      let aiCategory = this.aiCategory.join(',')
+      // let talkAiCategory = this.talkAiCategory.join(',')
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
@@ -1294,8 +1295,8 @@ export default {
         nameSpecial: this.search.nameSpecial,
         isNewCus: this.search.isNewCus,
         isSuccess: this.search.isSuccess,
-        talkIsSuccess: this.search.talkIsSuccess,
-        callIsSuccess: this.search.callIsSuccess,
+        // talkIsSuccess: this.search.talkIsSuccess,
+        // callIsSuccess: this.search.callIsSuccess,
         isName: this.search.isName,
         startMaxTalkTime: this.search.startMaxTalkTime,
         endMaxTalkTime: this.search.endMaxTalkTime,
@@ -1337,27 +1338,27 @@ export default {
         callEndDate: this.search.callEndDate
           ? this.search.callEndDate + ' 00:00:00'
           : null,
-        callStatus: this.search.callStatus,
-        callStartTalkTime: this.search.callStartTalkTime,
-        callEndTalkTime: this.search.callEndTalkTime,
-        callRobotName: this.search.callRobotName,
-        talkStartDate: this.search.talkStartDate
-          ? this.search.talkStartDate + ' 00:00:00'
-          : null,
-        talkEndDate: this.search.talkEndDate
-          ? this.search.talkEndDate + ' 00:00:00'
-          : null,
-        talkStartTalkTime: this.search.talkStartTalkTime,
-        talkEndTalkTime: this.search.talkEndTalkTime,
-        talkRobotName: this.search.talkRobotName,
+        talk_time: this.search.talk_time,
+        // callStartTalkTime: this.search.callStartTalkTime,
+        // callEndTalkTime: this.search.callEndTalkTime,
+        robotName: this.search.robotName,
+        // talkStartDate: this.search.talkStartDate
+        //   ? this.search.talkStartDate + ' 00:00:00'
+        //   : null,
+        // talkEndDate: this.search.talkEndDate
+        //   ? this.search.talkEndDate + ' 00:00:00'
+        //   : null,
+        // talkStartTalkTime: this.search.talkStartTalkTime,
+        // talkEndTalkTime: this.search.talkEndTalkTime,
+        // talkRobotName: this.search.talkRobotName,
         minTalkNum: this.search.minTalkNum,
         maxTalkNum: this.search.maxTalkNum,
         minCallNum: this.search.minCallNum,
         maxCallNum: this.search.maxCallNum,
-        talkGroupInfo: this.search.talkGroupInfo,
-        callGroupInfo: this.search.callGroupInfo,
-        talkAiCategory,
-        callAiCategory,
+        // talkGroupInfo: this.search.talkGroupInfo,
+        tag: this.search.tag,
+        // talkAiCategory,
+        aiCategory,
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -1490,8 +1491,8 @@ export default {
           name: JSON.stringify(this.checkedTableRow),
           search: JSON.stringify({
             ...search,
-            talkAiCategory: this.talkAiCategory,
-            callAiCategory: this.callAiCategory,
+            // talkAiCategory: this.talkAiCategory,
+            aiCategory: this.aiCategory,
           }),
           pagination: JSON.stringify(pagination),
           type: this.checkedTableRow[0].row.type,
@@ -1519,8 +1520,8 @@ export default {
           sex.push(2)
         }
       }
-      let talkAiCategory = this.talkAiCategory.join(',')
-      let callAiCategory = this.callAiCategory.join(',')
+      // let talkAiCategory = this.talkAiCategory.join(',')
+      let aiCategory = this.aiCategory.join(',')
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
@@ -1541,8 +1542,8 @@ export default {
         isCall: this.search.isCall,
         nameSpecial: this.search.nameSpecial,
         isSuccess: this.search.isSuccess,
-        talkIsSuccess: this.search.talkIsSuccess,
-        callIsSuccess: this.search.callIsSuccess,
+        // talkIsSuccess: this.search.talkIsSuccess,
+        // callIsSuccess: this.search.callIsSuccess,
         isNewCus: this.search.isNewCus,
         isName: this.search.isName,
         page: this.pagination.currentPage,
@@ -1584,27 +1585,28 @@ export default {
         callEndDate: this.search.callEndDate
           ? this.search.callEndDate + ' 00:00:00'
           : null,
-        callStatus: this.search.callStatus,
-        callStartTalkTime: this.search.callStartTalkTime,
-        callEndTalkTime: this.search.callEndTalkTime,
-        callRobotName: this.search.callRobotName,
-        talkStartDate: this.search.talkStartDate
-          ? this.search.talkStartDate + ' 00:00:00'
-          : null,
-        talkEndDate: this.search.talkEndDate
-          ? this.search.talkEndDate + ' 00:00:00'
-          : null,
-        talkStartTalkTime: this.search.talkStartTalkTime,
-        talkEndTalkTime: this.search.talkEndTalkTime,
-        talkRobotName: this.search.talkRobotName,
+        talk_time: this.search.talk_time,
+        // callStartTalkTime: this.search.callStartTalkTime,
+        // callEndTalkTime: this.search.callEndTalkTime,
+        robotName: this.search.robotName,
+        // talkStartDate: this.search.talkStartDate
+        //   ? this.search.talkStartDate + ' 00:00:00'
+        //   : null,
+        // talkEndDate: this.search.talkEndDate
+        //   ? this.search.talkEndDate + ' 00:00:00'
+        //   : null,
+        // talkStartTalkTime: this.search.talkStartTalkTime,
+        // talkEndTalkTime: this.search.talkEndTalkTime,
+        // talkRobotName: this.search.talkRobotName,
         minTalkNum: this.search.minTalkNum,
         maxTalkNum: this.search.maxTalkNum,
         minCallNum: this.search.minCallNum,
         maxCallNum: this.search.maxCallNum,
-        talkGroupInfo: this.search.talkGroupInfo,
-        callGroupInfo: this.search.callGroupInfo,
-        talkAiCategory,
-        callAiCategory,
+        tag: this.search.tag,
+        // talkGroupInfo: this.search.talkGroupInfo,
+
+        // talkAiCategory,
+        aiCategory,
       }
       let url = '/sdmulti/project/info/list'
       this.$request

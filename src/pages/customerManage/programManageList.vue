@@ -138,7 +138,7 @@
           min-width="200"
           align="center"
         ></el-table-column>
-        <el-table-column
+        <!-- <el-table-column
           prop="weeks"
           label="外呼周期"
           width="200"
@@ -153,15 +153,19 @@
                 <span>星期</span>
                 <span>{{
                   getShowWeeksInTable(
-                    scope.row.weeks.split(',').slice(0, 2).join(',')
+                    scope.row.weeks
+                      ? scope.row.weeks.split(',').slice(0, 2).join(',')
+                      : null
                   )
                 }}</span>
-                <span v-if="scope.row.weeks.split(',').length > 2">...</span>
+                <span
+                  v-if="
+                    scope.row.weeks && scope.row.weeks.split(',').length > 2
+                  "
+                  >...</span
+                >
               </div>
             </el-tooltip>
-            <!-- <div>
-              <span>星期{{ getShowWeeksInTable(scope.row.weeks) }}</span>
-            </div> -->
           </template>
         </el-table-column>
         <el-table-column
@@ -171,7 +175,11 @@
           align="center"
         >
           <template slot-scope="scope">
-            <el-tooltip :content="scope.row.times" placement="top">
+            <el-tooltip
+              :content="scope.row.times"
+              placement="top"
+              v-if="scope.row.times"
+            >
               <div>
                 <div
                   v-for="(item, index) in scope.row.times.split(',')"
@@ -183,8 +191,9 @@
                 </div>
               </div>
             </el-tooltip>
+            <div v-else></div>
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="最近一次修改时间" width="180" align="center">
           <template slot-scope="scope">
             <span>{{
@@ -278,10 +287,10 @@
               v-model.trim="editFormData.userMobile"
               placeholder="请输入所属业务账号"
               class="input-large"
-              :disabled="editForm.id"
+              :disabled="editFormData.id"
             ></el-input>
           </el-form-item>
-          <el-form-item prop="weeks" label="外呼周期：">
+          <!-- <el-form-item prop="weeks" label="外呼周期：">
             <el-checkbox-group
               v-model="editFormData.weeks"
               style="display: inline-block"
@@ -294,8 +303,8 @@
                 >{{ item.name }}</el-checkbox
               >
             </el-checkbox-group>
-          </el-form-item>
-          <el-form-item prop="times" label="外呼时间段：">
+          </el-form-item> -->
+          <!-- <el-form-item prop="times" label="外呼时间段：">
             <div style="font-size: 12px; color: #999">
               请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
             </div>
@@ -345,7 +354,7 @@
                 size="mini"
               ></el-button>
             </div>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item prop="status" label="项目状态：">
             <el-radio-group v-model="editFormData.status">
               <el-radio :label="1">启动</el-radio>
@@ -540,6 +549,7 @@ export default {
       this.editFormData.times.splice(index, 1)
     },
     getShowWeeksInTable(weeks) {
+      if (!weeks) return ''
       return weeks
         .replaceAll('1', '一')
         .replaceAll('2', '二')
@@ -631,22 +641,22 @@ export default {
         data.lineIds = data.lineIds.map((e) => parseInt(e))
       }
       this.editFormData = { ...data }
-      if (data.weeks) {
-        let arr = data.weeks.split(',')
-        this.editFormData.weeks = arr.map(Number)
-      }
-      if (data.times) {
-        let arr = data.times.split(',')
-        this.editFormData.times = arr.map((e) => {
-          let ar = e.split('-')
-          let startTime = ar[0].substring(0, ar[0].length - 3)
-          let endTime = ar[1].substring(0, ar[1].length - 3)
-          return {
-            startTime,
-            endTime,
-          }
-        })
-      }
+      // if (data.weeks) {
+      //   let arr = data.weeks.split(',')
+      //   this.editFormData.weeks = arr.map(Number)
+      // }
+      // if (data.times) {
+      //   let arr = data.times.split(',')
+      //   this.editFormData.times = arr.map((e) => {
+      //     let ar = e.split('-')
+      //     let startTime = ar[0].substring(0, ar[0].length - 3)
+      //     let endTime = ar[1].substring(0, ar[1].length - 3)
+      //     return {
+      //       startTime,
+      //       endTime,
+      //     }
+      //   })
+      // }
       this.dialogEditVisible = true
     },
     // 提交编辑项目表单
@@ -666,9 +676,9 @@ export default {
             return
           }
         }
-        let times = this.editFormData.times
-          .map((e) => e.startTime + ':00-' + e.endTime + ':00')
-          .join(',')
+        // let times = this.editFormData.times
+        //   .map((e) => e.startTime + ':00-' + e.endTime + ':00')
+        //   .join(',')
         const params = {
           id: this.editFormData.id,
           projectName: this.editFormData.projectName, // 项目名称
@@ -677,8 +687,8 @@ export default {
           status: this.editFormData.status,
           remark: this.editFormData.remark,
           userMobile: this.editFormData.userMobile,
-          weeks: this.editFormData.weeks.join(','),
-          times,
+          // weeks: this.editFormData.weeks.join(','),
+          // times,
         }
         let url = '/sdmulti/manage/project'
         let res = null
@@ -752,11 +762,11 @@ export default {
 </style>
 <style lang="scss" scoped>
 @import '@/assets/css/common.scss';
-.ddd {
-  /deep/ .el-dialog__body {
-    overflow: hidden;
-  }
-}
+// .ddd {
+//   /deep/ .el-dialog__body {
+//     overflow: hidden;
+//   }
+// }
 .form-item_upload {
   display: flex;
   align-items: center;

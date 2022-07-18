@@ -23,7 +23,8 @@
           v-model.trim="createFormData.name"
           placeholder="请输入任务名称"
           clearable
-          class="input-name"
+          style="width: 600px"
+          maxlength="200"
         ></el-input>
       </el-form-item>
       <el-form-item prop="projectId" label="项目名称：">
@@ -587,12 +588,15 @@ export default {
         conversionFlag: 0, // 转化失败重呼
         jietongFlag: 0, // 接通失败重呼
         weeks: [0, 1, 2, 3, 4, 5, 6],
-        times: [{ startTime: '08:00', endTime: '22:00' }],
+        times: [
+          { startTime: '08:00', endTime: '12:40' },
+          { startTime: '13:40', endTime: '21:00' },
+        ],
       }, // 新建任务表单项
       createFormRule: {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
-          { max: 40, message: '不得超过40个字符', trigger: 'blur' },
+          { max: 200, message: '不得超过200个字符', trigger: 'blur' },
         ],
         projectId: [
           { required: true, message: '请选择项目', trigger: 'change' },
@@ -835,8 +839,8 @@ export default {
       obj.nameSpecial = search.nameSpecial
       obj.isNewCus = search.isNewCus
       obj.isSuccess = search.isSuccess
-      obj.talkIsSuccess = search.talkIsSuccess
-      obj.callIsSuccess = search.callIsSuccess
+      // obj.talkIsSuccess = search.talkIsSuccess
+      // obj.callIsSuccess = search.callIsSuccess
       obj.isName = search.isName
       obj.startMaxTalkTime = search.startMaxTalkTime
       obj.endMaxTalkTime = search.endMaxTalkTime
@@ -869,23 +873,23 @@ export default {
       obj.successEndDate = search.successEndDate
       obj.callStartDate = search.callStartDate
       obj.callEndDate = search.callEndDate
-      obj.callStatus = search.callStatus
-      obj.callStartTalkTime = search.callStartTalkTime
-      obj.callEndTalkTime = search.callEndTalkTime
-      obj.callRobotName = search.callRobotName
-      obj.talkStartDate = search.talkStartDate
-      obj.talkEndDate = search.talkEndDate
-      obj.talkStartTalkTime = search.talkStartTalkTime
-      obj.talkEndTalkTime = search.talkEndTalkTime
-      obj.talkRobotName = search.talkRobotName
+      obj.talk_time = search.talk_time
+      // obj.callStartTalkTime = search.callStartTalkTime
+      // obj.callEndTalkTime = search.callEndTalkTime
+      obj.robotName = search.robotName
+      // obj.talkStartDate = search.talkStartDate
+      // obj.talkEndDate = search.talkEndDate
+      // obj.talkStartTalkTime = search.talkStartTalkTime
+      // obj.talkEndTalkTime = search.talkEndTalkTime
+      // obj.talkRobotName = search.talkRobotName
       obj.minTalkNum = search.minTalkNum
       obj.maxTalkNum = search.maxTalkNum
       obj.minCallNum = search.minCallNum
       obj.maxCallNum = search.maxCallNum
-      obj.talkGroupInfo = search.talkGroupInfo
-      obj.callGroupInfo = search.callGroupInfo
-      obj.talkAiCategory = search.talkAiCategory.join(',')
-      obj.callAiCategory = search.callAiCategory.join(',')
+      // obj.talkGroupInfo = search.talkGroupInfo
+      obj.tag = search.tag
+      // obj.talkAiCategory = search.talkAiCategory.join(',')
+      obj.aiCategory = search.aiCategory.join(',')
       obj.page = pagination.currentPage
       obj.pageSize = pagination.pageSize
       customerInfos.push(obj)
