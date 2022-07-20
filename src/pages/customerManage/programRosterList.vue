@@ -1176,9 +1176,9 @@ export default {
       }
     },
     getRobotList() {
-      // this.$request.jsonGet('/sdmulti/task/getRobots').then((res) => {
-      //   this.robotList = res.data
-      // })
+      this.$request.jsonGet('/sdmulti/task/getRobots').then((res) => {
+        this.robotList = res.data
+      })
     },
     whenCreateTimeMinChange(val) {
       if (

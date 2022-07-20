@@ -81,7 +81,7 @@
         <span>个进行选取</span>
       </el-form-item>
       <el-form-item prop="outCallPlatformId" label="外呼平台：">
-        <div class="input-large form-item_upload">
+        <!-- <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.outCallPlatformId"
             @change="handleChangePlat"
@@ -95,7 +95,12 @@
               :value="item.id"
             ></el-option>
           </el-select>
-        </div>
+        </div> -->
+        <el-input
+          v-model="outCallPlatformName"
+          disabled
+          class="input-name"
+        ></el-input>
       </el-form-item>
       <el-form-item
         prop="robotName"
@@ -513,6 +518,7 @@ export default {
       OutCallPlatformList: [], //可选外呼平台列表
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
+      outCallPlatformName: '', //外呼平台名
       recallResultList: [
         // { label: '正在通话中', key: '1' },
         // { label: '用户忙', key: '2' },
@@ -918,22 +924,25 @@ export default {
           // name: "测试平台-2"
           // times: "08:00:00-12:00:00"
           // weeks: "0,1,2,3,4,5,6"
-          if (res.data.weeks) {
-            let arr = res.data.weeks.split(',')
-            this.createFormData.weeks = arr.map(Number)
-          }
-          if (res.data.times) {
-            let arr = res.data.times.split(',')
-            this.createFormData.times = arr.map((e) => {
-              let ar = e.split('-')
-              let startTime = ar[0].substring(0, ar[0].length - 3)
-              let endTime = ar[1].substring(0, ar[1].length - 3)
-              return {
-                startTime,
-                endTime,
-              }
-            })
-          }
+          // if (res.data.weeks) {
+          //   let arr = res.data.weeks.split(',')
+          //   this.createFormData.weeks = arr.map(Number)
+          // }
+          // if (res.data.times) {
+          //   let arr = res.data.times.split(',')
+          //   this.createFormData.times = arr.map((e) => {
+          //     let ar = e.split('-')
+          //     let startTime = ar[0].substring(0, ar[0].length - 3)
+          //     let endTime = ar[1].substring(0, ar[1].length - 3)
+          //     return {
+          //       startTime,
+          //       endTime,
+          //     }
+          //   })
+          // }
+          this.createFormData.outCallPlatformId = res.data.calls
+          this.outCallPlatformName = res.data.name
+          this.handleChangePlat(res.data)
         }
       })
     },
@@ -1042,13 +1051,13 @@ export default {
       this.allowendTime = ''
     },
     // 选择外呼平台
-    handleChangePlat(select) {
-      if (select) {
+    handleChangePlat(plat) {
+      if (plat) {
         let platforms = []
         // select.forEach((item) => {})
-        let plat = this.OutCallPlatformList.find((list) => {
-          return list.id === select
-        })
+        // let plat = this.OutCallPlatformList.find((list) => {
+        //   return list.id === select
+        // })
         let obj = {}
         obj.platformId = plat.id
         obj.userId = plat.serviceUserId
@@ -1058,26 +1067,13 @@ export default {
         this.createFormData.robotName = ''
 
         this.fetchRobotList()
-        this.getRouteList()
+        this.getRouteList(plat)
       }
     },
-    getRouteList() {
-      // let serviceInfos = this.OutCallPlatformList.find((e) => {
-      //   return this.createFormData.outCallPlatformId == e.id
-      // })
-      // let fd = new FormData()
-      // fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
-      // this.$request.uploadPost('/sdmulti/task/getRoute', fd).then((res) => {
-      //   this.routeList = res.data
-      // })
-      let serviceInfo = this.OutCallPlatformList.find((e) => {
-        return this.createFormData.outCallPlatformId == e.id
+    getRouteList(plat) {
+      this.$request.jsonPost('/sdmulti/task/getRoute', plat).then((res) => {
+        this.routeList = res.data
       })
-      this.$request
-        .jsonPost('/sdmulti/task/getRoute', serviceInfo)
-        .then((res) => {
-          this.routeList = res.data
-        })
     },
     selectRobot(val) {
       if (val) {
