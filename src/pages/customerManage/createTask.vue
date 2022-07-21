@@ -940,7 +940,7 @@ export default {
           //     }
           //   })
           // }
-          this.createFormData.outCallPlatformId = res.data.calls
+          this.createFormData.outCallPlatformId = res.data.id
           this.outCallPlatformName = res.data.name
           this.handleChangePlat(res.data)
         }
@@ -1149,13 +1149,13 @@ export default {
     // 查询机器人列表
     fetchRobotList(plat) {
       let serviceInfo = { ...plat }
-      serviceInfo.ipAddress =
-        location.origin === 'http://test.sdmanage.qibot-ai.com'
-          ? serviceInfo.ipAddress.replace(
-              'http://call002.qibot-ai.com',
-              'http://test.sdmanage.qibot-ai.com'
-            )
-          : serviceInfo.ipAddress
+      // serviceInfo.ipAddress =
+      //   location.origin === 'http://test.sdmanage.qibot-ai.com'
+      //     ? serviceInfo.ipAddress.replace(
+      //         'http://call002.qibot-ai.com',
+      //         'http://test.sdmanage.qibot-ai.com'
+      //       )
+      //     : serviceInfo.ipAddress
       let serviceInfos = [serviceInfo]
       let fd = new FormData()
       fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
