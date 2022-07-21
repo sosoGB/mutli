@@ -80,8 +80,8 @@
         ></el-input>
         <span>个进行选取</span>
       </el-form-item>
-      <el-form-item prop="outCallPlatformId" label="外呼平台：">
-        <!-- <div class="input-large form-item_upload">
+      <!-- <el-form-item prop="outCallPlatformId" label="外呼平台：">
+        <div class="input-large form-item_upload">
           <el-select
             v-model="createFormData.outCallPlatformId"
             @change="handleChangePlat"
@@ -95,13 +95,13 @@
               :value="item.id"
             ></el-option>
           </el-select>
-        </div> -->
+        </div>
         <el-input
           v-model="outCallPlatformName"
           disabled
           class="input-name"
         ></el-input>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item
         prop="robotName"
         label="机器人名称："
