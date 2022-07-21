@@ -1150,7 +1150,7 @@ export default {
     fetchRobotList(plat) {
       let serviceInfo = { ...plat }
       serviceInfo.ipAddress =
-        process.env.NODE_ENV === 'dev'
+        location.origin === 'http://test.sdmanage.qibot-ai.com'
           ? serviceInfo.ipAddress.replace(
               'http://call002.qibot-ai.com',
               'http://test.sdmanage.qibot-ai.com'
