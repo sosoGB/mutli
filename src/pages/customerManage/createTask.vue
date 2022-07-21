@@ -1066,14 +1066,24 @@ export default {
         this.unionVO.platforms = platforms
         this.createFormData.robotName = ''
 
-        this.fetchRobotList()
+        this.fetchRobotList(plat)
         this.getRouteList(plat)
       }
     },
     getRouteList(plat) {
-      this.$request.jsonPost('/sdmulti/task/getRoute', plat).then((res) => {
-        this.routeList = res.data
-      })
+      let serviceInfo = { ...plat }
+      serviceInfo.ipAddress =
+        process.env.NODE_ENV === 'dev'
+          ? serviceInfo.ipAddress.replace(
+              'http://call002.qibot-ai.com',
+              'http://test.sdmanage.qibot-ai.com'
+            )
+          : serviceInfo
+      this.$request
+        .jsonPost('/sdmulti/task/getRoute', serviceInfo)
+        .then((res) => {
+          this.routeList = res.data
+        })
     },
     selectRobot(val) {
       if (val) {
@@ -1144,14 +1154,16 @@ export default {
         })
     },
     // 查询机器人列表
-    fetchRobotList() {
-      let serviceInfos = this.OutCallPlatformList.filter((e) => {
-        return this.createFormData.outCallPlatformId == e.id
-      }).map((e) => {
-        let a = { ...e }
-        delete a.status
-        return a
-      })
+    fetchRobotList(plat) {
+      let serviceInfo = { ...plat }
+      serviceInfo.ipAddress =
+        process.env.NODE_ENV === 'dev'
+          ? serviceInfo.ipAddress.replace(
+              'http://call002.qibot-ai.com',
+              'http://test.sdmanage.qibot-ai.com'
+            )
+          : serviceInfo
+      let serviceInfos = [serviceInfo]
       let fd = new FormData()
       fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
       this.$request
