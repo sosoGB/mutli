@@ -1149,6 +1149,13 @@ export default {
     // 查询机器人列表
     fetchRobotList(plat) {
       let serviceInfo = { ...plat }
+      serviceInfo.ipAddress =
+        process.env.NODE_ENV === 'dev'
+          ? serviceInfo.ipAddress.replace(
+              'http://call002.qibot-ai.com',
+              'http://test.sdmanage.qibot-ai.com'
+            )
+          : serviceInfo.ipAddress
       let serviceInfos = [serviceInfo]
       let fd = new FormData()
       fd.append('serviceInfos', JSON.stringify({ serviceInfos }))
