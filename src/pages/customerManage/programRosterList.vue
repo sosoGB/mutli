@@ -238,8 +238,8 @@
           class="advanced-input"
           :disabled="successFlag"
         >
-          <el-option label="是" :value="1"></el-option>
-          <el-option label="否" :value="0"></el-option>
+          <el-option label="是" :value="2"></el-option>
+          <el-option label="否" :value="1"></el-option>
         </el-select>
       </div>
       <div class="advanced-item">
@@ -434,7 +434,7 @@
           <el-select
             placeholder="请选择"
             clearable
-            v-model="search.talk_time"
+            v-model="search.callStatus"
             class="advanced-input"
           >
             <el-option label="是" :value="1"></el-option>
@@ -1012,7 +1012,7 @@ export default {
         successEndDate: null,
         callStartDate: '',
         callEndDate: '',
-        talk_time: null,
+        callStatus: null,
         // callStartTalkTime: null,
         // callEndTalkTime: null,
         robotName: null,
@@ -1062,7 +1062,7 @@ export default {
         successEndDate: null,
         callStartDate: '',
         callEndDate: '',
-        talk_time: '',
+        callStatus: '',
         // callStartTalkTime: null,
         // callEndTalkTime: null,
         robotName: null,
@@ -1170,7 +1170,7 @@ export default {
         this.successFlag = true
         // this.search.callIsSuccess = 1
         // this.search.talkIsSuccess = 1
-        this.search.isSuccess = 1
+        this.search.isSuccess = 2
       } else {
         this.successFlag = false
       }
@@ -1338,7 +1338,7 @@ export default {
         callEndDate: this.search.callEndDate
           ? this.search.callEndDate + ' 00:00:00'
           : null,
-        talk_time: this.search.talk_time,
+        callStatus: this.search.callStatus,
         // callStartTalkTime: this.search.callStartTalkTime,
         // callEndTalkTime: this.search.callEndTalkTime,
         robotName: this.search.robotName,
@@ -1585,7 +1585,7 @@ export default {
         callEndDate: this.search.callEndDate
           ? this.search.callEndDate + ' 00:00:00'
           : null,
-        talk_time: this.search.talk_time,
+        callStatus: this.search.callStatus,
         // callStartTalkTime: this.search.callStartTalkTime,
         // callEndTalkTime: this.search.callEndTalkTime,
         robotName: this.search.robotName,
