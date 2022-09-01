@@ -232,7 +232,7 @@
       <div class="advanced-item">
         <span class="advanced-label">是否已成功转化：</span>
         <el-select
-          v-model="search.IsSuccess"
+          v-model="search.isSuccess"
           placeholder="请选择"
           clearable
           class="advanced-input"
