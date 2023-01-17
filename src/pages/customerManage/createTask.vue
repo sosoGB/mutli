@@ -151,25 +151,6 @@
           >
         </div>
       </el-form-item>
-
-      <el-form-item
-        prop="importRelVar"
-        label="变量校验："
-        v-show="ulCom && ulRel"
-      >
-        <div class="input-large form-item_upload">
-          <el-button
-            @click="handleCheckVar()"
-            type="primary"
-            size="mini"
-            v-show="!varResult"
-            >{{ checkVar ? '校验中...' : '变量校验' }}</el-button
-          >
-          <el-button type="success" size="mini" v-show="varResult"
-            >校验成功</el-button
-          >
-        </div>
-      </el-form-item>
       <el-form-item prop="routeId" label="路由选择：">
         <el-select
           v-model="createFormData.routeId"
@@ -507,10 +488,8 @@ export default {
       selectRobotName: null, //已选机器人名称
       ulCom: null,
       ulRel: null,
-      checkVar: '', //是否在校验
       unionVO: null, //变量校验参数
       customerInfoVOs: null,
-      varResult: null, //校验结果
       allowstartTime: '', //允许开始时间
       allowendTime: '', //允许结束时间
       errorNum: 0, //错误号码数量
@@ -1090,49 +1069,6 @@ export default {
         })
       }
     },
-    // 变量校验
-    handleCheckVar() {
-      if (!this.createFormData.robotName) {
-        this.$message.warning('请先选择机器人名称')
-        return
-      }
-      if (!this.createFormData.outCallPlatformId) {
-        this.$message.warning('请先选择外呼平台')
-        return
-      }
-      if (!this.checkVar) {
-        this.checkVar = true
-        this.$message.warning('正在校验，请勿重复点击校验')
-        let param = new FormData()
-        const config = {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-        param.append('pFile', this.ulCom)
-        param.append('rFile', this.ulRel)
-        this.unionVO.start = this.createFormData.customerNum
-        this.unionVO.end = this.createFormData.customerNum2
-        param.append('unionVO', JSON.stringify(this.unionVO))
-        // param.append('start', this.createFormData.customerNum)
-        // param.append('end', this.createFormData.customerNum2)
-        const url = '/sdmulti/qbzz/manage/api/check/union'
-        return this.$request
-          .uploadPost(url, param, config)
-          .then((res) => {
-            if (res.code === '0') {
-              this.varResult = res.data
-              this.$message.success(res.message)
-            } else {
-              this.checkVar = false
-              return Promise.reject([])
-            }
-          })
-          .finally(() => {
-            this.checkVar = false
-          })
-      }
-    },
     // 校验并发数
     checkConcurrentNum() {
       this.$request
@@ -1255,7 +1191,7 @@ export default {
           .map((e) => e.startTime + ':00-' + e.endTime + ':00')
           .join(',')
         // 保存参数
-        const param = {
+        const paramJson = {
           userId: this.$store.state.userInfo.userId,
           name: this.createFormData.name,
           projectId: this.createFormData.projectId,
@@ -1270,26 +1206,33 @@ export default {
           allowTime: this.allowTimes,
           callSingle: this.createFormData.callSingle == 1 ? true : false, //呼叫去重
           connectCall: this.createFormData.recallFlag,
-          platforms: this.varResult, //校验结果
+          platforms: null, //校验结果
           projectInfoParams: this.customerInfoVOs,
           routeId: this.createFormData.routeId,
           weeks: this.createFormData.weeks.join(','),
           times,
         }
         // 如果选了自动失败重呼，则添加通话结果
-        if (param.connectCall) {
-          param.connectCallResult = this.createFormData.recallResult
+        if (paramJson.connectCall) {
+          paramJson.connectCallResult = this.createFormData.recallResult
             .join(',')
             .split(',')
             .map(Number)
-          param.timeInterval = this.createFormData.recallInterval
-          param.callNum = this.createFormData.recallMaxNum
+          paramJson.timeInterval = this.createFormData.recallInterval
+          paramJson.callNum = this.createFormData.recallMaxNum
         }
         // if (param.conversionFlag) {
         //   param.connectCallResult = this.createFormData.conversionrecallResult.join(',')
         //   param.conversionrecallSpace = this.createFormData.conversionrecallInterval
         //   param.conversionrecallMaxNum = this.createFormData.conversionrecallMaxNum
         // }
+        const param = new FormData()
+        for (const key in paramJson) {
+          param.append(key, paramJson[key])
+        }
+        param.append('pFile', this.ulCom)
+        param.append('rFile', this.ulRel)
+        param.append('unionVO', JSON.stringify(this.unionVO))
         let loading,
           ltext = '正在创建，请稍候'
         loading = this.$loading({
@@ -1299,8 +1242,13 @@ export default {
           background: 'rgba(0, 0, 0, 0.5)',
         })
         const url = '/sdmulti/task/save'
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
         return this.$request
-          .jsonPost(url, param)
+          .uploadPost(url, param, config)
           .then((res) => {
             if (res.code === '0') {
               this.$message.success('新增任务成功')
