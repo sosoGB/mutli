@@ -171,25 +171,25 @@
       <el-form-item prop="weeks" label="外呼周期：">
         <el-checkbox-group
           v-model="createFormData.weeks"
-          style="display:inline-block;"
+          style="display: inline-block"
         >
           <el-checkbox
             v-for="item in dateList"
             :label="item.value"
             :key="item.value"
-            style="width:80px;"
+            style="width: 80px"
             >{{ item.name }}</el-checkbox
           >
         </el-checkbox-group>
       </el-form-item>
       <el-form-item prop="times" label="外呼时间段：">
-        <div style="font-size:12px;color:#999;">
+        <div style="font-size: 12px; color: #999">
           请尽量避免在用户休息时间段外呼；分钟选取以10min为最小选择单位，如13h20min-16h40min。
         </div>
         <div
           v-for="(item, index) in createFormData.times"
           :key="index"
-          style="margin-bottom:10px;"
+          style="margin-bottom: 10px"
         >
           <el-time-select
             placeholder="起始时间"
@@ -198,7 +198,7 @@
             :picker-options="{
               start: '00:00',
               step: '00:10',
-              end: '23:50'
+              end: '23:50',
             }"
           >
           </el-time-select>
@@ -211,7 +211,7 @@
               start: '00:10',
               step: '00:10',
               end: '24:00',
-              minTime: item.startTime
+              minTime: item.startTime,
             }"
           >
           </el-time-select>
@@ -221,14 +221,14 @@
             type="primary"
             @click="addTimeRange"
             size="mini"
-            style="margin-left:20px;"
+            style="margin-left: 20px"
           ></el-button>
           <el-button
             v-else
             icon="el-icon-minus"
             type="danger"
             @click="deleteTimeRange(index)"
-            style="margin-left:20px;"
+            style="margin-left: 20px"
             size="mini"
           ></el-button>
         </div>
@@ -258,7 +258,7 @@
                 :picker-options="{
                   start: '08:00',
                   step: '00:10',
-                  end: '22:00'
+                  end: '22:00',
                 }"
                 placeholder="选择时间"
               >
@@ -381,7 +381,7 @@
               :picker-options="{
                 start: '08:00',
                 step: '00:10',
-                end: '22:00'
+                end: '22:00',
               }"
               placeholder="选择时间"
             >
@@ -473,7 +473,7 @@ import util from '@/service/filter'
 export default {
   components: {
     FileUploader,
-    ProgressPop
+    ProgressPop,
   },
   data() {
     return {
@@ -539,7 +539,7 @@ export default {
         { name: '星期四', value: 4 },
         { name: '星期五', value: 5 },
         { name: '星期六', value: 6 },
-        { name: '星期日', value: 0 }
+        { name: '星期日', value: 0 },
       ],
       createFormData: {
         name: null, // 任务名称
@@ -565,25 +565,25 @@ export default {
         conversionFlag: 0, // 转化失败重呼
         jietongFlag: 0, // 接通失败重呼
         weeks: [0, 1, 2, 3, 4, 5, 6],
-        times: [{ startTime: '08:00', endTime: '22:00' }]
+        times: [{ startTime: '08:00', endTime: '22:00' }],
       },
       // 新建任务表单项
       createFormRule: {
         name: [
           { required: true, message: '请输入任务名称', trigger: 'blur' },
-          { max: 40, message: '不得超过40个字符', trigger: 'blur' }
+          { max: 40, message: '不得超过40个字符', trigger: 'blur' },
         ],
         customerType: [
-          { required: true, message: '请选择客户种类', trigger: 'blur' }
+          { required: true, message: '请选择客户种类', trigger: 'blur' },
         ],
         customerId: [
-          { required: true, message: '请选择名单批次', trigger: 'blur' }
+          { required: true, message: '请选择名单批次', trigger: 'blur' },
         ],
         robotId: [
-          { required: true, message: '请选择机器人名称', trigger: 'blur' }
+          { required: true, message: '请选择机器人名称', trigger: 'blur' },
         ],
         activeNumber: [
-          { required: true, message: '请选择线路', trigger: 'blur' }
+          { required: true, message: '请选择线路', trigger: 'blur' },
         ],
         times: [
           {
@@ -608,8 +608,8 @@ export default {
                 }
               })
               callback()
-            }
-          }
+            },
+          },
         ],
         recallInterval: [
           {
@@ -620,8 +620,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         recallMaxNum: [
           {
@@ -632,8 +632,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         concurrentNum: [
           {
@@ -644,8 +644,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         conversionInterval: [
           {
@@ -656,8 +656,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         conversionMaxNum: [
           {
@@ -668,8 +668,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         importComVar: [
           {
@@ -683,8 +683,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         importRelVar: [
           {
@@ -698,36 +698,36 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
-        ]
+            trigger: 'blur',
+          },
+        ],
       }, // 新增任务表单项校验规则
       beginDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field],
         }
       },
       endDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field],
         }
       },
       datePicker: {
-        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7
+        disabledDate: (time) => time.getTime() < Date.now() - 8.64e7,
       },
       allowTime: [],
       allowTimes: [],
       dynamicValidateForm: {
         domains: [
           {
-            value: ''
-          }
-        ]
-      }
+            value: '',
+          },
+        ],
+      },
     }
   },
   watch: {
@@ -740,7 +740,7 @@ export default {
           this.checkConcurrentNum()
         }, 1500)
       },
-      deep: true
+      deep: true,
     },
     // 导入公用型变量
     'createFormData.importComVar'(files) {
@@ -780,7 +780,7 @@ export default {
             this.$message({
               message: res.reminderText,
               type: 'warning',
-              duration: 6000
+              duration: 6000,
             })
           }
         },
@@ -789,7 +789,7 @@ export default {
           this.createFormData.importFile = []
         }
       )
-    }
+    },
   },
   created() {
     // this.fetchRobotList()
@@ -815,7 +815,7 @@ export default {
           let list = Object.keys(res.data).map((label) => {
             return {
               label,
-              key: res.data[label]
+              key: res.data[label],
             }
           })
           this.recallResultList = list
@@ -826,7 +826,7 @@ export default {
       if (this.createFormData.times.length > 3) return
       this.createFormData.times.push({
         startTime: '',
-        endTime: ''
+        endTime: '',
       })
     },
     deleteTimeRange(index) {
@@ -836,14 +836,14 @@ export default {
       let param = new FormData()
       const config = {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       }
       const loading = this.$loading({
         lock: true,
         text: '正在解析，请稍候',
         spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
+        background: 'rgba(255, 255, 255, 0.3)',
       })
       param.append('file', file)
       const url = '/sdmulti/qbzz/manage/api/check/union'
@@ -878,7 +878,7 @@ export default {
       )
       this.allowTime.push({
         allowstartTime: this.allowstartTime,
-        allowendTime: this.allowendTime
+        allowendTime: this.allowendTime,
       })
       this.allowstartTime = ''
       this.allowendTime = ''
@@ -926,12 +926,11 @@ export default {
       }
       if (!this.checkVar) {
         this.checkVar = true
-        this.$message.warning('正在校验，请勿重复点击校验')
         let param = new FormData()
         const config = {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         }
         param.append('pFile', this.ulCom)
         param.append('rFile', this.ulRel)
@@ -958,7 +957,7 @@ export default {
       this.$request
         .jsonPost('/sdmulti/task/checkConcurrentNum', {
           concurrentNum: this.createFormData.concurrentNum,
-          serviceIds: this.createFormData.outCallPlatformId
+          serviceIds: this.createFormData.outCallPlatformId,
         })
         .then((res) => {
           if (res.code === '0' && res.data === false) {
@@ -994,7 +993,7 @@ export default {
       this.$request
         .jsonPost('/sdmulti/qbzz/manage/api/queryAllCus', {
           userId: this.$store.state.userInfo.id,
-          type: this.createFormData.customerType
+          type: this.createFormData.customerType,
         })
         .then((res) => {
           this.cusList = res.data
@@ -1004,7 +1003,7 @@ export default {
     fetchOutCallPlatformList() {
       this.$request
         .formGet('/sdmulti/task/getService', {
-          robotName: this.createFormData.robotId
+          robotName: this.createFormData.robotId,
         })
         .then((res) => {
           this.OutCallPlatformList = res.data
@@ -1071,14 +1070,14 @@ export default {
       let param = new FormData()
       const config = {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       }
       const loading = this.$loading({
         lock: true,
         text: '正在解析，请稍候',
         spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
+        background: 'rgba(255, 255, 255, 0.3)',
       })
       param.append('file', file)
       if (isOpportunity) {
@@ -1158,8 +1157,8 @@ export default {
         let times = this.createFormData.times
           .map((e) => e.startTime + ':00-' + e.endTime + ':00')
           .join(',')
-        // 保存参数
-        const param = {
+
+        const paramJson = {
           userId: this.$store.state.userInfo.userId,
           name: this.createFormData.name,
           robotName: this.createFormData.robotId,
@@ -1170,10 +1169,10 @@ export default {
           allowTime: this.allowTimes,
           callSingle: this.createFormData.callSingle == 1 ? true : false, //呼叫去重
           connectCall: this.createFormData.recallFlag,
-          platforms: this.varResult, //校验结果
+          platforms: null, //校验结果
           customerInfoVOs: this.customerInfoVOs,
           weeks: this.createFormData.weeks.join(','),
-          times
+          times,
         }
         // 如果选了自动失败重呼，则添加通话结果
         if (param.connectCall) {
@@ -1189,13 +1188,18 @@ export default {
         //   param.conversionrecallSpace = this.createFormData.conversionrecallInterval
         //   param.conversionrecallMaxNum = this.createFormData.conversionrecallMaxNum
         // }
+        // 保存参数
+        const param = new FormData()
+        for (const key in paramJson) {
+          param.append(key, paramJson[key])
+        }
         let loading,
           ltext = '正在创建，请稍候'
         loading = this.$loading({
           lock: true,
           text: ltext,
           spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.5)'
+          background: 'rgba(0, 0, 0, 0.5)',
         })
         const url = '/sdmulti/task/save'
         return this.$request
@@ -1215,7 +1219,7 @@ export default {
                 if (err.response.data.code == '300') {
                   this.$router.replace('/main/callManage/callTask')
                 }
-              }
+              },
             })
           })
           .finally(() => {
@@ -1239,8 +1243,8 @@ export default {
           }
         })
       })
-    }
-  }
+    },
+  },
 }
 </script>
 

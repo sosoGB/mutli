@@ -221,10 +221,13 @@
             <el-button
               v-if="
                 scope.row.status === 0 ||
-                  scope.row.status === 3 ||
-                  scope.row.status === 4
+                scope.row.status === 3 ||
+                scope.row.status === 4 ||
+                scope.row.status === 7 ||
+                scope.row.status === 8
               "
               @click="handleRun(scope.row.id, scope.row.status)"
+              :disabled="scope.row.status === 7 || scope.row.status === 8"
               >启动</el-button
             >
             <el-button
@@ -232,7 +235,13 @@
               @click="handlePause(scope.row.id, scope.row.status)"
               >暂停</el-button
             >
-            <el-button v-else-if="scope.row.status === 2" disabled
+            <el-button
+              v-else-if="
+                scope.row.status === 2 ||
+                scope.row.status === 9 ||
+                scope.row.status === 10
+              "
+              disabled
               >完成</el-button
             >
             <el-button @click="handleExport(scope.row.id)">下载</el-button>
@@ -324,7 +333,7 @@ import FlowSelect from '@/components/FlowSelect'
 export default {
   components: {
     FlowSelect,
-    ProgressPop
+    ProgressPop,
   },
   data() {
     return {
@@ -350,29 +359,29 @@ export default {
         projectId: '',
         beginDate: null,
         endDate: null,
-        robotName: null
+        robotName: null,
       }, // 搜索条件
       taskStatusList: {
-        '0': {
+        0: {
           statusName: '待启动',
-          statusClass: 'status-ready'
+          statusClass: 'status-ready',
         },
-        '1': {
+        1: {
           statusName: '运行中',
-          statusClass: 'status-running'
+          statusClass: 'status-running',
         },
-        '2': {
+        2: {
           statusName: '已完成',
-          statusClass: 'status-completed'
+          statusClass: 'status-completed',
         },
-        '3': {
+        3: {
           statusName: '已暂停',
-          statusClass: 'status-paused'
+          statusClass: 'status-paused',
         },
-        '4': {
+        4: {
           statusName: '定时暂停',
-          statusClass: 'status-timeout'
-        }
+          statusClass: 'status-timeout',
+        },
         // '5': {
         //   statusName: '定时启动',
         //   statusClass: 'status-timein'
@@ -381,6 +390,22 @@ export default {
         //   statusName: '重呼准备中',
         //   statusClass: 'status-recall'
         // }
+        7: {
+          statusName: '变量校验中',
+          statusClass: 'status-ready',
+        },
+        8: {
+          statusName: '任务创建中',
+          statusClass: 'status-normal',
+        },
+        9: {
+          statusName: '变量校验失败',
+          statusClass: 'status-paused',
+        },
+        10: {
+          statusName: '创建失败',
+          statusClass: 'status-paused',
+        },
       },
       robotList: [], // 可选机器人列表
       categoryList: [
@@ -393,7 +418,7 @@ export default {
         'D类',
         'E类',
         'F类',
-        '未分类'
+        '未分类',
       ], // 可选意向分类
       activeNumberList: [], // 可选线路
       availableCallTaskTemplate: [238, 253, 283, 310], // 可选任务模板id
@@ -403,7 +428,7 @@ export default {
       pagination: {
         currentPage: 1,
         total: 50,
-        pageSize: 10
+        pageSize: 10,
       }, // 分页数据
       dialogEditVisible: false, // 编辑任务弹框是否可见
       recallForm: {
@@ -420,7 +445,7 @@ export default {
         maxCallTime: null,
         minCallTime: null,
         maxAllCallNum: null,
-        minAllCallNum: null
+        minAllCallNum: null,
       },
       recallResultList: [
         // { label: '正在通话中', key: '1' },
@@ -445,15 +470,15 @@ export default {
         id: null, // 任务id
         planName: null, // 任务名称
         robotId: null, // 机器人名称
-        activeNumber: null // 线路
+        activeNumber: null, // 线路
       }, // 编辑任务表单项
       editFormRule: {
         robotId: [
-          { required: true, message: '请选择机器人名称', trigger: 'blur' }
+          { required: true, message: '请选择机器人名称', trigger: 'blur' },
         ],
         activeNumber: [
-          { required: true, message: '请选择线路', trigger: 'blur' }
-        ]
+          { required: true, message: '请选择线路', trigger: 'blur' },
+        ],
       }, // 编辑任务表单项校验规则
       chaseFormData: {
         planName: '', // 任务名称
@@ -461,7 +486,7 @@ export default {
         importFile: [], // 文件导入
         customerList: [], // 用户列表
         importNumber: null, // 输入号码
-        callSingle: 1 //呼叫去重，默认为1
+        callSingle: 1, //呼叫去重，默认为1
       }, // 追拨任务表单项
       chaseFormRule: {
         importFile: [
@@ -473,8 +498,8 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         importNumber: [
           {
@@ -491,24 +516,24 @@ export default {
                 callback()
               }
             },
-            trigger: 'blur'
-          }
-        ]
+            trigger: 'blur',
+          },
+        ],
       }, // 追拨任务表单项校验规则
       beginDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') > this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') > this[search][field],
         }
       },
       endDateValidator: (search, field) => {
         return {
           disabledDate: (current) =>
             this[search][field] &&
-            util.formatDate(current, 'yyyy-MM-dd') < this[search][field]
+            util.formatDate(current, 'yyyy-MM-dd') < this[search][field],
         }
-      }
+      },
     }
   },
   watch: {
@@ -527,7 +552,7 @@ export default {
             this.$message({
               message: res.reminderText,
               type: 'warning',
-              duration: 6000
+              duration: 6000,
             })
           }
         },
@@ -535,7 +560,7 @@ export default {
           this.chaseFormData.importFile = []
         }
       )
-    }
+    },
   },
   async created() {
     const { batch } = this.$route.query
@@ -582,7 +607,7 @@ export default {
         taskId: this.search.taskId,
         ids: this.isSelectAll
           ? []
-          : this.checkedTableRow.map((item) => item.row.id)
+          : this.checkedTableRow.map((item) => item.row.id),
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
@@ -605,7 +630,7 @@ export default {
       this.checkedTableRow.push({
         page: this.pagination.currentPage,
         index,
-        row
+        row,
       })
     },
     // 手动勾选全选
@@ -624,7 +649,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .concat(this.checkedTableRow)
@@ -635,7 +660,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .concat(this.checkedTableRow)
@@ -665,7 +690,7 @@ export default {
           let list = Object.keys(res.data).map((label) => {
             return {
               label,
-              key: res.data[label]
+              key: res.data[label],
             }
           })
           this.recallResultList = list
@@ -750,7 +775,7 @@ export default {
           status: this.search.taskStatus === '' ? null : this.search.taskStatus,
           page: this.pagination.currentPage,
           size: this.pagination.pageSize,
-          taskId: this.search.taskId
+          taskId: this.search.taskId,
         })
         .then((res) => {
           if (!res.data) {
@@ -808,7 +833,7 @@ export default {
         .jsonPost('/sdmulti/task/updateStatus', {
           status: 1,
           taskId,
-          userId: this.$store.state.userInfo.id
+          userId: this.$store.state.userInfo.id,
         })
         .then((res) => {
           if (res.code === '0') {
@@ -828,7 +853,7 @@ export default {
         .jsonPost('/sdmulti/task/updateStatus', {
           status: 3,
           taskId,
-          userId: this.$store.state.userInfo.id
+          userId: this.$store.state.userInfo.id,
         })
         .then((res) => {
           if (res.code === '0') {
@@ -859,7 +884,7 @@ export default {
         id: data.id,
         planName: data.planName,
         robotId: data.robotId,
-        activeNumber: data.lineIds
+        activeNumber: data.lineIds,
       }
       this.dialogEditVisible = true
     },
@@ -903,7 +928,7 @@ export default {
           id: this.editFormData.id,
           userId: this.$store.state.userInfo.id,
           robotId: this.editFormData.robotId,
-          activeNums: this.editFormData.activeNumber.join(',')
+          activeNums: this.editFormData.activeNumber.join(','),
         }
         this.$request.post('/sdmulti/plan/update', param).then((res) => {
           if (res.code === '0') {
@@ -929,14 +954,14 @@ export default {
       let param = new FormData()
       const config = {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       }
       const loading = this.$loading({
         lock: true,
         text: '正在解析，请稍候',
         spinner: 'el-icon-loading',
-        background: 'rgba(255, 255, 255, 0.3)'
+        background: 'rgba(255, 255, 255, 0.3)',
       })
       param.append('file', file)
       param.append('code', robotId)
@@ -968,13 +993,13 @@ export default {
       let res = await this.$request({
         method: 'get',
         responseType: 'blob',
-        url: '/sdmulti/variable/down/' + robotId + '/false'
+        url: '/sdmulti/variable/down/' + robotId + '/false',
       })
       a.download = robotItem.showName + '-文件导入模板.xls'
       a.href = URL.createObjectURL(res)
       a.click()
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss">
