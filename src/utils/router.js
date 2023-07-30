@@ -46,6 +46,10 @@ const routes = [
         component: () => import('../pages/customerManage/programRosterList.vue')
       },
       {
+        path: 'customerManage/rosterSelectRecords',
+        component: () => import('../pages/customerManage/rosterSelectRecords.vue')
+      },
+      {
         path: 'customerManage/programManageList',
         component: () => import('../pages/customerManage/programManageList.vue')
       },
@@ -89,7 +93,7 @@ const router = new Router({
 })
 router.beforeEach((to, from, next) => {
   const userInfo = localStorage.getItem('user');
-  if (!userInfo && to.path!== '/login') {
+  if (!userInfo && to.path !== '/login') {
     next({
       path: '/login'
     })

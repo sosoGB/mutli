@@ -714,6 +714,49 @@
             clearable
           ></el-input>
         </div>
+        <div class="advanced-item" v-if="!search.batch">
+          <div class="advanced-label">
+            <span style="color: #f00">*</span>
+            新名单来源：
+          </div>
+          <el-select
+            v-model="search.batchOrigin"
+            placeholder="请选择名单来源"
+            clearable
+            class="advanced-input"
+          >
+            <el-option
+              v-for="(item, key) in sourceTypeList"
+              :label="item"
+              :value="key"
+              :key="item"
+            ></el-option>
+          </el-select>
+        </div>
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            margin: 5px 20px;
+            align-items: center;
+          "
+        >
+          <span class="advanced-label" style="min-width: 140px"
+            >上传筛选条件：</span
+          >
+          <div style="display: flex; flex-direction: row">
+            <file-uploader
+              style="width=240px;margin-right:20px"
+              :uploaded.sync="pFile"
+            ></file-uploader>
+            <el-button @click="handleDownloadTemplate" type="primary"
+              >下载模板</el-button
+            >
+            <el-button @click="handleDownloadImported" type="primary"
+              >下载已导入的筛选条件</el-button
+            >
+          </div>
+        </div>
       </div>
     </div>
     <div class="table">
@@ -827,45 +870,6 @@
         ></el-table-column>
         <el-table-column
           :resizable="false"
-          prop="connectCt"
-          label="已接通的客户数量"
-          width="190"
-          align="center"
-          show-overflow-tooltip
-        ></el-table-column>
-        <el-table-column
-          :resizable="false"
-          prop="successCt"
-          label="已成功转化的客户数量"
-          width="180"
-          align="center"
-        ></el-table-column>
-        <el-table-column
-          prop="passPercent"
-          label="总体接通率"
-          width="180"
-          align="center"
-        >
-          <template slot-scope="scope">
-            <div>
-              {{ scope.row.connectPercent }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="successPercent"
-          label="接通转化率"
-          width="180"
-          align="center"
-        >
-          <template slot-scope="scope">
-            <div>
-              {{ scope.row.successPercent }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :resizable="false"
           label="操作"
           min-width="140"
           fixed="right"
@@ -873,6 +877,9 @@
         >
           <template slot-scope="scope">
             <el-button @click="lookTask(scope.row)">查看任务</el-button>
+            <el-button @click="lookTransform(scope.row)"
+              >查看转化情况</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -918,13 +925,36 @@
         <!-- <el-button type="primary" @click="handleDialogConfirm">确 定</el-button> -->
       </div>
     </el-dialog>
+    <el-dialog title="转化情况" width="600px" :visible.sync="transFormView">
+      <el-form :model="transForm">
+        <el-form-item label="已接通的客户数量：">
+          {{ transForm.connectCt }}
+        </el-form-item>
+        <el-form-item label="已成功转化的客户数量：">
+          {{ transForm.successCt }}
+        </el-form-item>
+        <el-form-item label="总体接通率：">
+          {{ transForm.connectPercent }}
+        </el-form-item>
+        <el-form-item label="接通转化率：">
+          {{ transForm.successPercent }}
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="transFormView = false">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 // import util from '@/service/util'
 import filter from '@/service/filter.js'
+import FileUploader from '@/components/FileUploader'
 import keepAlive from '@/utils/mixins/keepAlive.js' //用于从详情页返回列表页仍然返回之前页面
 export default {
+  components: {
+    FileUploader,
+  },
   mixins: [keepAlive],
   data() {
     // const now = filter.formatDate(Date.now(), 'yyyy-MM-dd')
@@ -933,6 +963,8 @@ export default {
     //   'yyyy-MM-dd'
     // )
     return {
+      transFormView: false,
+      transForm: {},
       clickedSle: false,
       authExport: false,
       userInfo: this.$store.state.userInfo,
@@ -943,6 +975,7 @@ export default {
       showMoreSearch: false, //是否显示高级搜索
       sourceTypeList: [],
       projectList: [],
+      pFile: [],
       pullForm: {
         type: '',
         number: '',
@@ -982,6 +1015,7 @@ export default {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
         batch: null, //客户批次
+        batchOrigin: '',
         repeatTimeEnd: '', //复用开始时间
         repeatTimeStart: '', //复用结束时间
         projectName: null, // 项目名称
@@ -1032,6 +1066,7 @@ export default {
         //查询筛选字段
         userId: this.$store.state.userInfo.id,
         batch: this.$route.query.batch, //客户批次
+        batchOrigin: '',
         repeatTimeEnd: '', //开始时间
         repeatTimeStart: '', //结束时间
         projectName: '', //项目名称
@@ -1153,10 +1188,13 @@ export default {
     }
   },
   created() {
-    this.queryList()
+    if (this.$route.query.search) {
+      Object.assign(this.search, JSON.parse(this.$route.query.search))
+    }
     this.getSourceTypeList()
     this.getProjectsAll()
     this.getRobotList()
+    this.queryList()
   },
   activated() {
     //重新进入缓存页面的钩子
@@ -1165,6 +1203,32 @@ export default {
     this.getProjectsAll()
   },
   methods: {
+    async handleDownloadTemplate() {
+      let a = document.createElement('a')
+      let res = await this.$request.xmlGet(`/sdmulti/cs/param/template`)
+      a.download = '筛选条件模板.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    },
+    async handleDownloadImported() {
+      let a = document.createElement('a')
+      let res = await this.$request.xml(`/sdmulti/cs/query/param/file`)
+      a.download = '筛选条件.xls'
+      a.href = URL.createObjectURL(res)
+      a.click()
+    },
+    lookTransform(row) {
+      const url = '/sdmulti/project/info/get/statistics'
+      this.$request
+        .jsonPost(url, {
+          ...row,
+          projectInfoId: row.id,
+        })
+        .then((res) => {
+          this.transForm = res.data
+          this.transFormView = true
+        })
+    },
     checkSuccessDate() {
       if (this.search.successStartDate && this.search.successEndDate) {
         this.successFlag = true
@@ -1277,6 +1341,7 @@ export default {
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
+        batchOrigin: this.search.batchOrigin || null,
         repeatTimeStart: this.search.repeatTimeStart
           ? this.search.repeatTimeStart + ' 00:00:00'
           : null,
@@ -1525,6 +1590,7 @@ export default {
       const params = {
         userId: this.$store.state.userInfo.id,
         batch: this.search.batch || null,
+        batchOrigin: this.search.batchOrigin || null,
         repeatTimeStart: this.search.repeatTimeStart
           ? this.search.repeatTimeStart + ' 00:00:00'
           : null,
@@ -1608,41 +1674,64 @@ export default {
         // talkAiCategory,
         aiCategory,
       }
-      let url = '/sdmulti/project/info/list'
-      this.$request
-        .jsonPost(url, params)
-        .then((res) => {
-          this.isLoading = false
-          this.showMoreSearch = false
+      if (!this.search.batch && this.pFile.length) {
+        if (!this.search.batchOrigin) {
+          this.$message.error('请选择新名单来源')
+          return
+        }
+        const url = '/sdmulti/cs/query/save'
+        const param2 = new FormData()
+        param2.append('projectInfoParam', JSON.stringify(params))
+        param2.append('pFile', this.pFile[0])
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+        this.$request.uploadPost(url, param2, config).then((res) => {
           if (res.code == 0) {
-            this.customerList = res.data ? res.data.list : []
-            this.pagination.total = res.data ? res.data.total : 0
-            if (this.checkedTableRow.length !== 0) {
-              this.$nextTick(() => {
-                const checkedRow = this.checkedTableRow.filter((item) => {
-                  return item.page === this.pagination.currentPage
-                })
-                if (this.isSelectAll) {
-                  this.customerList.forEach((item) => {
-                    this.$refs.table.toggleRowSelection(item)
-                  })
-                }
-                checkedRow.forEach((item) => {
-                  this.$refs.table.toggleRowSelection(
-                    this.customerList[item.index]
-                  )
-                })
-              })
-            } else if (this.isSelectAll) {
-              this.$nextTick(() => {
-                this.$refs.table.toggleAllSelection(true)
-              })
-            }
+            this.pFile = []
+            this.$message.success('创建筛选记录成功')
+            this.$router.push('/main/customerManage/rosterSelectRecords')
           }
         })
-        .finally(() => {
-          this.isLoading = false
-        })
+      } else {
+        let url = '/sdmulti/project/info/list'
+        this.$request
+          .jsonPost(url, params)
+          .then((res) => {
+            this.isLoading = false
+            this.showMoreSearch = false
+            if (res.code == 0) {
+              this.customerList = res.data ? res.data.list : []
+              this.pagination.total = res.data ? res.data.total : 0
+              if (this.checkedTableRow.length !== 0) {
+                this.$nextTick(() => {
+                  const checkedRow = this.checkedTableRow.filter((item) => {
+                    return item.page === this.pagination.currentPage
+                  })
+                  if (this.isSelectAll) {
+                    this.customerList.forEach((item) => {
+                      this.$refs.table.toggleRowSelection(item)
+                    })
+                  }
+                  checkedRow.forEach((item) => {
+                    this.$refs.table.toggleRowSelection(
+                      this.customerList[item.index]
+                    )
+                  })
+                })
+              } else if (this.isSelectAll) {
+                this.$nextTick(() => {
+                  this.$refs.table.toggleAllSelection(true)
+                })
+              }
+            }
+          })
+          .finally(() => {
+            this.isLoading = false
+          })
+      }
     },
   },
 }

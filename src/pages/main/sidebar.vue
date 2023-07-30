@@ -70,13 +70,17 @@ export default {
           children: [
             {
               name: '名单批次管理',
-              route: '/main/customerManage/customerList'
+              route: '/main/customerManage/customerList',
             },
             {
               name: '项目批次管理',
-              route: '/main/customerManage/programRosterList'
-            }
-          ]
+              route: '/main/customerManage/programRosterList',
+            },
+            {
+              name: '名单筛选记录',
+              route: '/main/customerManage/rosterSelectRecords',
+            },
+          ],
         },
         {
           name: '呼叫管理',
@@ -91,17 +95,17 @@ export default {
             // },
             {
               name: '呼叫任务管理',
-              route: '/main/callManage/callTask'
-            }
-          ]
-        }
-      ]
+              route: '/main/callManage/callTask',
+            },
+          ],
+        },
+      ],
     }
   },
   computed: {
     isMenuExpand() {
       return this.$store.state.isMenuExpand
-    }
+    },
   },
   created() {
     this.isPartial && this.$router.replace('/main/operationReport/reportList')
@@ -109,7 +113,7 @@ export default {
       this.menuList.splice(1, 3)
     }
     require('@/assets/css/qibao-sidebar.scss')
-  }
+  },
 }
 </script>
 <style lang="scss" scoped></style>

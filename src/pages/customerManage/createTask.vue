@@ -18,6 +18,9 @@
       :rules="createFormRule"
       label-width="180px"
     >
+      <el-form-item label="批次号：">
+        <span>{{ batch }}</span>
+      </el-form-item>
       <el-form-item prop="name" label="任务名称：">
         <el-input
           v-model.trim="createFormData.name"
@@ -56,6 +59,12 @@
           <el-radio :label="1">是</el-radio>
           <el-radio :label="0">否</el-radio>
         </el-radio-group>
+      </el-form-item>
+      <el-form-item label="总名单量：">
+        <span>{{ ct }}</span>
+      </el-form-item>
+      <el-form-item label="外呼名单量：">
+        <span>{{ ct }}</span>
       </el-form-item>
       <el-form-item label="外呼客户数量：" prop="customerNum">
         <span>共{{ selectCtNum }},从第</span>
@@ -129,7 +138,7 @@
         </div>
       </el-form-item>
 
-      <el-form-item prop="importComVar" label="共用型变量：">
+      <!-- <el-form-item prop="importComVar" label="共用型变量：">
         <div class="input-large form-item_upload">
           <file-uploader
             class="form-uploader"
@@ -150,7 +159,7 @@
             >下载模板</el-button
           >
         </div>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item prop="routeId" label="路由选择：">
         <el-select
           v-model="createFormData.routeId"
@@ -471,16 +480,17 @@
 </template>
 
 <script>
-import FileUploader from '@/components/FileUploader'
+// import FileUploader from '@/components/FileUploader'
 import ProgressPop from '@/components/ProgressPop'
 import util from '@/service/filter'
 export default {
   components: {
-    FileUploader,
+    // FileUploader,
     ProgressPop,
   },
   data() {
     return {
+      ct: '',
       type: this.$route.query.type, //名单来源
       batchList: this.$route.query.batchList, // 批次ID列表
       projectList: [],
@@ -498,6 +508,7 @@ export default {
       dialogVisible: false, // 加密提示弹框是否展示
       progerssFinish: false, // 加密相关文件上传是否完成
       outCallPlatformName: '', //外呼平台名
+      // transForm: {},
       recallResultList: [
         // { label: '正在通话中', key: '1' },
         // { label: '用户忙', key: '2' },
@@ -554,13 +565,14 @@ export default {
         projectId: null,
         repeatCount: 1,
         robotName: null, // 机器人名称
+        categoryCode: null,
         outCallPlatformId: [], // 外呼平台名称
         concurrentNum: null, //并发数量
         routeId: null,
         activeNumber: null, // 线路
         importMethod: 'file', // 导入方式
-        importComVar: [], //共用型变量导入
-        importRelVar: [], //关系型变量导入
+        // importComVar: [], //共用型变量导入
+        // importRelVar: [], //关系型变量导入
         customerList: [], // 用户列表
         callSingle: 1, // 呼叫去重
         recallFlag: 0, // 自动失败重呼
@@ -756,23 +768,23 @@ export default {
     //   deep: true
     // },
     // 导入公用型变量
-    'createFormData.importComVar'(files) {
-      if (!files || !files.length) return
-      if (!this.validateFile(files[0])) {
-        this.createFormData.importComVar = []
-        return
-      }
-      this.ulCom = files[0]
-    },
+    // 'createFormData.importComVar'(files) {
+    //   if (!files || !files.length) return
+    //   if (!this.validateFile(files[0])) {
+    //     this.createFormData.importComVar = []
+    //     return
+    //   }
+    //   this.ulCom = files[0]
+    // },
     // 导入关系型变量
-    'createFormData.importRelVar'(files) {
-      if (!files || !files.length) return
-      if (!this.validateFile(files[0])) {
-        this.createFormData.importRelVar = []
-        return
-      }
-      this.ulRel = files[0]
-    },
+    // 'createFormData.importRelVar'(files) {
+    //   if (!files || !files.length) return
+    //   if (!this.validateFile(files[0])) {
+    //     this.createFormData.importRelVar = []
+    //     return
+    //   }
+    //   this.ulRel = files[0]
+    // },
   },
   computed: {
     getCpl() {
@@ -801,7 +813,18 @@ export default {
     const query = this.$route.query
     //把数组由字符串转化成数字
     const param = query.name ? JSON.parse(query.name) : []
-    const search = query.search ? JSON.parse(query.search) : {}
+    const search =
+      typeof query.search == 'object'
+        ? query.search
+        : typeof query.search == 'string'
+        ? JSON.parse(query.search)
+        : {}
+    this.batch = search.batch
+    this.ct = search.queryNumber
+    if (search.projectId) {
+      this.createFormData.projectId = search.projectId
+      this.changeProject(search.projectId)
+    }
     const pagination = query.pagination ? JSON.parse(query.pagination) : {}
     let distList = []
     let customerInfos = []
@@ -862,6 +885,7 @@ export default {
       // obj.callStartTalkTime = search.callStartTalkTime
       // obj.callEndTalkTime = search.callEndTalkTime
       obj.robotName = search.robotName
+      obj.categoryCode = search.categoryCode || null
       // obj.talkStartDate = search.talkStartDate
       // obj.talkEndDate = search.talkEndDate
       // obj.talkStartTalkTime = search.talkStartTalkTime
@@ -885,16 +909,30 @@ export default {
     this.unionVO = vo
     const numList = distList.map(Number)
     //计算客户总数量
-    this.selectCtNum = numList.reduce(function (prev, cur) {
-      return prev + cur
-    })
+    if (numList.length) {
+      this.selectCtNum = numList.reduce(function (prev, cur) {
+        return prev + cur
+      })
+    }
+
     this.createFormData.customerNum2 = this.selectCtNum
     // this.fetchRobotList()
     this.fetchPlatFormList()
     this.getRecallResultList()
     this.getProjectList()
+    // this.getStatics(search)
   },
   methods: {
+    // getStatics(search) {
+    //   // const url = '/sdmulti/project/info/get/statistics'
+    //   // this.$request
+    //   //   .jsonPost(url, {
+    //   //     ...search,
+    //   //   })
+    //   //   .then((res) => {
+    //   //     this.transForm = res.data
+    //   //   })
+    // },
     changeProject(id) {
       const url = '/sdmulti/manage/project/service?projectId=' + id
       this.$request.jsonGet(url).then((res) => {
@@ -1044,7 +1082,7 @@ export default {
         platforms.push(obj)
         this.unionVO.platforms = platforms
         this.createFormData.robotName = ''
-
+        this.createFormData.categoryCode = ''
         this.fetchRobotList(plat)
         this.getRouteList(plat)
       }
@@ -1063,6 +1101,7 @@ export default {
         let robotId
         if (robot) {
           robotId = robot.id
+          this.categoryCode = robot.categoryCode
         }
         this.unionVO.platforms.forEach((e) => {
           e.robotId = robotId
@@ -1154,14 +1193,14 @@ export default {
     },
 
     // 点击下载模板
-    async handleDownloadTemplate(id) {
-      let a = document.createElement('a')
-      let res = await this.$request.xmlGet(`/sdmulti/task/template/down/${id}`)
-      const endStr = id === 1 ? '共用型变量.xls' : '关系型变量.xls'
-      a.download = endStr
-      a.href = URL.createObjectURL(res)
-      a.click()
-    },
+    // async handleDownloadTemplate(id) {
+    //   let a = document.createElement('a')
+    //   let res = await this.$request.xmlGet(`/sdmulti/task/template/down/${id}`)
+    //   const endStr = id === 1 ? '共用型变量.xls' : '关系型变量.xls'
+    //   a.download = endStr
+    //   a.href = URL.createObjectURL(res)
+    //   a.click()
+    // },
     // 提交新建任务表单
     async submitCreateForm() {
       this.$refs.createForm.validate(async (isValid) => {
@@ -1199,6 +1238,7 @@ export default {
           repeatCount: this.createFormData.repeatCount,
           phoneCt: this.selectCtNum,
           robotName: this.createFormData.robotName,
+          categoryCode: this.createFormData.categoryCode,
           calls: [this.createFormData.outCallPlatformId],
           concurrentNum: this.createFormData.concurrentNum,
           type: this.createFormData.type,
@@ -1226,10 +1266,10 @@ export default {
         //   param.conversionrecallSpace = this.createFormData.conversionrecallInterval
         //   param.conversionrecallMaxNum = this.createFormData.conversionrecallMaxNum
         // }
+        this.unionVO.start = this.createFormData.customerNum
+        this.unionVO.end = this.createFormData.customerNum2
         const param = new FormData()
-        for (const key in paramJson) {
-          param.append(key, paramJson[key])
-        }
+        param.append('taskParam', JSON.stringify(paramJson))
         param.append('pFile', this.ulCom)
         param.append('rFile', this.ulRel)
         param.append('unionVO', JSON.stringify(this.unionVO))

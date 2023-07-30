@@ -160,9 +160,34 @@
         ></el-table-column>
         <el-table-column label="任务状态" width="140" align="center">
           <template slot-scope="scope">
-            <span class="icon-status" :class="scope.row.statusClass">{{
-              scope.row.statusName
-            }}</span>
+            <span
+              class="icon-status"
+              :class="scope.row.statusClass"
+              v-if="scope.row.status != 9 && scope.row.status != 10"
+              >{{ scope.row.statusName }}</span
+            >
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="scope.row.errorInfo"
+              placement="top"
+              v-else
+            >
+              <span class="icon-status" :class="scope.row.statusClass">{{
+                scope.row.statusName
+              }}</span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="任务进度" width="120" align="center">
+          <template slot-scope="scope">
+            <div v-if="scope.row.status == 7">
+              {{ scope.row.checkSuccess }} / {{ scope.row.checkNum }}
+            </div>
+            <div v-else-if="scope.row.status == 8">
+              {{ scope.row.taskSuccess }} / {{ scope.row.taskNum }}
+            </div>
+            <div v-else>-</div>
           </template>
         </el-table-column>
         <el-table-column
@@ -905,7 +930,14 @@ export default {
       //   this.$message.error('删除项中包含启动中的任务，请取消该勾选')
       //   return
       // }
-      this.$confirm('是否确认删除该任务').then(() => {
+      const canDel = this.checkedTableRow.every((e) =>
+        [0, 2, 3, 4, 9, 10].includes(Number(e.row.status))
+      )
+      if (!canDel) {
+        this.$message.error('所选任务中存在状态不可删除的任务，请重新选取')
+        return
+      }
+      this.$confirm('是否确认删除所选任务').then(() => {
         let ids = this.checkedTableRow.map((e) => e.row.id)
         this.$request.post('/sdmulti/task/deleteTask', ids).then((res) => {
           if (res.code == 0) {

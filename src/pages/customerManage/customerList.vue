@@ -13,7 +13,7 @@
       <div class="tool-search">
         <el-input
           placeholder="请输入名单批次"
-          style="width:260px;"
+          style="width: 260px"
           class="search-component search-input"
           v-model.trim="search.batch"
           clearable
@@ -205,6 +205,8 @@
               scope.row.isDownLoad ? '正在下载' : '客户下载'
             }}</el-button>
             <el-button @click="viewProgram(scope.row)">查看项目</el-button>
+            <el-button @click="seeSelectRes(scope.row)">查看筛选情况</el-button>
+            <el-button @click="deleteOne(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -255,7 +257,7 @@
             :picker-options="{
               start: '00:00',
               step: '00:30',
-              end: '23:30'
+              end: '23:30',
             }"
             placeholder="选择时间"
           >
@@ -305,6 +307,109 @@
         >
       </div>
     </el-dialog>
+    <el-dialog title="名单筛选情况" width="800px" :visible.sync="diaVisible">
+      <div style="margin: 20px 0">
+        <table>
+          <tr class="outer-tr">
+            <td class="first">序号</td>
+            <td>名单总量</td>
+            <td>{{ selectRes.total }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">1</td>
+            <td>非正常号码</td>
+            <td>{{ selectRes.excPhone }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">2</td>
+            <td>手机号的前三位不合法</td>
+            <td>{{ selectRes.excThrPhone }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">3</td>
+            <td>手机号中间四位不合法</td>
+            <td>{{ selectRes.excFourPhone }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td>4</td>
+            <td>当前批次内重复名单</td>
+            <td>{{ selectRes.repeatNum }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">5</td>
+            <td>当前渠道名单库内重复名单</td>
+            <td>{{ selectRes.repeatAll }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">6</td>
+            <td>手机号解密失败</td>
+            <td>{{ selectRes.decryptError }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">7</td>
+            <td>属于禁呼区域的名单量</td>
+            <td>
+              <tr>
+                <td>北京</td>
+                <td>{{ selectRes.zoneDTO.beijing }}</td>
+              </tr>
+              <tr>
+                <td>新疆</td>
+                <td>{{ selectRes.zoneDTO.xinjiang }}</td>
+              </tr>
+              <tr>
+                <td>西藏</td>
+                <td>{{ selectRes.zoneDTO.xizang }}</td>
+              </tr>
+              <tr>
+                <td>青海</td>
+                <td>{{ selectRes.zoneDTO.qinghai }}</td>
+              </tr>
+            </td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">8</td>
+            <td>靓号名单量</td>
+            <td>
+              <tr>
+                <td>后三位 AAA</td>
+                <td>{{ selectRes.beaPhoneDTO.beaPhoneA }}</td>
+              </tr>
+              <tr>
+                <td>后四位 ABCD DCBA</td>
+                <td>{{ selectRes.beaPhoneDTO.beaPhoneB }}</td>
+              </tr>
+              <tr>
+                <td>11位 ABCD、DCBA</td>
+                <td>{{ selectRes.beaPhoneDTO.beaPhoneC }}</td>
+              </tr>
+              <tr>
+                <td>11位号码中含3个AAA重复及以上的（如222/333/444/888）</td>
+                <td>{{ selectRes.beaPhoneDTO.beaPhoneD }}</td>
+              </tr>
+              <tr>
+                <td>总计</td>
+                <td>{{ selectRes.beaPhoneDTO.beaPhoneNum }}</td>
+              </tr>
+            </td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">9</td>
+            <td>黑名单数量</td>
+            <td>企保黑名单</td>
+            <td>{{ selectRes.breakPhone }}</td>
+          </tr>
+          <tr class="outer-tr">
+            <td class="first">10</td>
+            <td>实际入库名单量</td>
+            <td>{{ selectRes.distNum }}</td>
+          </tr>
+        </table>
+      </div>
+      <div slot="footer">
+        <el-button type="primary" @click="diaVisible = false">返回</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -320,6 +425,7 @@ export default {
       'yyyy-MM-dd'
     )
     return {
+      diaVisible: false,
       clickedSle: false,
       isDownLoad: false, //是否在下载
       authExport: false,
@@ -333,29 +439,29 @@ export default {
       pullForm: {
         type: '',
         number: '',
-        autoPullTime: ''
+        autoPullTime: '',
       },
       rules: {
         type: [
-          { required: true, message: '请选择名单拉取方式', trigger: 'change' }
+          { required: true, message: '请选择名单拉取方式', trigger: 'change' },
         ],
         number: [
-          { required: true, message: '请输入最大拉取条数', trigger: 'blur' }
+          { required: true, message: '请输入最大拉取条数', trigger: 'blur' },
         ],
         autoPullTime: [
           {
             required: true,
             message: '请选择自动拉取名单时间',
-            trigger: 'change'
-          }
-        ]
+            trigger: 'change',
+          },
+        ],
       },
       dispatchForm: {
         program: null,
-        product: null
+        product: null,
       },
       dispacthFormrules: {
-        program: [{ required: true, message: '请选择项目', trigger: 'change' }]
+        program: [{ required: true, message: '请选择项目', trigger: 'change' }],
       },
       oldSearch: {
         //查询筛选字段
@@ -363,7 +469,7 @@ export default {
         batch: null, //客户批次
         endTime: oneMonthAgo, //开始时间
         startTime: now, //结束时间
-        customerType: null //客户种类
+        customerType: null, //客户种类
       },
       search: {
         //查询筛选字段
@@ -371,7 +477,7 @@ export default {
         batch: null, //客户批次
         endTime: now, //开始时间
         startTime: oneMonthAgo, //结束时间
-        customerType: null //客户种类
+        customerType: null, //客户种类
       },
       listPullDialogVisible: false,
       listDispatchDialogVisible: false,
@@ -379,14 +485,14 @@ export default {
       pagination: {
         pageSize: 10,
         currentPage: 1,
-        total: 0
+        total: 0,
       },
       robotList: [], // 可选机器人列表
       customerList: [], //表格填充数据
       isLoading: false,
       checkedTableRow: [], //表格已选中或取消行
       beginDateValidator: {
-        disabledDate: (current) => Date.now() < current
+        disabledDate: (current) => Date.now() < current,
       },
       endDateValidator: {
         disabledDate: (current) => {
@@ -396,10 +502,10 @@ export default {
                 this.search.lastFollowBeginTime) ||
             Date.now() < current
           )
-        }
+        },
       },
       beginUpdateValidator: {
-        disabledDate: (current) => Date.now() < current
+        disabledDate: (current) => Date.now() < current,
       },
       endUpdateValidator: {
         disabledDate: (current) => {
@@ -407,8 +513,12 @@ export default {
             this.search.startTime &&
             filter.formatDate(current, 'yyyy-MM-dd') < this.search.startTime
           )
-        }
-      }
+        },
+      },
+      selectRes: {
+        zoneDTO: {},
+        beaPhoneDTO: {},
+      },
     }
   },
   computed: {
@@ -420,7 +530,7 @@ export default {
         return item.product
       }
       return ''
-    }
+    },
   },
   watch: {
     listDispatchDialogVisible(val) {
@@ -428,7 +538,7 @@ export default {
         this.dispatchForm.program = ''
         this.programList = []
       }
-    }
+    },
   },
   created() {
     this.queryList()
@@ -440,6 +550,34 @@ export default {
     this.getSourceTypeList()
   },
   methods: {
+    deleteOne(row) {
+      //http://sdmanage.qibot-ai.com/sdmulti/qbzz/manage/api/customer/batch/delete?batch=数鸣20220831第4批建模名单
+      this.$confirm('是否确认删除所选任务').then(() => {
+        this.$request
+          .post(
+            '/sdmulti/qbzz/manage/api/customer/batch/delete?batch=' + row.batch
+          )
+          .then((res) => {
+            if (res.code == 0) {
+              this.$message.success('删除成功')
+              this.queryList()
+            }
+          })
+      })
+    },
+    seeSelectRes(row) {
+      this.diaVisible = true
+      //test.sdmanage.qibot-ai.com/sdmulti/qbzz/manage/api/get/customer/statis?batch=骏伯自营20230413第4批自营2
+      this.$request
+        .jsonGet(
+          '/sdmulti/qbzz/manage/api/get/customer/statis?batch=' + row.batch
+        )
+        .then((res) => {
+          if (res.code == 0) {
+            this.selectRes = res.data
+          }
+        })
+    },
     getSourceTypeList() {
       const url = '/sdmulti/qbzz/manage/api/customer/type/list'
       this.$request.jsonGet(url).then((res) => {
@@ -452,8 +590,8 @@ export default {
       this.$router.push({
         path: '/main/customerManage/programRosterList',
         query: {
-          batch: row.batch
-        }
+          batch: row.batch,
+        },
       })
     },
     listDispatch() {
@@ -463,7 +601,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .filter(
@@ -511,7 +649,7 @@ export default {
         batchList: this.checkedTableRow.map((e) => e.row.batch),
         product: this.programProduct,
         projectId: item.id,
-        projectName: item.projectName
+        projectName: item.projectName,
       }
       this.$request.jsonPost(url, params).then((res) => {
         if (res.code == '0') {
@@ -536,7 +674,7 @@ export default {
           this.$request
             .formPost(url, {
               timeStr: this.pullForm.autoPullTime + ':00',
-              batchSize: this.pullForm.number
+              batchSize: this.pullForm.number,
             })
             .then((res) => {
               if (res.code == '0') {
@@ -550,7 +688,7 @@ export default {
           let url = '/sdmulti/fetch/pullNow'
           this.$request
             .formPost(url, {
-              batchSize: this.pullForm.number
+              batchSize: this.pullForm.number,
             })
             .then((res) => {
               if (res.code == '0') {
@@ -589,7 +727,7 @@ export default {
       this.checkedTableRow.push({
         page: this.pagination.currentPage,
         index,
-        row
+        row,
       })
     },
     // 手动勾选全选
@@ -608,7 +746,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .concat(this.checkedTableRow)
@@ -619,7 +757,7 @@ export default {
             return {
               page: this.pagination.currentPage,
               index,
-              row: item
+              row: item,
             }
           })
           .concat(this.checkedTableRow)
@@ -660,7 +798,7 @@ export default {
               : null,
             endTime: this.search.endTime
               ? this.search.endTime + ' 23:59:59'
-              : null
+              : null,
           }
         )
         const a = document.createElement('a')
@@ -694,8 +832,8 @@ export default {
         query: {
           name: JSON.stringify(this.checkedTableRow),
           search: JSON.stringify(search),
-          pagination: JSON.stringify(pagination)
-        }
+          pagination: JSON.stringify(pagination),
+        },
       })
     },
     // 查询列表
@@ -722,7 +860,7 @@ export default {
             : null,
           type: this.search.customerType,
           page: this.pagination.currentPage,
-          pageSize: this.pagination.pageSize
+          pageSize: this.pagination.pageSize,
         })
         .then((res) => {
           this.isLoading = false
@@ -772,15 +910,15 @@ export default {
         type: this.search.customerType,
         ids: this.isSelectAll
           ? []
-          : this.checkedTableRow.map((item) => item.row.id)
+          : this.checkedTableRow.map((item) => item.row.id),
       }
       const res = await this.$request.xml(url, params)
       const a = document.createElement('a')
       a.download = '名单批次查询结果导出报表.xls'
       a.href = URL.createObjectURL(res)
       a.click()
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="scss" scoped>
@@ -881,6 +1019,32 @@ export default {
       padding: 8px 18px;
       border-radius: 4px;
     }
+  }
+  td.first {
+    width: 60px;
+  }
+  td {
+    min-height: 30px;
+    line-height: 30px;
+    text-align: center;
+  }
+  tr.outer-tr {
+    border-bottom: 1px solid #ccc;
+  }
+  tr {
+    width: 100%;
+  }
+  tr {
+    display: flex;
+    flex-direction: row;
+    td {
+      flex: 1;
+    }
+  }
+  td tr td {
+    min-width: 100px;
+    width: auto;
+    border-bottom: 1px solid #ccc;
   }
 }
 </style>
